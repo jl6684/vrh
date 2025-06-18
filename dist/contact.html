@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>
+        Vinyl Record House - Contact Us
+    </title>
+    <!-- Bootstrap 4.6.2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" 
+    integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" 
+    crossorigin="anonymous">
+    <!-- Fontawesome 6.7.2 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="stylesheet" href="./assets/css/style.css">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container-fluid">
+            <!-- Brand Logo and Name -->
+            <div class="nav-brand nav-link" href="#about" data-toggle="modal" data-target="#aboutModal" >
+                <span class="navbar-brand">
+                    <img src="./assets/img/VRHlogo.png" width="30" height="30" class="d-inline-block align-items-start" alt="">
+                </span>
+                    <span class="navbar-text"><h3 class="text-light">VRH</h3></span>
+            </div>
+
+            <!-- Search Box -->
+            <form class="form-inline mr-auto h4">
+                <div class="input-group">
+                    <input class="form-control" type="search" placeholder="Album, Artist, Genre..." aria-label="Search">
+                    <div class="input-group-append">
+                        <!-- <input type="text" class="form-control" name="search" placeholder="Album, Artist, Genre..."> -->
+                        <button class="btn btn-outline-light ml-2" type="submit">
+                            <!-- <i class="fas fa-search"></i> -->
+                            Search
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Navbar toggler for resposive design (only shows when necessary)-->
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Navigation Items -->
+            <div class="collapse navbar-collapse" id="navbar-menu">
+                <div class="navbar-nav ml-auto h4">
+                    <!-- Home -->
+                    <a class="nav-link text-light" href="index.html">Home</a>
+
+                    <!-- Categories Dropdown -->
+                    <div class="nav-item dropdown">
+                        <a class="nav-link text-light dropdown-toggle" href="#" id="categoriesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Categories
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="categoriesDropdown">
+                            <!-- First Group -->
+                            <h6 class="dropdown-header font-weight-bold">by Gender</h6>
+                            <a class="dropdown-item" href="#">Male Artists</a>
+                            <a class="dropdown-item" href="#">Female Artists</a>
+                            
+                            <div class="dropdown-divider"></div>
+                            
+                            <!-- Second Group -->
+                            <h6 class="dropdown-header font-weight-bold">by Band / Assortments / Others</h6>
+                            <a class="dropdown-item" href="#">Band</a>
+                            <a class="dropdown-item" href="#">Assortments</a>
+                            <a class="dropdown-item" href="#">Others</a>
+                        </div>
+                    </div>
+
+                    <!-- Membership Dropdown -->
+                    <div class="nav-item dropdown">
+                        <a class="nav-link text-light dropdown-toggle" href="#" id="membershipDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Membership
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="membershipDropdown">
+                            <a class="dropdown-item" href="#">Sign Up</a>
+                            <a class="dropdown-item" href="#">Log in</a>
+                        </div>
+                    </div>
+
+                    <!-- Contact Us -->
+                    <a class="nav-link text-light" href="contact.html">Contact Us</a>
+
+                    <!-- Shopping Cart with Badge -->
+                    <a class="nav-link cart-badge" href="#">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="shop-cart">2</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- About modal (hidden) -->
+    <div class="modal fade" id="aboutModal" role="dialog" tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title h2">
+                        About Vinyl Record Home
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <div class="media">
+                    <img src="./assets/img/pexels-lg.jpg" width="225" alt="">
+                        <div class="media-body">
+                            <div class="container">
+                                <h5 class="mt-0">
+                                    Welcome to our premier online vinyl store, your ultimate destination for high-quality records! Whether you're a seasoned collector or a newbie exploring the world of analog sound, we offer a vast selection of vinyl records across genres—from classic rock and jazz to modern pop and electronic. Our carefully curated collection features new releases, rare pressings, and timeless classics, all at competitive prices. With secure packaging, fast shipping, and exceptional customer service, we ensure your vinyl arrives in perfect condition. Dive into the rich, warm sound of vinyl and rediscover music the way it was meant to be heard. Happy spinning!
+                                </h5>
+                            </div>
+                            <div class="container">
+                                    <a href="SocialMediaURL.html">
+                                    <i class="fa-brands fa-x-twitter fa-2xl"></i>
+                                    </a>
+                                    <a href="SocialMediaURL.html">
+                                    <i class="fa-brands fa-square-facebook fa-2xl"></i>
+                                    </a>
+                                    <a href="SocialMediaURL.html">
+                                    <i class="fa-brands fa-instagram fa-2xl"></i> 
+                                    </a>
+                                    <a href="SocialMediaURL.html">
+                                    <i class="fa-brands fa-youtube fa-2xl"></i> 
+                                    </a>
+                                    <a href="SocialMediaURL.html">
+                                    <i class="fas fa-envelope fa-2xl"></i>
+                                    </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container text-center pt-5 mt-5">
+            <img src="./assets/img/VRHlogo.png" width="100" alt="">
+            <h1 class="display-4 mb-3">Contact Us</h1>
+            <p class="lead">We'd love to hear from you - let's talk vinyl!</p>
+        </div>
+    </section>
+
+    <!-- Slider Background -->
+    <div class="carousel" id="mainSlide">
+        <div class="carousel-inner">
+            <img class="w-100 d-block" src="./assets/img/pexels-bg2.jpg" alt="">
+        </div>
+    </div>
+
+    <!-- Contact Information -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <div class="contact-card p-4 text-center">
+                        <i class="fas fa-map-marker-alt contact-icon"></i>
+                        <h4>Visit Our Store</h4>
+                        <p class="mb-0">
+                        Tsim Sha Tsui, Kowloon<br>
+                        Hong Kong</p>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <div class="contact-card p-4 text-center">
+                        <i class="fas fa-phone contact-icon"></i>
+                        <h4>Call Us</h4>
+                        <p class="mb-2"><strong>Store:</strong> +852 2123-VINYL</p>
+                        <p class="mb-2"><strong>Orders:</strong> +852 2456-xxxx</p>
+                        <p class="mb-0"><small class="text-muted">Mon-Sun: 11AM-10PM<br>Public Holidays: 12PM-8PM</small></p>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <div class="contact-card p-4 text-center">
+                        <i class="fas fa-envelope contact-icon"></i>
+                        <h4>Email Us</h4>
+                        <p class="mb-2"><strong>General:</strong> info@VRH.hk</p>
+                        <p class="mb-2"><strong>Orders:</strong> orders@VRH.hk</p>
+                        <p class="mb-0"><strong>Support:</strong> help@VRH.hk</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Form & Map -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6 mb-4">
+                    <h2 class="mb-4">Send us a Message</h2>
+                    <form id="contactForm">
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="firstName">First Name *</label>
+                                <input type="text" class="form-control" id="firstName" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="lastName">Last Name *</label>
+                                <input type="text" class="form-control" id="lastName" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email Address *</label>
+                            <input type="email" class="form-control" id="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" class="form-control" id="phone">
+                        </div>
+                        <div class="form-group">
+                            <label for="subject">Subject *</label>
+                            <select class="form-control" id="subject" required>
+                                <option value="">Choose a topic...</option>
+                                <option value="general">General Inquiry</option>
+                                <option value="order">Order Question</option>
+                                <option value="return">Returns & Exchanges</option>
+                                <option value="recommendation">Record Recommendation</option>
+                                <option value="event">Event Information</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Message *</label>
+                            <textarea class="form-control" id="message" rows="5" required placeholder="Tell us how we can help you..."></textarea>
+                        </div>
+                        <div class="form-group form-check">
+                            <input type="checkbox" class="form-check-input" id="newsletter">
+                            <label class="form-check-label" for="newsletter">
+                                Subscribe to our newsletter for new releases and exclusive offers
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-custom btn-lg">Send Message</button>
+                    </form>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <h2 class="mb-4">Find Our Store</h2>
+                    <div class="map-container">
+                        <div class="text-center">
+                            <i class="fas fa-map-marked-alt fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Interactive Map</h5>
+                            <p class="text-muted">Map integration would go here<br>
+                            <small>Shop G12, Star House, 3 Salisbury Road, TST, Hong Kong</small></p>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <h4>Store Hours</h4>
+                        <table class="table table-sm">
+                            <tbody>
+                                <tr><td>Monday - Sunday</td><td>11:00 AM - 10:00 PM</td></tr>
+                                <tr><td>Public Holidays</td><td>12:00 PM - 8:00 PM</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2>Frequently Asked Questions</h2>
+                <p class="lead">Quick answers to common questions</p>
+            </div>
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="accordion" id="faqAccordion">
+                        <div class="card">
+                            <div class="card-header" id="faq1">
+                                <h5 class="mb-0">
+                                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse1">
+                                        Do you buy used vinyl records?
+                                    </button>
+                                </h5>
+                            </div>
+                            <div id="collapse1" class="collapse show" data-parent="#faqAccordion">
+                                <div class="card-body">
+                                    Yes! We're always looking to add quality vinyl to our collection. Bring your records in for evaluation, and we'll make you a fair offer based on condition and market demand.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header" id="faq2">
+                                <h5 class="mb-0">
+                                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapse2">
+                                        Do you offer shipping?
+                                    </button>
+                                </h5>
+                            </div>
+                            <div id="collapse2" class="collapse" data-parent="#faqAccordion">
+                                <div class="card-body">
+                                    Absolutely! We ship throughout Hong Kong with same-day delivery in urban areas, and worldwide with secure packaging to ensure your records arrive safely. Free delivery for orders over HK$500 within Hong Kong.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header" id="faq3">
+                                <h5 class="mb-0">
+                                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapse3">
+                                        Can you help me find a specific record?
+                                    </button>
+                                </h5>
+                            </div>
+                            <div id="collapse3" class="collapse" data-parent="#faqAccordion">
+                                <div class="card-body">
+                                    Of course! Our team loves a good hunt. Contact us with details about what you're looking for, and we'll use our network to track it down for you.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header" id="faq4">
+                                <h5 class="mb-0">
+                                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapse4">
+                                        Do you repair turntables or audio equipment?
+                                    </button>
+                                </h5>
+                            </div>
+                            <div id="collapse4" class="collapse" data-parent="#faqAccordion">
+                                <div class="card-body">
+                                    While we don't repair equipment in-house, we work with trusted local technicians and can recommend the best service for your needs.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Media & Newsletter -->
+    <section class="py-5 bg-dark text-white">
+        <div class="container text-center">
+            <h2 class="mb-4">Stay Connected</h2>
+            <p class="lead mb-4">Follow us for the latest arrivals, events, and vinyl news in Hong Kong</p>
+            <div class="mb-4">
+                <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-spotify"></i></a>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <h4 class="mb-3">Newsletter Signup</h4>
+                    <form class="form-inline justify-content-center">
+                        <input type="email" class="form-control mb-2 mr-sm-2" placeholder="Enter your email">
+                        <button type="submit" class="btn btn-outline-light mb-2">Subscribe</button>
+                    </form>
+                    <small class="text-muted">Get weekly updates on new arrivals and exclusive offers</small>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="container-fluid bg-dark p-5">
+        <div class="row align-items-start justify-content-between">
+            <div class="container col-md-4">
+                    <div class="media">
+                    <a href="index.html" class="logo-cntr block text_navigation_sm c-text-content-subtle"  title="Vinyl Record House">
+                        <img src="./assets/img/VRHlogo.png" width="100" alt=""></a>
+                        <div class="media-body">
+                            <div class="container">
+                                <h3 class="mt-0 text-light">
+                                    Vinyl Record House
+                                </h3>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+                
+            </div>
+
+            <div class="container col-md-4">
+                <div class="container">
+                    <a href="about.html" class="pb-50 mb-5 text-white h5">About Us</a></div><br />
+                <div class="container">
+                    <a href="t&c.html" class="pb-50 mb-5 text-white h5">Terms & Conditions</a></div><br />
+                <div class="container">
+                    <a href="recycling.html" class="pb-50 mb-5 text-white h5">Vinyl Recycling</a></div>
+            </div>
+
+            <div class="row col-md-4" id="contactAnchor">
+                <a href="https://x.com/yourpage"><i class="fa-brands fa-x-twitter mx-2 fa-2xl"></i></a>
+                <a href="https://www.facebook.com/yourpage"><i class="fa-brands fa-square-facebook mx-2 fa-2xl"></i></a>
+                <a href="https://www.instagram.com"><i class="fa-brands fa-instagram mx-2 fa-2xl"></i> </a>
+                <a href="https://www.youtube.com"><i class="fa-brands fa-youtube mx-2 fa-2xl"></i></a>
+                <a href="mailto:info@example.com?subject=Inquiry&body=Hello, I would like to know more about..."><i class="fas fa-envelope mx-2 fa-2xl"></i></a>
+            </div>
+            
+        </div>
+        <hr />
+        <p class="text-center">Vinyl Record House &copy; 2025</p>
+        <p class="text-center">
+            <a href="https://www.flaticon.com/free-icons/vinyl" title="vinyl icons" class="text-center">
+                Vinyl icons created by Freepik - Flaticon
+            </a>
+        </p>
+    </footer>
+
+    <!-- JQuery 3.5.1 -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" 
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" 
+        crossorigin="anonymous"></script>
+    <!-- Bootstrap 4.6.2 js -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" 
+        integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" 
+        crossorigin="anonymous"></script>
+    <script src="./assets/js/script.js"></script>
+
+    <script>
+    $(function() {
+        // Contact form handling
+        $('#contactForm').on('submit', function(e) {
+            e.preventDefault();
+            
+            // Simple form validation
+            let isValid = true;
+            $(this).find('[required]').each(function() {
+                if (!$(this).val()) {
+                    isValid = false;
+                    $(this).addClass('is-invalid');
+                } else {
+                    $(this).removeClass('is-invalid');
+                }
+            });
+            if (isValid) {
+                // Simulate form submission
+                alert('Thank you for your message! We\'ll get back to you within 24 hours.');
+                this.reset();
+            }
+        });
+    });
+    </script>
+</body>
+</html>
