@@ -16,7 +16,7 @@ $(function() {
     // If you are not using the load() function above, then uncomment 
     // the function below and it will work the same way.
     
-    $('.dropdown-item, .nav-item').on('click', function(e) {
+     $('a[href^="#"]').on('click', function(e) {
         if ( this.hash !== "" ) {
             e.preventDefault();
             var anchor = this.hash;
@@ -26,6 +26,27 @@ $(function() {
             }, 800, function() {
                 window.location.hash = anchor;
             });
+        }
+    });
+
+    // Contact form handling
+    $('#contactForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        // Simple form validation
+        let isValid = true;
+        $(this).find('[required]').each(function() {
+            if (!$(this).val()) {
+                isValid = false;
+                $(this).addClass('is-invalid');
+            } else {
+                $(this).removeClass('is-invalid');
+            }
+        });
+        if (isValid) {
+            // Simulate form submission
+            alert('Thank you for your message! We\'ll get back to you within 24 hours.');
+            this.reset();
         }
     });
     

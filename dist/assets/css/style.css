@@ -123,3 +123,22 @@ footer p, footer a {
     transform: translateY(-3px);
     text-decoration: none;
 }
+
+.custom-page-link {
+    border: 1px solid #bbb !important;
+    color: #333 !important;
+    background-color: #f8f9fa !important;
+    margin-right: 6px;
+    transition: box-shadow 0.2s;
+}
+.pagination .active .custom-page-link {
+    background-color: #d4af37 !important;
+    color: #fff !important;
+    border-color: #d4af37 !important;
+    box-shadow: 0 2px 8px rgba(0,123,255,0.15);
+}
+.custom-page-link:hover {
+    background-color: #d4af37 !important;
+    color: #fff !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+}
