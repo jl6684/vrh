@@ -1,6 +1,6 @@
-Title: ERB Full time Python Django project
+# Title: ERB Full time Python Django project
 
-# Frontend reference from https://github.com/codrkai/codrkai.github.io
+Frontend reference from https://github.com/codrkai/codrkai.github.io
 A Bootstrap 4 Website Example using Fontawesome
 
 <!-- Initial Environment -->
@@ -21,3 +21,6 @@ Remarks: After milestone of Django 5.2 kicked off, please refer to the requireme
 1. Finished copied initial frontend development local packages from from bcre project except Fontawesome.
 2. Updated all html files.
 3. Git push named: "Step 1: Use local frontend packages from bcre project."
+4. Create Django project in project folder "proj1" ~> Django-admin startproject vrhp1 .
+5. Follow bcre project, changed settings.py and urls.py accordingly.
+
