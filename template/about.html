@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>
+        Vinyl Record House - VRH
+    </title>
+    <!-- Bootstrap from bcre project -->
+    <link rel="stylesheet" href="../dist/assets/css/bootstrap.css" />
+    <!-- Custom css original from codrkai.github.io with appended update from Jeol -->
+    <link rel="stylesheet" href="../dist/assets/css/style.css" />
+    <!-- Fontawesome 6.7.2 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+</head> 
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container-fluid">
+            <!-- Brand Logo and Name -->
+            <div class="nav-brand nav-link" href="#about" data-toggle="modal" data-target="#aboutModal" >
+                <span class="navbar-brand">
+                    <img src="../dist/assets/img/VRHlogo.png" width="30" height="30" class="d-inline-block align-items-start" alt="">
+                </span>
+                    <span class="navbar-text"><h3 class="text-light">VRH</h3></span>
+            </div>
+
+            <!-- Search Box -->
+            <form class="form-inline mr-auto h4">
+                <div class="input-group">
+                    <input class="form-control" type="search" placeholder="Album, Artist, Genre..." aria-label="Search">
+                    <div class="input-group-append">
+                        <!-- <input type="text" class="form-control" name="search" placeholder="Album, Artist, Genre..."> -->
+                        <button class="btn btn-outline-light ml-2" type="submit">
+                            <!-- <i class="fas fa-search"></i> -->
+                            Search
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Navbar toggler for resposive design (only shows when necessary)-->
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Navigation Items -->
+            <div class="collapse navbar-collapse" id="navbar-menu">
+                <div class="navbar-nav ml-auto h4">
+                    <!-- Home -->
+                    <a class="nav-link text-light" href="index.html">Home</a>
+
+                    <!-- Categories Dropdown -->
+                    <div class="dropdown">
+                        <a class="nav-item nav-link text-light dropdown-toggle" href="#" id="categoriesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Categories
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="categoriesDropdown">
+                            <!-- First Group -->
+                            <h6 class="dropdown-header font-weight-bold">by Gender</h6>
+                            <a class="dropdown-item" href="../dist/male.html">Male Artists</a>
+                            <a class="dropdown-item" href="../dist/female.html">Female Artists</a>
+                            
+                            <div class="dropdown-divider"></div>
+                            
+                            <!-- Second Group -->
+                            <h6 class="dropdown-header font-weight-bold">by Band / Assortments / Others</h6>
+                            <a class="dropdown-item" href="../dist/band.html">Band</a>
+                            <a class="dropdown-item" href="../dist/assortments.html">Assortments</a>
+                            <a class="dropdown-item" href="../dist/others.html">Others</a>
+                        </div>
+                    </div>
+
+                    <!-- Membership Dropdown -->
+                    <div class="dropdown">
+                        <a class="nav-item nav-link text-light dropdown-toggle" href="#" id="membershipDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Membership
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="membershipDropdown">
+                            <a class="dropdown-item" href="#">Sign Up</a>
+                            <a class="dropdown-item" href="#">Log in</a>
+                        </div>
+                    </div>
+
+                    <!-- Contact Us -->
+                    <a class="nav-link text-light" href="contact.html">Contact Us</a>
+
+                    <!-- Shopping Cart with Badge -->
+                    <a class="nav-link cart-badge" href="#">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="shop-cart">2</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- About modal (hidden) -->
+    <div class="modal fade" id="aboutModal" role="dialog" tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title h2">
+                        About Vinyl Record Home
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <div class="media">
+                    <img src="../dist/assets/img/pexels-lg.jpg" width="225" alt="">
+                        <div class="media-body">
+                            <div class="container">
+                                <h5 class="mt-0">
+                                    Welcome to our premier online vinyl store, your ultimate destination for high-quality records! Whether you're a seasoned collector or a newbie exploring the world of analog sound, we offer a vast selection of vinyl records across genres—from classic rock and jazz to modern pop and electronic. Our carefully curated collection features new releases, rare pressings, and timeless classics, all at competitive prices. With secure packaging, fast shipping, and exceptional customer service, we ensure your vinyl arrives in perfect condition. Dive into the rich, warm sound of vinyl and rediscover music the way it was meant to be heard. Happy spinning!
+                                </h5>
+                            </div>
+                            <div class="container">
+                                    <a href="https://x.com/yourpage">
+                                    <i class="fa-brands fa-x-twitter fa-2xl"></i>
+                                    </a>
+                                    <a href="https://www.facebook.com/yourpage">
+                                    <i class="fa-brands fa-square-facebook fa-2xl"></i>
+                                    </a>
+                                    <a href="https://www.instagram.com">
+                                    <i class="fa-brands fa-instagram fa-2xl"></i> 
+                                    </a>
+                                    <a href="https://www.youtube.com">
+                                    <i class="fa-brands fa-youtube fa-2xl"></i> 
+                                    </a>
+                                    <a href="mailto:info@example.com?subject=Inquiry&body=Hello, I would like to know more about...">
+                                    <i class="fas fa-envelope fa-2xl"></i>
+                                    </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container text-center pt-5 mt-5">
+            <img src="../dist/assets/img/VRHlogo.png" width="100" alt="">
+            <h1 class="display-4 mb-3">About Us</h1>
+            <p class="lead">Where music comes alive and memories are made</p>
+        </div>
+    </section>
+
+    <!-- Slider Background -->
+    <div class="carousel" id="mainSlide">
+        <div class="carousel-inner">
+            <img class="w-100 d-block" src="../dist/assets/img/pexels-bg2.jpg" alt="">
+        </div>
+    </div>
+
+    <!-- Our Story Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6">
+                    <h2 class="mb-4">Our Story</h2>
+                    <div class="story-card p-4 mb-4">
+                        <p class="lead">Vinyl Record House began as a small dream in a Tsim Sha Tsui shop, born from an insatiable passion for the warm, authentic sound that only vinyl can deliver.</p>
+                    </div>
+                    <p>Welcome to our premier online vinyl store, your ultimate destination for high-quality records! Whether you're a seasoned collector or a newbie exploring the world of analog sound, we offer a vast selection of vinyl records across genres—from classic rock and jazz to modern pop and electronic. Our carefully curated collection features new releases, rare pressings, and timeless classics, all at competitive prices. With secure packaging, fast shipping, and exceptional customer service, we ensure your vinyl arrives in perfect condition. Dive into the rich, warm sound of vinyl and rediscover music the way it was meant to be heard. Happy spinning! </p>
+                    <p>   What started as a personal collection of rare finds and beloved classics has grown into a thriving community hub for music lovers across Hong Kong. We believe that every record tells a story, and every spin creates a memory.</p>
+                    <p>Today, we're proud to be Hong Kong's trusted source for both timeless classics and the latest releases, serving collectors, casual listeners, and music enthusiasts from Central to New Territories.</p>
+                </div>
+                <div class="col-lg-6">
+                    <img src="../dist/assets/img/pexels-lg.jpg" alt="Vinyl Records" class="img-fluid rounded shadow">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- What Makes Us Special -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2>What Makes Us Special</h2>
+                <p class="lead">More than just a record store - we're a community</p>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="text-center">
+                        <i class="fas fa-search feature-icon"></i>
+                        <h4>Curated Selection</h4>
+                        <p>Every record in our collection is hand-picked for quality and significance. From rare Cantopop gems to essential international listening, we ensure each piece meets our high standards.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="text-center">
+                        <i class="fas fa-users feature-icon"></i>
+                        <h4>Expert Knowledge</h4>
+                        <p>Our team consists of passionate music enthusiasts with decades of combined experience in Hong Kong's music scene. We're here to help you discover your next favorite album.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="text-center">
+                        <i class="fas fa-heart feature-icon"></i>
+                        <h4>Community Focus</h4>
+                        <p>We host listening parties, artist meet-and-greets, and educational workshops in our Tsim Sha Tsui location. Music is meant to be shared, and we love bringing Hong Kong's music community together.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Our Mission -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto text-center">
+                    <h2 class="mb-4">Our Mission</h2>
+                    <blockquote class="blockquote">
+                        <p class="mb-4 lead">"To preserve and celebrate the art of vinyl records while creating a welcoming space where Hong Kong music lovers can discover, connect, and share their passion for authentic sound."</p>
+                    </blockquote>
+                    <p>We're committed to supporting both established and emerging artists from Hong Kong, Asia, and around the world, promoting the vinyl format, and ensuring that future generations can experience the unmatched warmth and depth of analog sound.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2>Meet Our Team</h2>
+                <p class="lead">The passionate people behind Vinyl Record House</p>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="card team-member border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-user-circle fa-5x text-muted mb-3"></i>
+                            <h5 class="card-title">Sarah Wong</h5>
+                            <p class="text-muted">Founder & Curator</p>
+                            <p class="card-text">With 25+ years in Hong Kong's music industry, Sarah has an ear for quality and a passion for discovering Cantopop classics and international gems.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card team-member border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-user-circle fa-5x text-muted mb-3"></i>
+                            <h5 class="card-title">Marcus Lam</h5>
+                            <p class="text-muted">Audio Specialist</p>
+                            <p class="card-text">Marcus ensures every record meets our quality standards and helps customers with equipment recommendations, specializing in both vintage and modern setups.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card team-member border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-user-circle fa-5x text-muted mb-3"></i>
+                            <h5 class="card-title">Emma Chen</h5>
+                            <p class="text-muted">Community Manager</p>
+                            <p class="card-text">Emma organizes our events and builds connections between local and international artists and Hong Kong's vibrant music community.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="container-fluid bg-dark p-5">
+        <div class="row align-items-start justify-content-between">
+            <div class="container col-md-4">
+                    <div class="media">
+                    <a href="index.html" class="logo-cntr block text_navigation_sm c-text-content-subtle"  title="Vinyl Record House">
+                        <img src="../dist/assets/img/VRHlogo.png" width="100" alt=""></a>
+                        <div class="media-body">
+                            <div class="container">
+                                <h3 class="mt-0 text-light">
+                                    Vinyl Record House
+                                </h3>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+                
+            </div>
+
+            <div class="container col-md-4">
+                <div class="container">
+                    <a href="about.html" class="pb-50 mb-5 text-white h5">About Us</a></div><br />
+                <div class="container">
+                    <a href="t&c.html" class="pb-50 mb-5 text-white h5">Terms & Conditions</a></div><br />
+                <div class="container">
+                    <a href="recycling.html" class="pb-50 mb-5 text-white h5">Vinyl Recycling</a></div>
+            </div>
+
+            <div class="row col-md-4" id="contactAnchor">
+                <a href="https://x.com/yourpage"><i class="fa-brands fa-x-twitter mx-2 fa-2xl"></i></a>
+                <a href="https://www.facebook.com/yourpage"><i class="fa-brands fa-square-facebook mx-2 fa-2xl"></i></a>
+                <a href="https://www.instagram.com"><i class="fa-brands fa-instagram mx-2 fa-2xl"></i> </a>
+                <a href="https://www.youtube.com"><i class="fa-brands fa-youtube mx-2 fa-2xl"></i></a>
+                <a href="mailto:info@example.com?subject=Inquiry&body=Hello, I would like to know more about..."><i class="fas fa-envelope mx-2 fa-2xl"></i></a>
+            </div>
+            
+        </div>
+        <hr />
+        <p class="text-center">Vinyl Record House &copy; 2025</p>
+        <p class="text-center">
+            <a href="https://www.flaticon.com/free-icons/vinyl" title="vinyl icons" class="text-center">
+                Vinyl icons created by Freepik - Flaticon
+            </a>
+        </p>
+    </footer>
+
+    <!-- js file copied from bcre project -->
+    <script src="../dist/assets/js/jquery-3.3.1.min.js"></script>
+    <script src="../dist/assets/js/bootstrap.bundle.min.js "></script>
+    <!-- Original script file from codrkai.github.io template -->
+    <script src="../dist/assets/js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>
+        Vinyl Record House - VRH
+    </title>
+    <!-- Bootstrap from bcre project -->
+    <link rel="stylesheet" href="../dist/assets/css/bootstrap.css" />
+    <!-- Custom css original from codrkai.github.io with appended update from Jeol -->
+    <link rel="stylesheet" href="../dist/assets/css/style.css" />
+    <!-- Fontawesome 6.7.2 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+</head>  
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container-fluid">
+            <!-- Brand Logo and Name -->
+            <div class="nav-brand nav-link" href="#about" data-toggle="modal" data-target="#aboutModal" >
+                <span class="navbar-brand">
+                    <img src="../dist/assets/img/VRHlogo.png" width="30" height="30" class="d-inline-block align-items-start" alt="">
+                </span>
+                    <span class="navbar-text"><h3 class="text-light">VRH</h3></span>
+            </div>
+
+            <!-- Search Box -->
+            <form class="form-inline mr-auto h4">
+                <div class="input-group">
+                    <input class="form-control" type="search" placeholder="Album, Artist, Genre..." aria-label="Search">
+                    <div class="input-group-append">
+                        <!-- <input type="text" class="form-control" name="search" placeholder="Album, Artist, Genre..."> -->
+                        <button class="btn btn-outline-light ml-2" type="submit">
+                            <!-- <i class="fas fa-search"></i> -->
+                            Search
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Navbar toggler for resposive design (only shows when necessary)-->
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Navigation Items -->
+            <div class="collapse navbar-collapse" id="navbar-menu">
+                <div class="navbar-nav ml-auto h4">
+                    <!-- Home -->
+                    <a class="nav-link text-light" href="index.html">Home</a>
+
+                    <!-- Categories Dropdown -->
+                    <div class="dropdown">
+                        <a class="nav-item nav-link text-light dropdown-toggle" href="#" id="categoriesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Categories
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="categoriesDropdown">
+                            <!-- First Group -->
+                            <h6 class="dropdown-header font-weight-bold">by Gender</h6>
+                            <a class="dropdown-item" href="../dist/male.html">Male Artists</a>
+                            <a class="dropdown-item" href="../dist/female.html">Female Artists</a>
+                            
+                            <div class="dropdown-divider"></div>
+                            
+                            <!-- Second Group -->
+                            <h6 class="dropdown-header font-weight-bold">by Band / Assortments / Others</h6>
+                            <a class="dropdown-item" href="../dist/band.html">Band</a>
+                            <a class="dropdown-item" href="../dist/assortments.html">Assortments</a>
+                            <a class="dropdown-item" href="../dist/others.html">Others</a>
+                        </div>
+                    </div>
+
+                    <!-- Membership Dropdown -->
+                    <div class="dropdown">
+                        <a class="nav-item nav-link text-light dropdown-toggle" href="#" id="membershipDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Membership
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="membershipDropdown">
+                            <a class="dropdown-item" href="#">Sign Up</a>
+                            <a class="dropdown-item" href="#">Log in</a>
+                        </div>
+                    </div>
+
+                    <!-- Contact Us -->
+                    <a class="nav-link text-light" href="contact.html">Contact Us</a>
+
+                    <!-- Shopping Cart with Badge -->
+                    <a class="nav-link cart-badge" href="#">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="shop-cart">2</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- About modal (hidden) -->
+    <div class="modal fade" id="aboutModal" role="dialog" tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title h2">
+                        About Vinyl Record Home
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <div class="media">
+                    <img src="../dist/assets/img/pexels-lg.jpg" width="225" alt="">
+                        <div class="media-body">
+                            <div class="container">
+                                <h5 class="mt-0">
+                                    Welcome to our premier online vinyl store, your ultimate destination for high-quality records! Whether you're a seasoned collector or a newbie exploring the world of analog sound, we offer a vast selection of vinyl records across genres—from classic rock and jazz to modern pop and electronic. Our carefully curated collection features new releases, rare pressings, and timeless classics, all at competitive prices. With secure packaging, fast shipping, and exceptional customer service, we ensure your vinyl arrives in perfect condition. Dive into the rich, warm sound of vinyl and rediscover music the way it was meant to be heard. Happy spinning!
+                                </h5>
+                            </div>
+                            <div class="container">
+                                    <a href="https://x.com/yourpage">
+                                    <i class="fa-brands fa-x-twitter fa-2xl"></i>
+                                    </a>
+                                    <a href="https://www.facebook.com/yourpage">
+                                    <i class="fa-brands fa-square-facebook fa-2xl"></i>
+                                    </a>
+                                    <a href="https://www.instagram.com">
+                                    <i class="fa-brands fa-instagram fa-2xl"></i> 
+                                    </a>
+                                    <a href="https://www.youtube.com">
+                                    <i class="fa-brands fa-youtube fa-2xl"></i> 
+                                    </a>
+                                    <a href="mailto:info@example.com?subject=Inquiry&body=Hello, I would like to know more about...">
+                                    <i class="fas fa-envelope fa-2xl"></i>
+                                    </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container text-center pt-5 mt-5">
+            <img src="../dist/assets/img/VRHlogo.png" width="100" alt="">
+            <h1 class="display-4 mb-3">Vinyl Record Home</h1>
+            <p class="lead">Where Every Groove Feels Like Home</p>
+        </div>
+    </section>
+
+    <!-- Content -->
+    <div class="container-fluid p-0">
+        <h1 class="display-4 bg-light p-5" id="projectAnchor">
+            Band Artists
+        </h1>
+        
+        <!-- Records -->
+        <div class="card-deck p-5">
+            <div class="card">
+                <a href="#"><img class="card-img-top" src="../dist/assets/img/projects/projects-macbook-stats.jpg" alt=""></a>
+                <div class="card-body">
+                    <h3 class="card-title">
+                        Record 1
+                    </h3>
+                    <p class="card-text">
+                        <h5>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eos, eveniet.</h5>
+                    </p>
+                </div>
+            </div>
+
+            <div class="card">
+                <a href="#"><img class="card-img-top" src="../dist/assets/img/projects/projects-coding-sunset.jpg" alt=""></a>
+                <div class="card-body">
+                    <h3 class="card-title">
+                        Record 2
+                    </h3>
+                    <p class="card-text">
+                        <h5>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eos, eveniet.</h5>
+                    </p>
+                </div>
+            </div>
+
+            <div class="card">
+                <a href="#"><img class="card-img-top" src="../dist/assets/img/projects/projects-hello-world.jpg" alt=""></a>
+                <div class="card-body">
+                    <h3 class="card-title">
+                        Record 3
+                    </h3>
+                    <p class="card-text">
+                        <h5>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eos, eveniet.</h5>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-deck p-5">
+            <div class="card">
+                <a href="#"><img class="card-img-top" src="../dist/assets/img/projects/projects-retro-computer.jpg" alt=""></a>
+                <div class="card-body">
+                    <h3 class="card-title">
+                        Record 4
+                    </h3>
+                    <p class="card-text">
+                        <h5>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eos, eveniet.</h5>
+                    </p>
+                </div>
+            </div>
+
+            <div class="card">
+                <a href="#"><img class="card-img-top" src="../dist/assets/img/projects/projects-robodog.jpg" alt=""></a>
+                <div class="card-body">
+                    <h3 class="card-title">
+                        Record 5
+                    </h3>
+                    <p class="card-text">
+                        <h5>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eos, eveniet.</h5>
+                    </p>
+                </div>
+            </div>
+
+            <div class="card">
+                <a href="#"><img class="card-img-top" src="../dist/assets/img/projects/projects-robot.jpg" alt=""></a>
+                <div class="card-body">
+                    <h3 class="card-title">
+                        Record 6
+                    </h3>
+                    <p class="card-text">
+                        <h5>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eos, eveniet.</h5>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination Bar -->
+        <nav aria-label="Page navigation example">
+            <ul class="pagination pagination-lg justify-content-center">
+                <li class="page-item"><a class="page-link custom-page-link" href="#">&lt;</a></li>
+                <li class="page-item active"><a class="page-link custom-page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link custom-page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link custom-page-link" href="#">3</a></li>
+                <li class="page-item"><a class="page-link custom-page-link" href="#">&gt;</a></li>
+            </ul>
+        </nav>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="container-fluid bg-dark p-5">
+        <div class="row align-items-start justify-content-between">
+            <div class="container col-md-4">
+                    <div class="media">
+                    <a href="index.html" class="logo-cntr block text_navigation_sm c-text-content-subtle"  title="Vinyl Record House">
+                        <img src="../dist/assets/img/VRHlogo.png" width="100" alt=""></a>
+                        <div class="media-body">
+                            <div class="container">
+                                <h3 class="mt-0 text-light">
+                                    Vinyl Record House
+                                </h3>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+                
+            </div>
+
+            <div class="container col-md-4">
+                <div class="container">
+                    <a href="about.html" class="pb-50 mb-5 text-white h5">About Us</a></div><br />
+                <div class="container">
+                    <a href="t&c.html" class="pb-50 mb-5 text-white h5">Terms & Conditions</a></div><br />
+                <div class="container">
+                    <a href="recycling.html" class="pb-50 mb-5 text-white h5">Vinyl Recycling</a></div>
+            </div>
+
+            <div class="row col-md-4" id="contactAnchor">
+                <a href="https://x.com/yourpage"><i class="fa-brands fa-x-twitter mx-2 fa-2xl"></i></a>
+                <a href="https://www.facebook.com/yourpage"><i class="fa-brands fa-square-facebook mx-2 fa-2xl"></i></a>
+                <a href="https://www.instagram.com"><i class="fa-brands fa-instagram mx-2 fa-2xl"></i> </a>
+                <a href="https://www.youtube.com"><i class="fa-brands fa-youtube mx-2 fa-2xl"></i></a>
+                <a href="mailto:info@example.com?subject=Inquiry&body=Hello, I would like to know more about..."><i class="fas fa-envelope mx-2 fa-2xl"></i></a>
+            </div>
+            
+        </div>
+        <hr />
+        <p class="text-center">Vinyl Record House &copy; 2025</p>
+        <p class="text-center">
+            <a href="https://www.flaticon.com/free-icons/vinyl" title="vinyl icons" class="text-center">
+                Vinyl icons created by Freepik - Flaticon
+            </a>
+        </p>
+    </footer>
+
+    <!-- js file copied from bcre project -->
+    <script src="../dist/assets/js/jquery-3.3.1.min.js"></script>
+    <script src="../dist/assets/js/bootstrap.bundle.min.js "></script>
+    <!-- Original script file from codrkai.github.io template -->
+    <script src="../dist/assets/js/script.js"></script>
+</body>
+</html>
