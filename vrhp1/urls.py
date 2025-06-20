@@ -22,6 +22,6 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    #path('', include('pages.urls', namespace='pages')),     # pages is an APPS level group
+    path('', include('main.urls')),  # Include main app URLs
     path('admin/', admin.site.urls),
-] #+ debug_toolbar_urls() + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

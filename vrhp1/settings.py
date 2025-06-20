@@ -48,6 +48,9 @@ INSTALLED_APPS = [
     #'django.contrib.humanize',      # Add djanog extra library for datetime, currency calcuations
 
     #"debug_toolbar",                # Register downloaded APPS ~>python -m pip install django-debug-toolbar
+    
+    # Custom Apps
+    'main',
 ]
 
 # These middleware calls Django login library
@@ -143,7 +146,7 @@ USE_TZ = True
 STATIC_ROOT = os.path.join(BASE_DIR,'static')
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'erb6/static')
+    os.path.join(BASE_DIR, 'templates/assets')
 ]
 
 # Default primary key field type
