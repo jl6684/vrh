@@ -33,3 +33,9 @@ Remarks: After milestone of Django 5.2 kicked off, please refer to the requireme
 2. Added 4 more html files under each categories.
 3. Git push named: "Step 4: Added pagination button on male.html and added 4 more html files under each categories."
 
+20250620_1100
+1. Change Navbar class aligned with Joel, keep script.js unchange.
+2. Applied to all other html files.
+3. Applied latest style.css from Joel.
+4. Generate dropdow list style by AI and applied to style.css
+5. Git push named: "Step 5: Categories pull down frontend finished."

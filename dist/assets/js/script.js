@@ -16,7 +16,7 @@ $(function() {
     // If you are not using the load() function above, then uncomment 
     // the function below and it will work the same way.
     
-     $('a[href^="#"]').on('click', function(e) {
+    $('.dropdown-item, .nav-item').on('click', function(e) {
         if ( this.hash !== "" ) {
             e.preventDefault();
             var anchor = this.hash;
@@ -28,6 +28,19 @@ $(function() {
             });
         }
     });
+
+    //  $('a[href^="#"]').on('click', function(e) {
+    //     if ( this.hash !== "" ) {
+    //         e.preventDefault();
+    //         var anchor = this.hash;
+
+    //         $('html, body').animate({
+    //             scrollTop: $(anchor).offset().top
+    //         }, 800, function() {
+    //             window.location.hash = anchor;
+    //         });
+    //     }
+    // });
 
     // Contact form handling
     $('#contactForm').on('submit', function(e) {

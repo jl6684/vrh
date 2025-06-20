@@ -32,11 +32,12 @@ footer p, footer a {
     padding: 3px 8px;
 }
 
+/* Enhanced vinyl shop theme styles */
 .hero-section {
-    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('../img/pexels-bg.jpg');
+    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('./assets/img/pexels-bg.jpg');
     background-size: cover;
     background-position: center;
-    height: 50vh;
+    height: 60vh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -44,65 +45,59 @@ footer p, footer a {
     text-align: center;
 }
 
-/* .vinyl-icon {
+.vinyl-icon {
     font-size: 4rem;
     color: #d4af37;
     margin-bottom: 1rem;
     animation: spin 10s linear infinite;
-} */
-        
+}
+
 @keyframes spin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
-        
-.contact-card {
+
+.story-card, .contact-card {
     background: #f8f9fa;
     border-left: 5px solid #d4af37;
     transition: transform 0.3s ease;
-    height: 100%;
 }
-        
-.contact-card:hover {
+
+.story-card:hover, .contact-card:hover {
     transform: translateY(-5px);
 }
-        
-.contact-icon {
+
+.feature-icon, .contact-icon {
     font-size: 2.5rem;
     color: #d4af37;
     margin-bottom: 1rem;
 }
-        
-.form-control:focus {
-    border-color: #d4af37;
-    box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
+
+.team-member {
+    transition: transform 0.3s ease;
 }
-        
+
+.team-member:hover {
+    transform: scale(1.05);
+}
+
 .btn-custom {
     background-color: #d4af37;
     border-color: #d4af37;
     color: #fff;
 }
-        
+
 .btn-custom:hover {
     background-color: #b8941f;
     border-color: #b8941f;
     color: #fff;
 }
-        
-.map-container {
-    position: relative;
-    overflow: hidden;
-    width: 100%;
-    height: 300px;
-    background: #f8f9fa;
-    border: 2px solid #dee2e6;
-    border-radius: 0.25rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+
+.form-control:focus {
+    border-color: #d4af37;
+    box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
 }
-        
+
 .social-link {
     display: inline-block;
     width: 50px;
@@ -124,21 +119,172 @@ footer p, footer a {
     text-decoration: none;
 }
 
-.custom-page-link {
-    border: 1px solid #bbb !important;
-    color: #333 !important;
-    background-color: #f8f9fa !important;
-    margin-right: 6px;
-    transition: box-shadow 0.2s;
+/* Enhanced navbar for consistency - removed background override to keep original transparent style */
+
+/* Vinyl record animations for fun */
+.fas.fa-record-vinyl {
+    transition: transform 0.3s ease;
 }
-.pagination .active .custom-page-link {
-    background-color: #d4af37 !important;
-    color: #fff !important;
-    border-color: #d4af37 !important;
-    box-shadow: 0 2px 8px rgba(0,123,255,0.15);
+
+.fas.fa-record-vinyl:hover {
+    transform: rotate(45deg);
 }
-.custom-page-link:hover {
-    background-color: #d4af37 !important;
+
+/* Enhanced cards with better spacing */
+.card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+/* Enhanced Navbar Dropdown Hover Effects */
+.dropdown-menu {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0px 1px 20px #eaeaea;
+    background-color: transparent;
+    backdrop-filter: blur(10px);
+    background: rgba(0, 0, 0, 0.8);
+    padding: 8px 0;
+    margin-top: 8px;
+    transition: all 0.3s ease;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+}
+
+.dropdown:hover .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    box-shadow: 0px 1px 20px #eaeaea;
+}
+
+.dropdown-menu:hover {
+    box-shadow: 0px 1px 20px #eaeaea;
+    transform: translateY(0);
+}
+
+.dropdown-item {
+    padding: 12px 20px;
+    font-weight: 500;
     color: #fff !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    margin: 2px 8px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.dropdown-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.dropdown-item:hover {
+    background: linear-gradient(135deg, #d4af37, #b8941f) !important;
+    color: white !important;
+    transform: translateX(8px) scale(1.02);
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+    border-radius: 8px;
+    padding-left: 28px;
+}
+
+.dropdown-item:hover::before {
+    left: 100%;
+}
+
+.dropdown-item:active {
+    transform: translateX(8px) scale(0.98);
+    transition: transform 0.1s ease;
+}
+
+.dropdown-header {
+    color: #d4af37 !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 15px 20px 8px 20px;
+    margin: 0 8px;
+    border-bottom: 2px solid rgba(212, 175, 55, 0.2);
+    font-size: 0.85rem;
+}
+
+.dropdown-divider {
+    margin: 8px 16px;
+    border-top: 1px solid rgba(212, 175, 55, 0.2);
+    position: relative;
+}
+
+.dropdown-divider::after {
+    content: '♪';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    padding: 0 8px;
+    color: #d4af37;
+    font-size: 12px;
+}
+
+/* Enhanced dropdown toggle hover effect */
+.dropdown-toggle:hover {
+    color: #d4af37 !important;
+    transform: translateY(-1px);
+    transition: all 0.3s ease;
+}
+
+.dropdown-toggle::after {
+    transition: transform 0.3s ease;
+    transform: rotate(0deg) !important;
+}
+
+.dropdown-toggle:hover::after {
+    transform: rotate(0deg) !important;
+}
+
+/* Special hover effect for membership items */
+.dropdown-menu .dropdown-item[href="#"]:hover {
+    background: linear-gradient(135deg, #6c757d, #495057) !important;
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+}
+
+
+/* Animation for dropdown appearance */
+.dropdown-menu.show {
+    animation: dropdownSlideIn 0.3s ease-out;
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+@keyframes dropdownSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Enhanced focus states for accessibility */
+.dropdown-item:focus {
+    outline: 2px solid #d4af37;
+    outline-offset: 2px;
+    background: linear-gradient(135deg, #d4af37, #b8941f) !important;
+    color: white !important;
 }
