@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Contact Us - Vinyl Record House{% endblock %}
+
+{% block content %}
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container text-center pt-5 mt-5">
+            <img src="{% static 'img/VRHlogo.png' %}" width="100" alt="" class="logo-spin">
+            <h1 class="display-4 mb-3">Contact Us</h1>
+            <p class="lead">We'd love to hear from you - let's talk vinyl!</p>
+        </div>
+    </section>
+
+ 
+
+    <!-- Contact Information -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <div class="contact-card p-4 text-center">
+                        <i class="fas fa-map-marker-alt contact-icon"></i>
+                        <h4>Visit Our Store</h4>
+                        <p class="mb-0">
+                        Tsim Sha Tsui, Kowloon<br>
+                        Hong Kong</p>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <div class="contact-card p-4 text-center">
+                        <i class="fas fa-phone contact-icon"></i>
+                        <h4>Call Us</h4>
+                        <p class="mb-2"><strong>Store:</strong> +852 2123-VINYL</p>
+                        <p class="mb-2"><strong>Orders:</strong> +852 2456-xxxx</p>
+                        <p class="mb-0"><small class="text-muted">Mon-Sun: 11AM-10PM<br>Public Holidays: 12PM-8PM</small></p>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <div class="contact-card p-4 text-center">
+                        <i class="fas fa-envelope contact-icon"></i>
+                        <h4>Email Us</h4>
+                        <p class="mb-2"><strong>General:</strong> info@VRH.hk</p>
+                        <p class="mb-2"><strong>Orders:</strong> orders@VRH.hk</p>
+                        <p class="mb-0"><strong>Support:</strong> help@VRH.hk</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Form & Map -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6 mb-4">
+                    <h2 class="mb-4">Send us a Message</h2>
+                    <form method="post" id="contactForm">
+                        {% csrf_token %}
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="firstName">First Name *</label>
+                                <input type="text" class="form-control" id="firstName" name="first_name" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="lastName">Last Name *</label>
+                                <input type="text" class="form-control" id="lastName" name="last_name" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email Address *</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" class="form-control" id="phone" name="phone">
+                        </div>
+                        <div class="form-group">
+                            <label for="subject">Subject *</label>
+                            <select class="form-control" id="subject" name="subject" required>
+                                <option value="">Choose a topic...</option>
+                                <option value="general">General Inquiry</option>
+                                <option value="order">Order Question</option>
+                                <option value="return">Returns & Exchanges</option>
+                                <option value="recommendation">Record Recommendation</option>
+                                <option value="event">Event Information</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Message *</label>
+                            <textarea class="form-control" id="message" name="message" rows="5" required placeholder="Tell us how we can help you..."></textarea>
+                        </div>
+                        <div class="form-group form-check">
+                            <input type="checkbox" class="form-check-input" id="newsletter" name="newsletter">
+                            <label class="form-check-label" for="newsletter">
+                                Subscribe to our newsletter for new releases and exclusive offers
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-custom btn-lg">Send Message</button>
+                    </form>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <h2 class="mb-4">Find Our Store</h2>
+                    <div class="map-container">
+                        <div class="text-center">
+                            <i class="fas fa-map-marked-alt fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Interactive Map</h5>
+                            <p class="text-muted">Map integration would go here<br>
+                            <small>Shop G12, Star House, 3 Salisbury Road, TST, Hong Kong</small></p>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <h4>Store Hours</h4>
+                        <table class="table table-sm">
+                            <tbody>
+                                <tr><td>Monday - Sunday</td><td>11:00 AM - 10:00 PM</td></tr>
+                                <tr><td>Public Holidays</td><td>12:00 PM - 8:00 PM</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2>Frequently Asked Questions</h2>
+                <p class="lead">Quick answers to common questions</p>
+            </div>
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="accordion" id="faqAccordion">
+                        <div class="card">
+                            <div class="card-header" id="faq1">
+                                <h5 class="mb-0">
+                                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse1">
+                                        Do you buy used vinyl records?
+                                    </button>
+                                </h5>
+                            </div>
+                            <div id="collapse1" class="collapse show" data-parent="#faqAccordion">
+                                <div class="card-body">
+                                    Yes! We're always looking to add quality vinyl to our collection. Bring your records in for evaluation, and we'll make you a fair offer based on condition and market demand.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header" id="faq2">
+                                <h5 class="mb-0">
+                                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapse2">
+                                        Do you offer shipping?
+                                    </button>
+                                </h5>
+                            </div>
+                            <div id="collapse2" class="collapse" data-parent="#faqAccordion">
+                                <div class="card-body">
+                                    Absolutely! We ship throughout Hong Kong with same-day delivery in urban areas, and worldwide with secure packaging to ensure your records arrive safely. Free delivery for orders over HK$500 within Hong Kong.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header" id="faq3">
+                                <h5 class="mb-0">
+                                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapse3">
+                                        Can you help me find a specific record?
+                                    </button>
+                                </h5>
+                            </div>
+                            <div id="collapse3" class="collapse" data-parent="#faqAccordion">
+                                <div class="card-body">
+                                    Of course! Our team loves a good hunt. Contact us with details about what you're looking for, and we'll use our network to track it down for you.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header" id="faq4">
+                                <h5 class="mb-0">
+                                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapse4">
+                                        Do you repair turntables or audio equipment?
+                                    </button>
+                                </h5>
+                            </div>
+                            <div id="collapse4" class="collapse" data-parent="#faqAccordion">
+                                <div class="card-body">
+                                    While we don't repair equipment in-house, we work with trusted local technicians and can recommend the best service for your needs.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Media & Newsletter -->
+    <section class="py-5 bg-dark text-white">
+        <div class="container text-center">
+            <h2 class="mb-4">Stay Connected</h2>
+            <p class="lead mb-4">Follow us for the latest arrivals, events, and vinyl news in Hong Kong</p>
+            <div class="mb-4">
+                <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-spotify"></i></a>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <h4 class="mb-3">Newsletter Signup</h4>
+                    <form class="form-inline justify-content-center">
+                        <input type="email" class="form-control mb-2 mr-sm-2" placeholder="Enter your email">
+                        <button type="submit" class="btn btn-outline-light mb-2">Subscribe</button>
+                    </form>
+                    <small class="text-muted">Get weekly updates on new arrivals and exclusive offers</small>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

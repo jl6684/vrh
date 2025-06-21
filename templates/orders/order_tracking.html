@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Order Tracking - {{ order.order_id|truncatechars:8 }} - Vinyl Record House{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-shipping-fast"></i> Order Tracking</h2>
+                <a href="{% url 'orders:detail' order.order_id %}" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left"></i> Back to Order Details
+                </a>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Order #{{ order.order_id|truncatechars:8 }}</h5>
+                    <small class="text-muted">Placed on {{ order.created_at|date:"F d, Y at g:i A" }}</small>
+                </div>
+                <div class="card-body">
+                    <!-- Order Status Timeline -->
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h6 class="mb-3">Order Status</h6>
+                            <div class="order-timeline">
+                                <div class="timeline-item {% if order.status == 'pending' %}active{% elif order.status != 'pending' %}completed{% endif %}">
+                                    <div class="timeline-marker">
+                                        <i class="fas fa-shopping-cart"></i>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <h6>Order Placed</h6>
+                                        <p class="text-muted small">{{ order.created_at|date:"M d, Y g:i A" }}</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="timeline-item {% if order.status == 'confirmed' %}active{% elif order.status in 'processing,shipped,delivered' %}completed{% endif %}">
+                                    <div class="timeline-marker">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <h6>Order Confirmed</h6>
+                                        <p class="text-muted small">
+                                            {% if order.status != 'pending' %}
+                                                {{ order.updated_at|date:"M d, Y g:i A" }}
+                                            {% else %}
+                                                Pending confirmation
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                <div class="timeline-item {% if order.status == 'processing' %}active{% elif order.status in 'shipped,delivered' %}completed{% endif %}">
+                                    <div class="timeline-marker">
+                                        <i class="fas fa-cog"></i>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <h6>Processing</h6>
+                                        <p class="text-muted small">
+                                            {% if order.status in 'processing,shipped,delivered' %}
+                                                Being prepared for shipment
+                                            {% else %}
+                                                Awaiting processing
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                <div class="timeline-item {% if order.status == 'shipped' %}active{% elif order.status == 'delivered' %}completed{% endif %}">
+                                    <div class="timeline-marker">
+                                        <i class="fas fa-truck"></i>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <h6>Shipped</h6>
+                                        <p class="text-muted small">
+                                            {% if order.shipped_at %}
+                                                {{ order.shipped_at|date:"M d, Y g:i A" }}
+                                            {% elif order.status in 'shipped,delivered' %}
+                                                In transit
+                                            {% else %}
+                                                Not yet shipped
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                <div class="timeline-item {% if order.status == 'delivered' %}completed{% endif %}">
+                                    <div class="timeline-marker">
+                                        <i class="fas fa-home"></i>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <h6>Delivered</h6>
+                                        <p class="text-muted small">
+                                            {% if order.delivered_at %}
+                                                {{ order.delivered_at|date:"M d, Y g:i A" }}
+                                            {% else %}
+                                                Estimated delivery: 2-3 business days
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">Shipping Address</h6>
+                                    <p class="card-text small">
+                                        {{ order.get_full_name }}<br>
+                                        {{ order.address_line_1 }}<br>
+                                        {% if order.address_line_2 %}{{ order.address_line_2 }}<br>{% endif %}
+                                        {{ order.city }}, {{ order.state }} {{ order.postal_code }}<br>
+                                        {{ order.country }}
+                                    </p>
+                                    
+                                    <h6 class="card-title mt-3">Order Summary</h6>
+                                    <p class="card-text small">
+                                        Items: {{ order.get_total_items }}<br>
+                                        Subtotal: ${{ order.total_amount|floatformat:2 }}<br>
+                                        Shipping: ${{ order.shipping_cost|floatformat:2 }}<br>
+                                        <strong>Total: ${{ order.total_amount|floatformat:2 }}</strong>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.order-timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.order-timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: #e9ecef;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -22px;
+    top: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #e9ecef;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+.timeline-item.active .timeline-marker {
+    background-color: #007bff;
+    color: white;
+}
+
+.timeline-item.completed .timeline-marker {
+    background-color: #28a745;
+    color: white;
+}
+
+.timeline-content h6 {
+    margin-bottom: 5px;
+}
+</style>
+{% endblock %}

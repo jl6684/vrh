@@ -1,0 +1,289 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Shopping Cart - Vinyl Record House{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0"><i class="fas fa-shopping-cart"></i> Shopping Cart</h4>
+            </div>
+            <div class="card-body">
+                {% if cart_items %}
+                    <div id="cart-items">
+                        {% for item in cart_items %}
+                        <div class="cart-item border-bottom pb-3 mb-3" data-item-id="{{ item.id }}">
+                            <div class="row align-items-center">
+                                <div class="col-md-2">
+                                    {% if item.vinyl_record.cover_image %}
+                                        <img src="{{ item.vinyl_record.cover_image.url }}" class="img-fluid rounded" alt="{{ item.vinyl_record.title }}">
+                                    {% else %}
+                                        <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 80px;">
+                                            <i class="fas fa-compact-disc fa-2x text-muted"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-4">
+                                    <h6 class="mb-1">{{ item.vinyl_record.title }}</h6>
+                                    <p class="mb-1 text-muted">{{ item.vinyl_record.artist.name }}</p>
+                                    <small class="text-muted">{{ item.vinyl_record.label.name }} • {{ item.vinyl_record.release_year }}</small>
+                                </div>
+                                <div class="col-md-2">
+                                    <strong>${{ item.vinyl_record.price }}</strong>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="input-group input-group-sm">
+                                        <button class="btn btn-outline-secondary btn-decrease" type="button" data-item-id="{{ item.id }}">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                        <input type="number" class="form-control text-center quantity-input" 
+                                               value="{{ item.quantity }}" min="1" max="{{ item.vinyl_record.stock_quantity }}"
+                                               data-item-id="{{ item.id }}">
+                                        <button class="btn btn-outline-secondary btn-increase" type="button" data-item-id="{{ item.id }}">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                    <small class="text-muted">Max: {{ item.vinyl_record.stock_quantity }}</small>
+                                </div>
+                                <div class="col-md-2 text-end">
+                                    <strong class="item-total">${{ item.get_total_price }}</strong>
+                                    <br>
+                                    <button class="btn btn-sm btn-outline-danger btn-remove" data-item-id="{{ item.id }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <button class="btn btn-outline-warning" id="clear-cart">
+                                <i class="fas fa-trash"></i> Clear Cart
+                            </button>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <a href="{% url 'vinyl:list' %}" class="btn btn-outline-primary">
+                                <i class="fas fa-arrow-left"></i> Continue Shopping
+                            </a>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
+                        <h5>Your cart is empty</h5>
+                        <p class="text-muted">Add some vinyl records to get started!</p>
+                        <a href="{% url 'vinyl:list' %}" class="btn btn-primary">
+                            <i class="fas fa-compact-disc"></i> Browse Vinyl Records
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    {% if cart_items %}
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-calculator"></i> Order Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Items ({{ total_items }}):</span>
+                    <span id="cart-subtotal">${{ total_price }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Shipping:</span>
+                    <span id="shipping-cost">
+                        {% if total_price >= 500 %}
+                            <span class="text-success">FREE</span>
+                        {% else %}
+                            $50.00
+                        {% endif %}
+                    </span>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between mb-3">
+                    <strong>Total:</strong>
+                    <strong id="cart-total">
+                        ${% if total_price >= 500 %}{{ total_price }}{% else %}{{ total_price|add:50 }}{% endif %}
+                    </strong>
+                </div>
+                
+                {% if user.is_authenticated %}
+                    <div class="d-grid">
+                        <a href="{% url 'cart:checkout' %}" class="btn btn-success">
+                            <i class="fas fa-credit-card"></i> Proceed to Checkout
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="d-grid">
+                        <a href="{% url 'accounts:login' %}?next={% url 'cart:checkout' %}" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt"></i> Login to Checkout
+                        </a>
+                    </div>
+                    <p class="text-center mt-2 small text-muted">
+                        New customer? <a href="{% url 'accounts:register' %}">Create an account</a>
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Shipping Info -->
+        <div class="card mt-3">
+            <div class="card-body">
+                <h6><i class="fas fa-shipping-fast"></i> Shipping Information</h6>
+                <ul class="list-unstyled small">
+                    <li><i class="fas fa-check text-success"></i> Free shipping on orders over $500</li>
+                    <li><i class="fas fa-check text-success"></i> 2-3 business days delivery</li>
+                    <li><i class="fas fa-check text-success"></i> Secure packaging guaranteed</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Update cart item quantity
+    $('.quantity-input').on('change', function() {
+        updateCartItem($(this).data('item-id'), $(this).val());
+    });
+    
+    $('.btn-increase').on('click', function() {
+        var input = $(this).siblings('.quantity-input');
+        var currentVal = parseInt(input.val());
+        var maxVal = parseInt(input.attr('max'));
+        if (currentVal < maxVal) {
+            input.val(currentVal + 1);
+            updateCartItem($(this).data('item-id'), currentVal + 1);
+        }
+    });
+    
+    $('.btn-decrease').on('click', function() {
+        var input = $(this).siblings('.quantity-input');
+        var currentVal = parseInt(input.val());
+        if (currentVal > 1) {
+            input.val(currentVal - 1);
+            updateCartItem($(this).data('item-id'), currentVal - 1);
+        }
+    });
+    
+    // Remove cart item
+    $('.btn-remove').on('click', function() {
+        var itemId = $(this).data('item-id');
+        removeCartItem(itemId);
+    });
+    
+    // Clear cart
+    $('#clear-cart').on('click', function() {
+        if (confirm('Are you sure you want to clear your cart?')) {
+            clearCart();
+        }
+    });
+    
+    function updateCartItem(itemId, quantity) {
+        $.ajax({
+            url: `/cart/update/${itemId}/`,
+            method: 'POST',
+            data: JSON.stringify({
+                'quantity': quantity
+            }),
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val(),
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function(response) {
+                if (response.success) {
+                    updateCartDisplay(response);
+                    showMessage(response.message, 'success');
+                } else {
+                    showMessage(response.error, 'danger');
+                }
+            },
+            error: function() {
+                showMessage('Error updating cart item', 'danger');
+            }
+        });
+    }
+    
+    function removeCartItem(itemId) {
+        $.ajax({
+            url: `/cart/remove/${itemId}/`,
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val(),
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function(response) {
+                if (response.success) {
+                    $(`.cart-item[data-item-id="${itemId}"]`).fadeOut(300, function() {
+                        $(this).remove();
+                        if ($('.cart-item').length === 0) {
+                            location.reload();
+                        }
+                    });
+                    updateCartDisplay(response);
+                    showMessage(response.message, 'success');
+                }
+            },
+            error: function() {
+                showMessage('Error removing cart item', 'danger');
+            }
+        });
+    }
+    
+    function clearCart() {
+        $.ajax({
+            url: '/cart/clear/',
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val(),
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function(response) {
+                if (response.success) {
+                    showMessage(response.message, 'success');
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1000);
+                } else {
+                    showMessage(response.error || 'Error clearing cart', 'danger');
+                }
+            },
+            error: function() {
+                showMessage('Error clearing cart', 'danger');
+            }
+        });
+    }
+    
+    function updateCartDisplay(response) {
+        $('#cart-count').text(response.cart_count);
+        $('#cart-subtotal').text('$' + response.cart_total);
+        $('#cart-total').text('$' + (response.cart_total >= 500 ? response.cart_total : response.cart_total + 50));
+        $('#shipping-cost').html(response.cart_total >= 500 ? '<span class="text-success">FREE</span>' : '$50.00');
+    }
+    
+    function showMessage(message, type) {
+        var alertHtml = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>`;
+        $('#cart-items').prepend(alertHtml);
+        
+        setTimeout(function() {
+            $('.alert').fadeOut();
+        }, 3000);
+    }
+});
+</script>
+{% endblock %}

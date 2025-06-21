@@ -1,0 +1,318 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ vinyl.title }} - {{ vinyl.artist.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Vinyl Cover Image -->
+        <div class="col-lg-6">
+            <div class="sticky-top" style="top: 100px;">
+                {% if vinyl.cover_image %}
+                    <img src="{{ vinyl.cover_image.url }}" 
+                         alt="{{ vinyl.title }}" 
+                         class="img-fluid rounded shadow-lg">
+                {% else %}
+                    <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                         style="height: 400px;">
+                        <i class="fas fa-record-vinyl fa-5x text-muted"></i>
+                    </div>
+                {% endif %}
+                
+                <!-- Audio Preview -->
+                {% if vinyl.audio_sample %}
+                    <div class="mt-4 p-3 bg-light rounded">
+                        <h6><i class="fas fa-play-circle"></i> Audio Preview</h6>
+                        <audio controls class="w-100">
+                            <source src="{{ vinyl.audio_sample.url }}" type="audio/mpeg">
+                            Your browser does not support the audio element.
+                        </audio>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Product Details -->
+        <div class="col-lg-6">
+            <div class="mb-3">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'home:index' %}">Home</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'vinyl:list' %}">Vinyl</a></li>
+                        <li class="breadcrumb-item active">{{ vinyl.title }}</li>
+                    </ol>
+                </nav>
+            </div>
+            
+            <h1 class="h2 mb-1">{{ vinyl.title }}</h1>
+            <p class="text-muted h5 mb-3">by <a href="{% url 'vinyl:list' %}?artist={{ vinyl.artist.id }}" 
+                                               class="text-decoration-none">{{ vinyl.artist.name }}</a></p>
+            
+            <!-- Rating -->
+            <div class="d-flex align-items-center mb-3">
+                <div class="me-3">
+                    {% for i in "12345" %}
+                        {% if forloop.counter <= vinyl.average_rating %}
+                            <i class="fas fa-star text-warning"></i>
+                        {% else %}
+                            <i class="far fa-star text-warning"></i>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <span class="text-muted">({{ vinyl.review_count }} review{{ vinyl.review_count|pluralize }})</span>
+            </div>
+            
+            <!-- Price and Stock -->
+            <div class="mb-4">
+                <h3 class="text-primary mb-2">${{ vinyl.price }}</h3>
+                {% if vinyl.stock_quantity > 0 %}
+                    <p class="text-success mb-0">
+                        <i class="fas fa-check-circle"></i> In Stock ({{ vinyl.stock_quantity }} available)
+                    </p>
+                {% else %}
+                    <p class="text-danger mb-0">
+                        <i class="fas fa-times-circle"></i> Out of Stock
+                    </p>
+                {% endif %}
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="row mb-4">
+                <div class="col-8">
+                    {% if vinyl.stock_quantity > 0 %}
+                        <button class="btn btn-primary btn-lg w-100 add-to-cart-btn" 
+                                data-vinyl-id="{{ vinyl.id }}">
+                            <i class="fas fa-shopping-cart"></i> Add to Cart
+                        </button>
+                    {% else %}
+                        <button class="btn btn-secondary btn-lg w-100" disabled>
+                            <i class="fas fa-ban"></i> Out of Stock
+                        </button>
+                    {% endif %}
+                </div>
+                <div class="col-4">
+                    <button class="btn btn-outline-danger btn-lg w-100 wishlist-btn" 
+                            data-vinyl-id="{{ vinyl.id }}">
+                        <i class="far fa-heart"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Product Information -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h6>Genre</h6>
+                    <p><a href="{% url 'vinyl:list' %}?genre={{ vinyl.genre.id }}" 
+                          class="badge bg-secondary text-decoration-none">{{ vinyl.genre.name }}</a></p>
+                    
+                    <h6>Label</h6>
+                    <p><a href="{% url 'vinyl:list' %}?label={{ vinyl.label.id }}" 
+                          class="text-decoration-none text-muted">{{ vinyl.label.name }}</a></p>
+                </div>
+                <div class="col-md-6">
+                    <h6>Release Date</h6>
+                    <p>{{ vinyl.release_date|date:"F Y" }}</p>
+                    
+                    <h6>Format</h6>
+                    <p>{{ vinyl.format }} - {{ vinyl.size }}"</p>
+                </div>
+            </div>
+            
+            <!-- Description -->
+            {% if vinyl.description %}
+                <div class="mb-4">
+                    <h6>Description</h6>
+                    <p class="text-muted">{{ vinyl.description }}</p>
+                </div>
+            {% endif %}
+            
+            <!-- Track Listing -->
+            {% if vinyl.track_listing %}
+                <div class="mb-4">
+                    <h6>Track Listing</h6>
+                    <div class="bg-light p-3 rounded">
+                        <pre class="mb-0 small">{{ vinyl.track_listing }}</pre>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Reviews Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Customer Reviews</h5>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'reviews:write' vinyl.id %}" 
+                           class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-pen"></i> Write Review
+                        </a>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if reviews %}
+                        {% for review in reviews %}
+                            <div class="border-bottom pb-3 mb-3">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <strong>{{ review.user.get_full_name|default:review.user.username }}</strong>
+                                        <div class="text-warning">
+                                            {% for i in "12345" %}
+                                                {% if forloop.counter <= review.rating %}
+                                                    <i class="fas fa-star"></i>
+                                                {% else %}
+                                                    <i class="far fa-star"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">{{ review.created_at|date:"M d, Y" }}</small>
+                                </div>
+                                {% if review.title %}
+                                    <h6>{{ review.title }}</h6>
+                                {% endif %}
+                                <p class="mb-2">{{ review.comment }}</p>
+                                <div class="d-flex align-items-center">
+                                    <button class="btn btn-outline-secondary btn-sm me-2 helpful-btn" 
+                                            data-review-id="{{ review.id }}">
+                                        <i class="fas fa-thumbs-up"></i> Helpful ({{ review.helpful_count }})
+                                    </button>
+                                </div>
+                            </div>
+                        {% endfor %}
+                        
+                        <div class="text-center mt-4">
+                            <a href="{% url 'reviews:list' vinyl.id %}" 
+                               class="btn btn-outline-primary">
+                                View All Reviews
+                            </a>
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center py-4">
+                            No reviews yet. Be the first to review this vinyl!
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Add to cart functionality
+document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+    button.addEventListener('click', function() {
+        const vinylId = this.dataset.vinylId;
+        
+        fetch(`/cart/add/${vinylId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                'quantity': 1
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update cart count in navbar
+                const cartCountElement = document.querySelector('#cart-count');
+                if (cartCountElement) {
+                    cartCountElement.textContent = data.cart_count;
+                }
+                
+                // Show success message
+                this.innerHTML = '<i class="fas fa-check"></i> Added to Cart';
+                this.classList.remove('btn-primary');
+                this.classList.add('btn-success');
+                
+                setTimeout(() => {
+                    this.innerHTML = '<i class="fas fa-shopping-cart"></i> Add to Cart';
+                    this.classList.remove('btn-success');
+                    this.classList.add('btn-primary');
+                }, 2000);
+            } else {
+                console.error('Error adding to cart:', data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+});
+
+// Wishlist functionality
+document.querySelectorAll('.wishlist-btn').forEach(button => {
+    button.addEventListener('click', function() {
+        const vinylId = this.dataset.vinylId;
+        
+        fetch(`/wishlist/toggle/${vinylId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                'vinyl_id': vinylId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (data.added) {
+                    this.innerHTML = '<i class="fas fa-heart"></i>';
+                    this.classList.remove('btn-outline-danger');
+                    this.classList.add('btn-danger');
+                } else {
+                    this.innerHTML = '<i class="far fa-heart"></i>';
+                    this.classList.remove('btn-danger');
+                    this.classList.add('btn-outline-danger');
+                }
+            } else {
+                console.error('Error toggling wishlist:', data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+});
+
+// Helpful review functionality
+document.querySelectorAll('.helpful-btn').forEach(button => {
+    button.addEventListener('click', function() {
+        const reviewId = this.dataset.reviewId;
+        
+        fetch(`/reviews/helpful/${reviewId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                'review_id': reviewId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                this.innerHTML = `<i class="fas fa-thumbs-up"></i> Helpful (${data.helpful_count})`;
+            } else {
+                console.error('Error marking review helpful:', data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+});
+</script>
+{% endblock %}

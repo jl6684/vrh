@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Vinyl Recycling - Vinyl Record House{% endblock %}
+
+{% block extra_css %}
+<style>
+.hero-section {
+    background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('{% static "img/pexels-bg2.jpg" %}');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    padding: 100px 0;
+    margin-top: -76px;
+    padding-top: 176px;
+}
+
+.recycle-icon {
+    color: #28a745;
+    font-size: 4rem;
+}
+
+.step-number {
+    background: #007bff;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin: 0 auto 1rem;
+}
+</style>
+{% endblock %}
+
+{% block main_class %}{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container text-center">
+        <img src="{% static 'img/VRHlogo.png' %}" width="100" alt="VRH Logo" class="logo-spin">
+        <h1 class="display-4 mb-3">Vinyl Recycling</h1>
+        <p class="lead">Giving new life to old records - sustainability meets music</p>
+        <i class="fas fa-recycle recycle-icon mt-3"></i>
+    </div>
+</section>
+
+<!-- Introduction Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h2 class="mb-4">Our Commitment to Sustainability</h2>
+                <p class="lead">At Vinyl Record House, we believe in preserving not just music, but also our planet. Our vinyl recycling program transforms damaged or unwanted records into new opportunities while reducing environmental impact.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- What is Vinyl Recycling -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h3>What is Vinyl Recycling?</h3>
+                <p>Vinyl recycling is an eco-friendly process that repurposes old or damaged vinyl records, reducing waste and environmental impact. Instead of ending up in landfills, these records get a second chance at life.</p>
+                <p>By recycling vinyl, we can:</p>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success me-2"></i> Reduce plastic waste in landfills</li>
+                    <li><i class="fas fa-check text-success me-2"></i> Create unique decorative items and art pieces</li>
+                    <li><i class="fas fa-check text-success me-2"></i> Support sustainable business practices</li>
+                    <li><i class="fas fa-check text-success me-2"></i> Preserve resources for future generations</li>
+                </ul>
+            </div>
+            <div class="col-lg-6">
+                <img src="{% static 'img/pexels-bg.jpg' %}" alt="Vinyl Recycling" class="img-fluid rounded shadow">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2>How Our Recycling Program Works</h2>
+            <p class="lead">Simple steps to give your old vinyl a new purpose</p>
+        </div>
+        <div class="row">
+            <div class="col-md-3 mb-4">
+                <div class="text-center">
+                    <div class="step-number">1</div>
+                    <h5>Bring Your Records</h5>
+                    <p>Bring your damaged, warped, or unwanted vinyl records to our store. We accept records that are beyond repair for playing.</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="text-center">
+                    <div class="step-number">2</div>
+                    <h5>Assessment</h5>
+                    <p>Our team evaluates each record to determine the best recycling method and potential for creative repurposing.</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="text-center">
+                    <div class="step-number">3</div>
+                    <h5>Creative Transformation</h5>
+                    <p>Records are transformed into art pieces, bowls, decorative items, or components for new vinyl production.</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="text-center">
+                    <div class="step-number">4</div>
+                    <h5>New Life</h5>
+                    <p>The recycled items find new homes as unique art pieces or contribute to sustainable vinyl production.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Benefits Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2>Benefits of Vinyl Recycling</h2>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-leaf fa-3x text-success mb-3"></i>
+                        <h5 class="card-title">Environmental Impact</h5>
+                        <p class="card-text">Reduces plastic waste and minimizes the environmental footprint of vinyl production by reusing existing materials.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-palette fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">Creative Art</h5>
+                        <p class="card-text">Transforms damaged records into unique decorative pieces, wall art, and functional items for music lovers.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-heart fa-3x text-danger mb-3"></i>
+                        <h5 class="card-title">Community Impact</h5>
+                        <p class="card-text">Supports eco-conscious consumers and builds a community around sustainable music appreciation.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- What We Accept -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6">
+                <h3>What We Accept for Recycling</h3>
+                <div class="mb-4">
+                    <h5 class="text-success"><i class="fas fa-check-circle me-2"></i>We Accept:</h5>
+                    <ul>
+                        <li>Scratched or damaged vinyl records</li>
+                        <li>Warped records that won't play properly</li>
+                        <li>Records with significant wear and tear</li>
+                        <li>Incomplete or partial albums</li>
+                        <li>Records without sleeves or covers</li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="text-danger"><i class="fas fa-times-circle me-2"></i>We Don't Accept:</h5>
+                    <ul>
+                        <li>Records in playable condition (we'd rather sell these!)</li>
+                        <li>Rare or valuable records (let us evaluate first)</li>
+                        <li>Records with toxic materials or chemicals</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <h3>Get Involved</h3>
+                <p>Ready to join our recycling program? Here's how you can participate:</p>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'home:contact' %}" class="btn btn-success btn-lg">
+                        <i class="fas fa-recycle me-2"></i>Start Recycling Today
+                    </a>
+                    <a href="{% url 'vinyl:list' %}" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-shopping-cart me-2"></i>Shop Sustainable Vinyl
+                    </a>
+                </div>
+                <div class="mt-4">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Bring your records to our Tsim Sha Tsui location or contact us for collection arrangements.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

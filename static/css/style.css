@@ -288,3 +288,30 @@ footer p, footer a {
     background: linear-gradient(135deg, #d4af37, #b8941f) !important;
     color: white !important;
 }
+
+/* VRH Logo Spin Animation - Available for all pages */
+@keyframes logoSpin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.logo-spin {
+    animation: logoSpin 10s linear infinite;
+}
+
+/* Additional logo animation variations */
+.logo-spin-fast {
+    animation: logoSpin 5s linear infinite;
+}
+
+.logo-spin-slow {
+    animation: logoSpin 15s linear infinite;
+}
+
+.logo-spin-hover:hover {
+    animation: logoSpin 2s linear infinite;
+}

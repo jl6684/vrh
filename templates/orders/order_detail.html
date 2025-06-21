@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Order #{{ order.order_number }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Order Success Message -->
+            {% if order.status == 'pending' %}
+                <div class="alert alert-success text-center mb-4">
+                    <i class="fas fa-check-circle fa-3x mb-3"></i>
+                    <h4>Order Placed Successfully!</h4>
+                    <p class="mb-0">Thank you for your order. We'll send you an email confirmation shortly.</p>
+                </div>
+            {% endif %}
+            
+            <!-- Order Details Card -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-0">Order #{{ order.order_number }}</h5>
+                        <small class="text-muted">Placed on {{ order.created_at|date:"F d, Y at g:i A" }}</small>
+                    </div>
+                    <div>
+                        {% if order.status == 'pending' %}
+                            <span class="badge bg-warning text-dark">{{ order.get_status_display }}</span>
+                        {% elif order.status == 'processing' %}
+                            <span class="badge bg-info">{{ order.get_status_display }}</span>
+                        {% elif order.status == 'shipped' %}
+                            <span class="badge bg-primary">{{ order.get_status_display }}</span>
+                        {% elif order.status == 'delivered' %}
+                            <span class="badge bg-success">{{ order.get_status_display }}</span>
+                        {% elif order.status == 'cancelled' %}
+                            <span class="badge bg-danger">{{ order.get_status_display }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Order Items -->
+                    <h6 class="mb-3">Items Ordered</h6>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th class="text-center">Quantity</th>
+                                    <th class="text-end">Price</th>
+                                    <th class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order.items.all %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                {% if item.vinyl.cover_image %}
+                                                    <img src="{{ item.vinyl.cover_image.url }}" 
+                                                         alt="{{ item.vinyl.title }}" 
+                                                         class="me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                                                {% endif %}
+                                                <div>
+                                                    <h6 class="mb-0">{{ item.vinyl.title }}</h6>
+                                                    <small class="text-muted">{{ item.vinyl.artist.name }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">{{ item.quantity }}</td>
+                                        <td class="text-end">${{ item.price }}</td>
+                                        <td class="text-end">${{ item.get_total_price }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Subtotal:</strong></td>
+                                    <td class="text-end"><strong>${{ order.subtotal }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Shipping:</strong></td>
+                                    <td class="text-end"><strong>${{ order.shipping_cost }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Tax:</strong></td>
+                                    <td class="text-end"><strong>${{ order.tax_amount }}</strong></td>
+                                </tr>
+                                <tr class="table-active">
+                                    <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                                    <td class="text-end"><strong>${{ order.total_amount }}</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    
+                    <!-- Address Information -->
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <h6>Billing Address</h6>
+                            <address>
+                                {{ order.billing_first_name }} {{ order.billing_last_name }}<br>
+                                {{ order.billing_address_line_1 }}<br>
+                                {% if order.billing_address_line_2 %}
+                                    {{ order.billing_address_line_2 }}<br>
+                                {% endif %}
+                                {{ order.billing_city }}, {{ order.billing_state }} {{ order.billing_postal_code }}<br>
+                                {{ order.billing_country }}
+                            </address>
+                            
+                            <h6>Contact Information</h6>
+                            <p>
+                                Email: {{ order.billing_email }}<br>
+                                {% if order.billing_phone %}
+                                    Phone: {{ order.billing_phone }}
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Shipping Address</h6>
+                            <address>
+                                {% if order.shipping_first_name %}
+                                    {{ order.shipping_first_name }} {{ order.shipping_last_name }}<br>
+                                    {{ order.shipping_address_line_1 }}<br>
+                                    {% if order.shipping_address_line_2 %}
+                                        {{ order.shipping_address_line_2 }}<br>
+                                    {% endif %}
+                                    {{ order.shipping_city }}, {{ order.shipping_state }} {{ order.shipping_postal_code }}<br>
+                                    {{ order.shipping_country }}
+                                {% else %}
+                                    <em>Same as billing address</em>
+                                {% endif %}
+                            </address>
+                            
+                            {% if order.tracking_number %}
+                                <h6>Tracking Information</h6>
+                                <p>
+                                    Tracking Number: <strong>{{ order.tracking_number }}</strong><br>
+                                    <a href="#" class="btn btn-outline-primary btn-sm">Track Package</a>
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if order.notes %}
+                        <div class="mt-4">
+                            <h6>Order Notes</h6>
+                            <p class="text-muted">{{ order.notes }}</p>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-between mt-4">
+                        <div>
+                            {% if user.is_authenticated %}
+                                <a href="{% url 'accounts:order_history' %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-list"></i> View All Orders
+                                </a>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <a href="{% url 'orders:invoice' order.order_id %}" class="btn btn-outline-primary">
+                                <i class="fas fa-download"></i> Download Invoice
+                            </a>
+                            {% if order.status == 'pending' %}
+                                <button class="btn btn-outline-danger ms-2" onclick="cancelOrder()">
+                                    <i class="fas fa-times"></i> Cancel Order
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Continue Shopping -->
+            <div class="text-center mt-4">
+                <a href="{% url 'vinyl:list' %}" class="btn btn-primary">
+                    <i class="fas fa-shopping-bag"></i> Continue Shopping
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function cancelOrder() {
+    if (confirm('Are you sure you want to cancel this order?')) {
+        fetch('{% url "orders:cancel" order.order_id %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error cancelling order. Please contact support.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error cancelling order. Please contact support.');
+        });
+    }
+}
+</script>
+{% endblock %}

@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # SECRET_KEY = 'django-insecure-i7_%&n!j8_-0kn#nife)e%jvma-om6qka45dlt@&p(jboi7(u2'
-SECRET_KEY = os.getenv('SITE_SECRET_KEY')   # New added
+SECRET_KEY = os.getenv('SITE_SECRET_KEY')   # Read from environment variable with fallback
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -45,12 +45,19 @@ INSTALLED_APPS = [
     'django.contrib.sessions',      # Middleware
     'django.contrib.messages',      # Communication
     'django.contrib.staticfiles',
-    #'django.contrib.humanize',      # Add djanog extra library for datetime, currency calcuations
+    #'django.contrib.humanize',      # Add django extra library for datetime, currency calculations
 
     #"debug_toolbar",                # Register downloaded APPS ~>python -m pip install django-debug-toolbar
     
     # Custom Apps
-    'main',
+    'apps.home',
+    'apps.vinyl',
+    'apps.accounts',
+    'apps.cart',
+    'apps.orders',
+    'apps.wishlist',
+    'apps.reviews',
+    'main',  # Keep for migration purposes, will remove later
 ]
 
 # These middleware calls Django login library
@@ -77,6 +84,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'apps.cart.context_processors.cart_context',
             ],
         },
     },
@@ -162,6 +170,20 @@ INTERNAL_IPS = [
 # Add media folder and paths
 MEDIA_ROOT = os.path.join(BASE_DIR,'media')
 MEDIA_URL = '/media/'
+
+# Create media subdirectories for organized file storage
+import os
+media_dirs = [
+    'vinyl_covers',
+    'vinyl_covers/additional',
+    'audio_samples',
+    'profile_pics',
+    'user_uploads'
+]
+
+for media_dir in media_dirs:
+    full_path = os.path.join(BASE_DIR, 'media', media_dir)
+    os.makedirs(full_path, exist_ok=True)
 
 # Declare message
 # Pass variables to Bootstrap message box

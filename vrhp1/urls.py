@@ -22,6 +22,18 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('', include('main.urls')),  # Include main app URLs
+    # Main apps
+    path('', include('apps.home.urls')),
+    path('vinyl/', include('apps.vinyl.urls')),
+    path('accounts/', include('apps.accounts.urls')),
+    path('cart/', include('apps.cart.urls')),
+    path('orders/', include('apps.orders.urls')),
+    path('wishlist/', include('apps.wishlist.urls')),
+    path('reviews/', include('apps.reviews.urls')),
+    
+    # Admin
     path('admin/', admin.site.urls),
+    
+    # Legacy support (will migrate existing data)
+    path('main/', include('main.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
