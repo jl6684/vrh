@@ -10,9 +10,6 @@ urlpatterns = [
     path('delete/<int:review_id>/', views.delete_review, name='delete'),
     path('<int:review_id>/', views.review_detail_view, name='detail'),
     
-    # Review interactions
-    path('helpful/<int:review_id>/', views.mark_review_helpful, name='helpful'),
-    
     # Review lists
     path('vinyl/<int:vinyl_id>/', views.review_list_view, name='list'),
     path('my-reviews/', views.my_reviews_view, name='my_reviews'),

@@ -86,7 +86,6 @@
                                 <option value="oldest" {% if request.GET.sort == 'oldest' %}selected{% endif %}>Oldest First</option>
                                 <option value="highest_rated" {% if request.GET.sort == 'highest_rated' %}selected{% endif %}>Highest Rated</option>
                                 <option value="lowest_rated" {% if request.GET.sort == 'lowest_rated' %}selected{% endif %}>Lowest Rated</option>
-                                <option value="most_helpful" {% if request.GET.sort == 'most_helpful' %}selected{% endif %}>Most Helpful</option>
                             </select>
                         </div>
                         <div class="col-md-2">
@@ -135,15 +134,6 @@
                                 </small>
                             </div>
                             <div class="col-md-4 text-end">
-                                {% if user.is_authenticated %}
-                                    <div class="btn-group" role="group">
-                                        <button type="button" class="btn btn-sm btn-outline-success helpful-btn" 
-                                                data-review-id="{{ review.id }}" data-helpful="true">
-                                            <i class="fas fa-thumbs-up"></i> Helpful ({{ review.helpful_count }})
-                                        </button>
-                                    </div>
-                                {% endif %}
-                                
                                 {% if review.user == user %}
                                     <div class="mt-2">
                                         <a href="{% url 'reviews:edit' review.id %}" class="btn btn-sm btn-outline-primary">
@@ -206,37 +196,4 @@
         </div>
     </div>
 </div>
-
-<script>
-// Handle helpful button clicks
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.helpful-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const reviewId = this.dataset.reviewId;
-            const isHelpful = this.dataset.helpful === 'true';
-            
-            fetch(`{% url 'reviews:helpful' 0 %}`.replace('0', reviewId), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}',
-                },
-                body: JSON.stringify({
-                    'is_helpful': isHelpful
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    this.innerHTML = `<i class="fas fa-thumbs-up"></i> Helpful (${data.helpful_count})`;
-                    this.disabled = true;
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        });
-    });
-});
-</script>
 {% endblock %}

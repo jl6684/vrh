@@ -126,16 +126,6 @@
                     <p class="text-muted">{{ vinyl.description }}</p>
                 </div>
             {% endif %}
-            
-            <!-- Track Listing -->
-            {% if vinyl.track_listing %}
-                <div class="mb-4">
-                    <h6>Track Listing</h6>
-                    <div class="bg-light p-3 rounded">
-                        <pre class="mb-0 small">{{ vinyl.track_listing }}</pre>
-                    </div>
-                </div>
-            {% endif %}
         </div>
     </div>
     
@@ -175,12 +165,6 @@
                                     <h6>{{ review.title }}</h6>
                                 {% endif %}
                                 <p class="mb-2">{{ review.comment }}</p>
-                                <div class="d-flex align-items-center">
-                                    <button class="btn btn-outline-secondary btn-sm me-2 helpful-btn" 
-                                            data-review-id="{{ review.id }}">
-                                        <i class="fas fa-thumbs-up"></i> Helpful ({{ review.helpful_count }})
-                                    </button>
-                                </div>
                             </div>
                         {% endfor %}
                         
@@ -285,34 +269,5 @@ document.querySelectorAll('.wishlist-btn').forEach(button => {
     });
 });
 
-// Helpful review functionality
-document.querySelectorAll('.helpful-btn').forEach(button => {
-    button.addEventListener('click', function() {
-        const reviewId = this.dataset.reviewId;
-        
-        fetch(`/reviews/helpful/${reviewId}/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: JSON.stringify({
-                'review_id': reviewId
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                this.innerHTML = `<i class="fas fa-thumbs-up"></i> Helpful (${data.helpful_count})`;
-            } else {
-                console.error('Error marking review helpful:', data.error);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-    });
-});
 </script>
 {% endblock %}

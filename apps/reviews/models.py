@@ -18,7 +18,6 @@ class Review(models.Model):
     
     # Review metadata
     is_verified_purchase = models.BooleanField(default=False)  # User bought this vinyl
-    helpful_count = models.PositiveIntegerField(default=0)  # Cached count of helpful votes
     
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
@@ -39,18 +38,3 @@ class Review(models.Model):
     def get_star_display(self):
         """Return stars as string for template display"""
         return '★' * self.rating + '☆' * (5 - self.rating)
-
-
-class ReviewHelpful(models.Model):
-    """Track which users found a review helpful"""
-    review = models.ForeignKey(Review, on_delete=models.CASCADE, related_name='helpful_votes')
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    is_helpful = models.BooleanField(default=True)  # True for helpful, False for not helpful
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ('review', 'user')
-
-    def __str__(self):
-        helpful_text = "helpful" if self.is_helpful else "not helpful"
-        return f"{self.user.username} found review {self.review.id} {helpful_text}"
