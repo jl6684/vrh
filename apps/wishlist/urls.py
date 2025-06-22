@@ -14,4 +14,5 @@ urlpatterns = [
     
     # AJAX endpoints
     path('status/<int:vinyl_id>/', views.wishlist_status, name='status'),
+    path('bulk-status/', views.bulk_wishlist_status, name='bulk_status'),
 ]

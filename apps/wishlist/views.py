@@ -95,7 +95,7 @@ def remove_from_wishlist(request, vinyl_id):
         wishlist_item = WishlistItem.objects.get(wishlist=wishlist, vinyl_record=vinyl_record)
         wishlist_item.delete()
         
-        if request.content_type == 'application/json':
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or 'application/json' in request.headers.get('Content-Type', ''):
             return JsonResponse({
                 'success': True,
                 'message': f'{vinyl_record.title} removed from wishlist',
@@ -105,7 +105,7 @@ def remove_from_wishlist(request, vinyl_id):
             messages.success(request, f'{vinyl_record.title} removed from wishlist')
             
     except WishlistItem.DoesNotExist:
-        if request.content_type == 'application/json':
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or 'application/json' in request.headers.get('Content-Type', ''):
             return JsonResponse({
                 'success': False,
                 'message': 'Item not found in wishlist',
@@ -132,18 +132,22 @@ def toggle_wishlist(request, vinyl_id):
     try:
         wishlist_item = WishlistItem.objects.get(wishlist=wishlist, vinyl_record=vinyl_record)
         wishlist_item.delete()
-        action = 'removed'
+        in_wishlist = False
+        added = False
         message = f'{vinyl_record.title} removed from wishlist'
     except WishlistItem.DoesNotExist:
         WishlistItem.objects.create(wishlist=wishlist, vinyl_record=vinyl_record)
-        action = 'added'
+        in_wishlist = True
+        added = True
         message = f'{vinyl_record.title} added to wishlist'
     
-    if request.content_type == 'application/json':
+    if request.content_type == 'application/json' or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return JsonResponse({
             'success': True,
             'message': message,
-            'action': action
+            'action': 'added' if added else 'removed',
+            'added': added,
+            'in_wishlist': in_wishlist
         })
     else:
         messages.success(request, message)
@@ -204,7 +208,7 @@ def clear_wishlist(request):
     count = WishlistItem.objects.filter(wishlist=wishlist).count()
     WishlistItem.objects.filter(wishlist=wishlist).delete()
     
-    if request.content_type == 'application/json':
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or 'application/json' in request.headers.get('Content-Type', ''):
         return JsonResponse({
             'success': True,
             'message': f'{count} items removed from wishlist'
@@ -224,3 +228,25 @@ def wishlist_status(request, vinyl_id):
     return JsonResponse({
         'in_wishlist': in_wishlist
     })
+
+
+@login_required
+def bulk_wishlist_status(request):
+    """Check wishlist status for multiple vinyl records (AJAX endpoint)"""
+    vinyl_ids = request.GET.get('vinyl_ids', '').split(',')
+    vinyl_ids = [id.strip() for id in vinyl_ids if id.strip().isdigit()]
+    
+    if not vinyl_ids:
+        return JsonResponse({'error': 'No valid vinyl IDs provided'}, status=400)
+    
+    wishlist, created = Wishlist.objects.get_or_create(user=request.user)
+    wishlist_items = WishlistItem.objects.filter(
+        wishlist=wishlist, 
+        vinyl_record__id__in=vinyl_ids
+    ).values_list('vinyl_record__id', flat=True)
+    
+    status = {}
+    for vinyl_id in vinyl_ids:
+        status[vinyl_id] = int(vinyl_id) in wishlist_items
+    
+    return JsonResponse({'status': status})

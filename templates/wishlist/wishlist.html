@@ -161,6 +161,7 @@
 {% endblock %}
 
 {% block extra_js %}
+{% csrf_token %}
 <script>
 $(document).ready(function() {
     // Move to cart
@@ -215,7 +216,7 @@ $(document).ready(function() {
                 'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
             },
             headers: {
-                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
             },
             success: function(response) {
                 if (response.success) {
@@ -227,6 +228,9 @@ $(document).ready(function() {
                     });
                     showMessage(response.message, 'success');
                 }
+            },
+            error: function() {
+                showMessage('Error removing item from wishlist', 'danger');
             }
         });
     }
@@ -239,12 +243,15 @@ $(document).ready(function() {
                 'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
             },
             headers: {
-                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
             },
             success: function(response) {
                 if (response.success) {
                     location.reload();
                 }
+            },
+            error: function() {
+                showMessage('Error clearing wishlist', 'danger');
             }
         });
     }

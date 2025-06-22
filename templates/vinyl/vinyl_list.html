@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load wishlist_tags %}
 
 {% block title %}Vinyl Records - Vinyl Record House{% endblock %}
 
@@ -141,11 +142,7 @@
                                     
                                     <!-- Quick Actions Overlay -->
                                     <div class="position-absolute top-0 end-0 p-2" style="z-index: 10;">
-                                        {% if user.is_authenticated %}
-                                            <button class="btn btn-sm btn-light rounded-circle wishlist-btn shadow-sm" data-vinyl-id="{{ vinyl.id }}" style="width: 35px; height: 35px;">
-                                                <i class="far fa-heart" style="font-size: 0.85rem;"></i>
-                                            </button>
-                                        {% endif %}
+                                        {% wishlist_button vinyl %}
                                     </div>
                                 </div>
                                 
@@ -262,6 +259,7 @@
 </div>
 
 <script>
+
 document.addEventListener('DOMContentLoaded', function() {
     // Add to cart functionality
     document.querySelectorAll('.add-to-cart-btn').forEach(button => {
@@ -339,6 +337,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: JSON.stringify({
                     'vinyl_id': vinylId
@@ -350,11 +349,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     const icon = this.querySelector('i');
                     if (data.in_wishlist) {
                         icon.className = 'fas fa-heart';
+                        icon.style.color = '#dc3545';
                         this.classList.add('added');
                     } else {
                         icon.className = 'far fa-heart';
+                        icon.style.color = '';
                         this.classList.remove('added');
                     }
+                    
+                    // Show temporary feedback
+                    const originalText = this.innerHTML;
+                    this.innerHTML = data.in_wishlist ? '<i class="fas fa-check" style="color: #28a745;"></i>' : '<i class="fas fa-times" style="color: #dc3545;"></i>';
+                    setTimeout(() => {
+                        this.innerHTML = originalText;
+                    }, 1000);
                 }
             })
             .catch(error => {

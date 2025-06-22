@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load wishlist_tags %}
 
 {% block title %}{{ vinyl.title }} - {{ vinyl.artist.name }}{% endblock %}
 
@@ -92,10 +93,21 @@
                     {% endif %}
                 </div>
                 <div class="col-4">
-                    <button class="btn btn-outline-danger btn-lg w-100 wishlist-btn" 
-                            data-vinyl-id="{{ vinyl.id }}">
-                        <i class="far fa-heart"></i>
-                    </button>
+                    {% if user.is_authenticated %}
+                        {% is_in_wishlist vinyl as in_wishlist %}
+                        <button class="btn btn-lg w-100 wishlist-btn {% if in_wishlist %}btn-danger{% else %}btn-outline-danger{% endif %}" 
+                                data-vinyl-id="{{ vinyl.id }}">
+                            {% if in_wishlist %}
+                                <i class="fas fa-heart"></i>
+                            {% else %}
+                                <i class="far fa-heart"></i>
+                            {% endif %}
+                        </button>
+                    {% else %}
+                        <a href="{% url 'accounts:login' %}" class="btn btn-outline-secondary btn-lg w-100">
+                            <i class="far fa-heart"></i> Login to Wishlist
+                        </a>
+                    {% endif %}
                 </div>
             </div>
             
@@ -111,11 +123,11 @@
                           class="text-decoration-none text-muted">{{ vinyl.label.name }}</a></p>
                 </div>
                 <div class="col-md-6">
-                    <h6>Release Date</h6>
-                    <p>{{ vinyl.release_date|date:"F Y" }}</p>
+                    <h6>Release Year</h6>
+                    <p>{{ vinyl.release_year }}</p>
                     
                     <h6>Format</h6>
-                    <p>{{ vinyl.format }} - {{ vinyl.size }}"</p>
+                    <p>{{ vinyl.speed }} RPM - {{ vinyl.size }}"</p>
                 </div>
             </div>
             
@@ -186,6 +198,7 @@
 </div>
 
 <script>
+
 // Add to cart functionality
 document.querySelectorAll('.add-to-cart-btn').forEach(button => {
     button.addEventListener('click', function() {
@@ -250,7 +263,7 @@ document.querySelectorAll('.wishlist-btn').forEach(button => {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                if (data.added) {
+                if (data.in_wishlist) {
                     this.innerHTML = '<i class="fas fa-heart"></i>';
                     this.classList.remove('btn-outline-danger');
                     this.classList.add('btn-danger');
@@ -260,7 +273,7 @@ document.querySelectorAll('.wishlist-btn').forEach(button => {
                     this.classList.add('btn-outline-danger');
                 }
             } else {
-                console.error('Error toggling wishlist:', data.error);
+                console.error('Error toggling wishlist:', data.message);
             }
         })
         .catch(error => {
