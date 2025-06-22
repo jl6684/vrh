@@ -1,0 +1,51 @@
+{% load static %}
+
+
+    <!-- Footer -->
+    <footer class="container-fluid bg-dark p-5">
+        <div class="row align-items-start justify-content-between">
+            <div class="container col-md-4">
+                    <div class="media">
+                    <a href="{% url 'index' %}" class="logo-cntr block text_navigation_sm c-text-content-subtle" 
+                        title="Vinyl Record House">
+                        <img src="{% static 'img/' %}VRHlogo.png" width="100" alt=""></a>
+                        <div class="media-body">
+                            <div class="container">
+                                <h3 class="mt-0 text-light">
+                                    Vinyl Record House
+                                </h3>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+                
+            </div>
+
+            <div class="container col-md-4">
+                <div class="container">
+                    <a href="{% url 'about' %}" class="pb-50 mb-5 text-white h5">About Us</a></div><br />
+                <div class="container">
+                    <a href="{% url 'terms' %}" class="pb-50 mb-5 text-white h5">Terms & Conditions</a></div><br />
+                <div class="container">
+                    <a href="{% url 'recycling' %}" class="pb-50 mb-5 text-white h5">Vinyl Recycling</a></div>
+            </div>
+
+            <div class="row col-md-4" id="contactAnchor">
+                <a href="https://x.com/yourpage"><i class="fa-brands fa-x-twitter mx-2 fa-2xl"></i></a>
+                <a href="https://www.facebook.com/yourpage"><i class="fa-brands fa-square-facebook mx-2 fa-2xl"></i></a>
+                <a href="https://www.instagram.com"><i class="fa-brands fa-instagram mx-2 fa-2xl"></i> </a>
+                <a href="https://www.youtube.com"><i class="fa-brands fa-youtube mx-2 fa-2xl"></i></a>
+                <a href="mailto:info@example.com?subject=Inquiry&body=Hello, I would like to know more about...">
+                    <i class="fas fa-envelope mx-2 fa-2xl"></i></a>
+            </div>
+            
+        </div>
+        <hr />
+        <p class="text-center">Vinyl Record House &copy; 2025</p>
+        <p class="text-center">
+            <a href="https://www.flaticon.com/free-icons/vinyl" title="vinyl icons" class="text-center">
+                Vinyl icons created by Freepik - Flaticon
+            </a>
+        </p>
+    </footer>

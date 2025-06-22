@@ -23,5 +23,6 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('', include('main.urls')),  # Include main app URLs
+    path('cart/', include('cart.urls', namespace='cart')), # Include cart app URLs with namespace
     path('admin/', admin.site.urls),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

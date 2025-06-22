@@ -45,10 +45,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',      # Middleware
     'django.contrib.messages',      # Communication
     'django.contrib.staticfiles',
-    #'django.contrib.humanize',      # Add djanog extra library for datetime, currency calcuations
-
+    'django.contrib.humanize',      # Add djanog extra library for datetime, currency calcuations
+    'cart',                # Register cart app
     #"debug_toolbar",                # Register downloaded APPS ~>python -m pip install django-debug-toolbar
-    
     # Custom Apps
     'main',
 ]

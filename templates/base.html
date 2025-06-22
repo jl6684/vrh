@@ -1,0 +1,35 @@
+{% load static %}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>
+        Vinyl Record House - VRH
+    </title>
+    <!-- Bootstrap from bcre project -->
+    <link rel="stylesheet" href="{% static 'css/' %}bootstrap.css" />
+    <!-- Custom css original from codrkai.github.io with appended update from Jeol -->
+    <link rel="stylesheet" href="{% static 'css/' %}style.css" />
+    <!-- Fontawesome 6.7.2 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+</head>  
+
+
+<body>
+
+{% include "partials/_navbar.html" %}
+{% block content%}{% endblock %}
+{% include "partials/_footer.html" %}
+<!-- js file copied from bcre project -->
+<script src="{% static 'js/' %}jquery-3.3.1.min.js"></script>
+<script src="{% static 'js/' %}bootstrap.bundle.min.js "></script>
+<!-- Original script file from codrkai.github.io template -->
+<script src="{% static 'js/' %}script.js"></script>
+
+
+</body>
+</html
