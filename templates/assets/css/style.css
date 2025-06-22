@@ -52,7 +52,7 @@ footer p, footer a {
 
 /* Enhanced vinyl shop theme styles */
 .hero-section {
-    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('./assets/img/pexels-bg.jpg');
+    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('../img/pexels-bg.jpg');
     background-size: cover;
     background-position: center;
     height: 60vh;
