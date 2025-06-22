@@ -87,16 +87,7 @@
                     <!-- Review Actions -->
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            {% if user.is_authenticated and user != review.user %}
-                                <button type="button" class="btn btn-outline-success helpful-btn" 
-                                        data-review-id="{{ review.id }}" data-helpful="true">
-                                    <i class="fas fa-thumbs-up"></i> Helpful ({{ review.helpful_count }})
-                                </button>
-                            {% else %}
-                                <span class="text-muted">
-                                    <i class="fas fa-thumbs-up"></i> {{ review.helpful_count }} helpful vote{{ review.helpful_count|pluralize }}
-                                </span>
-                            {% endif %}
+                            <!-- No helpful voting functionality -->
                         </div>
 
                         {% if review.user == user %}
@@ -156,39 +147,4 @@
         </div>
     </div>
 </div>
-
-<script>
-// Handle helpful button clicks
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.helpful-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const reviewId = this.dataset.reviewId;
-            const isHelpful = this.dataset.helpful === 'true';
-            
-            fetch(`{% url 'reviews:helpful' 0 %}`.replace('0', reviewId), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}',
-                },
-                body: JSON.stringify({
-                    'is_helpful': isHelpful
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    this.innerHTML = `<i class="fas fa-thumbs-up"></i> Helpful (${data.helpful_count})`;
-                    this.disabled = true;
-                    this.classList.remove('btn-outline-success');
-                    this.classList.add('btn-success');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        });
-    });
-});
-</script>
 {% endblock %}

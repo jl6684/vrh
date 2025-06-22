@@ -1,0 +1,11 @@
+{% if user.is_authenticated %}
+    <button class="btn btn-sm btn-light rounded-circle wishlist-btn shadow-sm {{ css_classes }}" 
+            data-vinyl-id="{{ vinyl_record.id }}" 
+            style="width: 35px; height: 35px;">
+        {% if in_wishlist %}
+            <i class="fas fa-heart" style="font-size: 0.85rem; color: #dc3545;"></i>
+        {% else %}
+            <i class="far fa-heart" style="font-size: 0.85rem;"></i>
+        {% endif %}
+    </button>
+{% endif %}

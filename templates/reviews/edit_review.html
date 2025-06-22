@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Write Review - {{ vinyl_record.title }}{% endblock %}
+{% block title %}Edit Review - {{ review.vinyl_record.title }}{% endblock %}
 
 {% block content %}
 <div class="container py-4">
@@ -9,15 +9,15 @@
         <div class="col-lg-8">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="mb-0">Write a Review</h4>
+                    <h4 class="mb-0">Edit Your Review</h4>
                 </div>
                 <div class="card-body">
                     <!-- Product Info -->
                     <div class="row mb-4">
                         <div class="col-md-3">
-                            {% if vinyl_record.cover_image %}
-                                <img src="{{ vinyl_record.cover_image.url }}" 
-                                     alt="{{ vinyl_record.title }}" 
+                            {% if review.vinyl_record.cover_image %}
+                                <img src="{{ review.vinyl_record.cover_image.url }}" 
+                                     alt="{{ review.vinyl_record.title }}" 
                                      class="img-fluid rounded">
                             {% else %}
                                 <div class="bg-light rounded d-flex align-items-center justify-content-center" 
@@ -27,10 +27,10 @@
                             {% endif %}
                         </div>
                         <div class="col-md-9">
-                            <h5>{{ vinyl_record.title }}</h5>
-                            <p class="text-muted">by {{ vinyl_record.artist.name }}</p>
-                            <p class="text-muted small">{{ vinyl_record.genre.name }} • {{ vinyl_record.release_year }}</p>
-                            {% if has_purchased %}
+                            <h5>{{ review.vinyl_record.title }}</h5>
+                            <p class="text-muted">by {{ review.vinyl_record.artist.name }}</p>
+                            <p class="text-muted small">{{ review.vinyl_record.genre.name }} • {{ review.vinyl_record.release_year }}</p>
+                            {% if review.is_verified_purchase %}
                                 <span class="badge bg-success">
                                     <i class="fas fa-check"></i> Verified Purchase
                                 </span>
@@ -72,10 +72,10 @@
                         </div>
                         
                         <div class="d-flex justify-content-between">
-                            <a href="{% url 'vinyl:detail' vinyl_record.slug %}" 
+                            <a href="{% url 'vinyl:detail' review.vinyl_record.slug %}" 
                                class="btn btn-outline-secondary">Cancel</a>
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-star"></i> Submit Review
+                                <i class="fas fa-save"></i> Update Review
                             </button>
                         </div>
                     </form>

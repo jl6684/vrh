@@ -151,12 +151,8 @@ def order_history_view(request):
     """User order history view"""
     orders = Order.objects.filter(user=request.user).order_by('-created_at')
     
-    # Pagination
-    paginator = Paginator(orders, 10)  # Show 10 orders per page
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    
-    return render(request, 'accounts/order_history.html', {'page_obj': page_obj})
+    # Use simple orders list instead of pagination for consistency
+    return render(request, 'orders/order_list.html', {'orders': orders})
 
 
 @login_required

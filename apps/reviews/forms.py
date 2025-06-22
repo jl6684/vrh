@@ -52,7 +52,6 @@ class ReviewSearchForm(forms.Form):
             ('-created_at', 'Oldest First'),
             ('rating', 'Lowest Rating'),
             ('-rating', 'Highest Rating'),
-            ('-helpful_count', 'Most Helpful'),
         ],
         required=False,
         initial='created_at',
