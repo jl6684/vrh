@@ -46,13 +46,7 @@
                                             <i class="fas fa-compact-disc fa-3x text-muted"></i>
                                         </div>
                                     {% endif %}
-                                    
-                                    <!-- Stock Status Badge -->
-                                    {% if item.vinyl_record.stock_quantity <= 0 %}
-                                        <span class="position-absolute top-0 end-0 badge bg-danger m-2">Out of Stock</span>
-                                    {% elif item.vinyl_record.stock_quantity <= 5 %}
-                                        <span class="position-absolute top-0 end-0 badge bg-warning m-2">Low Stock</span>
-                                    {% endif %}
+
                                 </div>
                                 
                                 <div class="card-body d-flex flex-column">

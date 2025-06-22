@@ -4,9 +4,9 @@ $(function() {
 
     $(window).scroll(function() {
         if ( $(this).scrollTop() > 100 ) {
-            $('.navbar').addClass('solid bg-dark');
+            $('.navbar').addClass('solid bg-dark').removeClass('bg-white');
         } else {
-            $('.navbar').removeClass('solid bg-dark');
+            $('.navbar').addClass('solid bg-dark').removeClass('bg-white');
         }
     });
 

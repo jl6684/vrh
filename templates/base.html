@@ -19,7 +19,7 @@
 
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top solid bg-dark">
         <div class="container-fluid">
             <!-- Brand Logo and Name -->
             <div class="nav-brand nav-link" href="#about" data-toggle="modal" data-target="#aboutModal" >
@@ -48,7 +48,7 @@
 
             <!-- Navigation Items -->
             <div class="collapse navbar-collapse" id="navbar-menu">
-                <div class="navbar-nav ml-auto h4">
+                <div class="navbar-nav ml-auto h5">
                     <!-- Home -->
                     <a class="nav-link text-light" href="{% url 'home:index' %}">Home</a>
 
@@ -93,10 +93,6 @@
                                 <a class="dropdown-item" href="{% url 'orders:list' %}">My Orders</a>
                                 <a class="dropdown-item" href="{% url 'reviews:my_reviews' %}">My Reviews</a>
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="{% url 'accounts:logout' %}">Logout</a>
-                            {% else %}
-                                <a class="dropdown-item" href="{% url 'accounts:register' %}">Sign Up</a>
-                                <a class="dropdown-item" href="{% url 'accounts:login' %}">Log in</a>
                             {% endif %}
                         </div>
                     </div>
@@ -120,13 +116,22 @@
                     <!-- Welcome User Item -->
                     {% if user.is_authenticated %}
                         <a class="nav-link text-light" href="{% url 'accounts:profile' %}">
-                            <i class="fas fa-user"></i> Welcome, {{ user.first_name|default:user.username }}
+                            <i class="fas fa-user"></i> {{ user.first_name|default:user.username }}
                         </a>
                     {% else %}
                         <a class="nav-link text-light" href="{% url 'accounts:login' %}">
-                            <i class="fas fa-user-circle"></i> Welcome
+                            <i class="fas fa-user-circle fa-xl"></i>
                         </a>
                     {% endif %}
+
+                    <!-- Logout button-->   
+                    {% if user.is_authenticated %}
+                        <a class="nav-link text-light" href="{% url 'accounts:logout' %}">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    {% endif %}
+                    
+
                 </div>
             </div>
         </div>
