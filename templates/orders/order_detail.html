@@ -55,14 +55,14 @@
                                     <tr>
                                         <td>
                                             <div class="d-flex align-items-center">
-                                                {% if item.vinyl.cover_image %}
-                                                    <img src="{{ item.vinyl.cover_image.url }}" 
-                                                         alt="{{ item.vinyl.title }}" 
-                                                         class="me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                                                {% if item.vinyl_record.cover_image %}
+                                                    <img src="{{ item.vinyl_record.cover_image.url }}" 
+                                                         alt="{{ item.vinyl_record.title }}" 
+                                                         class="me-3" style="width: 100px; height: 100px; object-fit: cover;">
                                                 {% endif %}
                                                 <div>
-                                                    <h6 class="mb-0">{{ item.vinyl.title }}</h6>
-                                                    <small class="text-muted">{{ item.vinyl.artist.name }}</small>
+                                                    <h6 class="mb-0">{{ item.vinyl_record.title }}</h6>
+                                                    <small class="text-muted">{{ item.vinyl_record.artist.name }}</small>
                                                 </div>
                                             </div>
                                         </td>
