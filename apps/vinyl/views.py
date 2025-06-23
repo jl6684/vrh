@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
-from django.db.models import Q, Avg
+from django.db.models import Q, Avg, Count
 from .models import VinylRecord, Artist, Genre, Label
 
 
@@ -37,6 +37,12 @@ def vinyl_list(request):
     if sort_by in ['price', '-price', 'release_year', '-release_year', '-created_at', 'title']:
         vinyl_records = vinyl_records.order_by(sort_by)
     
+    # Add average rating and review count to each vinyl record
+    vinyl_records = vinyl_records.annotate(
+        average_rating=Avg('reviews__rating'),
+        review_count=Count('reviews', distinct=True)
+    )
+    
     # Pagination
     paginator = Paginator(vinyl_records, 12)  # 12 records per page
     page_number = request.GET.get('page')
@@ -61,11 +67,20 @@ def vinyl_detail(request, slug):
     """Detailed view of a single vinyl record"""
     vinyl = get_object_or_404(VinylRecord, slug=slug, is_available=True)
     
+    # Annotate with average rating and review count
+    vinyl = VinylRecord.objects.filter(id=vinyl.id).annotate(
+        average_rating=Avg('reviews__rating'),
+        review_count=Count('reviews', distinct=True)
+    ).first()
+    
     # Get related vinyl records (same artist or genre)
     related_vinyl = VinylRecord.objects.filter(
         Q(artist=vinyl.artist) | Q(genre=vinyl.genre),
         is_available=True
-    ).exclude(id=vinyl.id)[:4]
+    ).exclude(id=vinyl.id).annotate(
+        average_rating=Avg('reviews__rating'),
+        review_count=Count('reviews', distinct=True)
+    )[:4]
     
     # Get reviews for this vinyl
     reviews = vinyl.reviews.select_related('user').order_by('-created_at')[:10]
@@ -74,8 +89,6 @@ def vinyl_detail(request, slug):
         'vinyl': vinyl,
         'related_vinyl': related_vinyl,
         'reviews': reviews,
-        'average_rating': vinyl.get_average_rating(),
-        'review_count': vinyl.get_review_count(),
     }
     return render(request, 'vinyl/vinyl_detail.html', context)
 
@@ -89,7 +102,7 @@ def vinyl_search(request):
     year_from = request.GET.get('year_from')
     year_to = request.GET.get('year_to')
     
-    vinyl_records = VinylRecord.objects.filter(is_available=True)
+    vinyl_records = VinylRecord.objects.filter(is_available=True).select_related('artist', 'genre', 'label')
     
     # Apply search filters
     if query:
@@ -115,6 +128,12 @@ def vinyl_search(request):
     if year_to:
         vinyl_records = vinyl_records.filter(release_year__lte=year_to)
     
+    # Add rating annotations
+    vinyl_records = vinyl_records.annotate(
+        average_rating=Avg('reviews__rating'),
+        review_count=Count('reviews', distinct=True)
+    )
+    
     # Pagination
     paginator = Paginator(vinyl_records, 12)
     page_number = request.GET.get('page')
@@ -133,7 +152,13 @@ def vinyl_search(request):
 def vinyl_by_genre(request, genre_id):
     """Show vinyl records by specific genre"""
     genre = get_object_or_404(Genre, id=genre_id)
-    vinyl_records = VinylRecord.objects.filter(genre=genre, is_available=True)
+    vinyl_records = VinylRecord.objects.filter(
+        genre=genre, 
+        is_available=True
+    ).select_related('artist', 'genre', 'label').annotate(
+        average_rating=Avg('reviews__rating'),
+        review_count=Count('reviews', distinct=True)
+    )
     
     paginator = Paginator(vinyl_records, 12)
     page_number = request.GET.get('page')
@@ -149,7 +174,13 @@ def vinyl_by_genre(request, genre_id):
 def vinyl_by_artist(request, artist_id):
     """Show vinyl records by specific artist"""
     artist = get_object_or_404(Artist, id=artist_id)
-    vinyl_records = VinylRecord.objects.filter(artist=artist, is_available=True)
+    vinyl_records = VinylRecord.objects.filter(
+        artist=artist, 
+        is_available=True
+    ).select_related('artist', 'genre', 'label').annotate(
+        average_rating=Avg('reviews__rating'),
+        review_count=Count('reviews', distinct=True)
+    )
     
     paginator = Paginator(vinyl_records, 12)
     page_number = request.GET.get('page')
@@ -168,7 +199,10 @@ def male_artists(request):
     vinyl_records = VinylRecord.objects.filter(
         is_available=True,
         artist__artist_type='male'
-    ).select_related('artist', 'genre', 'label')
+    ).select_related('artist', 'genre', 'label').annotate(
+        average_rating=Avg('reviews__rating'),
+        review_count=Count('reviews', distinct=True)
+    )
     
     paginator = Paginator(vinyl_records, 12)
     page_number = request.GET.get('page')
@@ -186,7 +220,10 @@ def female_artists(request):
     vinyl_records = VinylRecord.objects.filter(
         is_available=True,
         artist__artist_type='female'
-    ).select_related('artist', 'genre', 'label')
+    ).select_related('artist', 'genre', 'label').annotate(
+        average_rating=Avg('reviews__rating'),
+        review_count=Count('reviews', distinct=True)
+    )
     
     paginator = Paginator(vinyl_records, 12)
     page_number = request.GET.get('page')
@@ -204,7 +241,10 @@ def band_artists(request):
     vinyl_records = VinylRecord.objects.filter(
         is_available=True,
         artist__artist_type='band'
-    ).select_related('artist', 'genre', 'label')
+    ).select_related('artist', 'genre', 'label').annotate(
+        average_rating=Avg('reviews__rating'),
+        review_count=Count('reviews', distinct=True)
+    )
     
     paginator = Paginator(vinyl_records, 12)
     page_number = request.GET.get('page')
@@ -222,7 +262,10 @@ def assortments(request):
     vinyl_records = VinylRecord.objects.filter(
         is_available=True,
         artist__artist_type='assortment'
-    ).select_related('artist', 'genre', 'label')
+    ).select_related('artist', 'genre', 'label').annotate(
+        average_rating=Avg('reviews__rating'),
+        review_count=Count('reviews', distinct=True)
+    )
     
     paginator = Paginator(vinyl_records, 12)
     page_number = request.GET.get('page')
@@ -240,7 +283,10 @@ def others(request):
     vinyl_records = VinylRecord.objects.filter(
         is_available=True,
         artist__artist_type='other'
-    ).select_related('artist', 'genre', 'label')
+    ).select_related('artist', 'genre', 'label').annotate(
+        average_rating=Avg('reviews__rating'),
+        review_count=Count('reviews', distinct=True)
+    )
     
     paginator = Paginator(vinyl_records, 12)
     page_number = request.GET.get('page')

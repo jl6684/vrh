@@ -10,15 +10,10 @@ def index(request):
     featured_vinyl = VinylRecord.objects.filter(
         is_available=True,
         stock_quantity__gt=0
-    ).select_related('artist', 'genre').order_by('-created_at')[:8]
-    
-    # Add average rating to each vinyl record
-    for vinyl in featured_vinyl:
-        reviews = vinyl.reviews.all()
-        if reviews:
-            vinyl.average_rating = int(reviews.aggregate(Avg('rating'))['rating__avg'] or 0)
-        else:
-            vinyl.average_rating = 0
+    ).select_related('artist', 'genre').annotate(
+        average_rating=Avg('reviews__rating'),
+        review_count=Count('reviews', distinct=True)
+    ).order_by('-created_at')[:8]
     
     # Get latest vinyl records
     latest_vinyl = VinylRecord.objects.filter(is_available=True).order_by('-created_at')[:6]

@@ -100,6 +100,27 @@
                         </h3>
                         <p class="card-text">
                             <h5>{{ vinyl.artist.name }}</h5>
+                            
+                            <!-- Rating -->
+                            {% if vinyl.average_rating %}
+                                <div class="mb-2">
+                                    <span class="text-warning">
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= vinyl.average_rating %}
+                                                <i class="fas fa-star"></i>
+                                            {% else %}
+                                                <i class="far fa-star"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </span>
+                                    <small class="text-muted">({{ vinyl.review_count }})</small>
+                                </div>
+                            {% else %}
+                                <div class="mb-2">
+                                    <span class="text-muted small">No reviews yet</span>
+                                </div>
+                            {% endif %}
+                            
                             <p class="text-muted">${{ vinyl.price }}</p>
                         </p>
                         <a class="btn btn-sm btn-dark h4" href="{% url 'vinyl:detail' vinyl.slug %}">

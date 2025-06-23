@@ -51,18 +51,24 @@
                                                class="text-decoration-none">{{ vinyl.artist.name }}</a></p>
             
             <!-- Rating -->
-            <div class="d-flex align-items-center mb-3">
-                <div class="me-3">
-                    {% for i in "12345" %}
-                        {% if forloop.counter <= vinyl.average_rating %}
-                            <i class="fas fa-star text-warning"></i>
-                        {% else %}
-                            <i class="far fa-star text-warning"></i>
-                        {% endif %}
-                    {% endfor %}
+            {% if vinyl.average_rating %}
+                <div class="d-flex align-items-center mb-3">
+                    <div class="me-3">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= vinyl.average_rating %}
+                                <i class="fas fa-star text-warning"></i>
+                            {% else %}
+                                <i class="far fa-star text-warning"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <span class="text-muted">({{ vinyl.review_count }} review{{ vinyl.review_count|pluralize }})</span>
                 </div>
-                <span class="text-muted">({{ vinyl.review_count }} review{{ vinyl.review_count|pluralize }})</span>
-            </div>
+            {% else %}
+                <div class="d-flex align-items-center mb-3">
+                    <span class="text-muted">No reviews yet</span>
+                </div>
+            {% endif %}
             
             <!-- Price and Stock -->
             <div class="mb-4">
