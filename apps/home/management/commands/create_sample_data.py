@@ -154,7 +154,7 @@ class Command(BaseCommand):
         genres_data = [
             'Rock', 'Pop', 'Jazz', 'Blues', 'Classical', 'Electronic',
             'Hip-Hop', 'R&B', 'Country', 'Folk', 'Reggae', 'Punk',
-            'Alternative', 'Indie', 'Funk', 'Soul'
+            'Alternative', 'Indie', 'Funk', 'Soul','Soundtrack'
         ]
         
         genres = []
@@ -171,7 +171,8 @@ class Command(BaseCommand):
         labels_data = [
             'Atlantic Records', 'Columbia Records', 'EMI', 'Universal Music',
             'Warner Bros. Records', 'Capitol Records', 'Sony Music', 'RCA Records',
-            'Motown Records', 'Blue Note Records', 'Verve Records', 'Def Jam'
+            'Motown Records', 'Blue Note Records', 'Verve Records', 'Def Jam',
+            'Polydor', '風行唱片', 'Deutsche Grammophon'
         ]
         
         labels = []
@@ -189,12 +190,70 @@ class Command(BaseCommand):
         
         # Create artists
         artists_data = [
-            'The Beatles', 'Bob Dylan', 'Miles Davis', 'Pink Floyd', 'Led Zeppelin',
-            'Stevie Wonder', 'Aretha Franklin', 'David Bowie', 'Prince', 'Madonna',
-            'Michael Jackson', 'Joni Mitchell', 'The Rolling Stones', 'Queen',
-            'Elvis Presley', 'Johnny Cash', 'Billie Holiday', 'John Coltrane',
-            'The Beach Boys', 'Radiohead', 'Nirvana', 'Amy Winehouse',
-            'Kendrick Lamar', 'Beyoncé', 'Adele', 'Taylor Swift'
+            # Male Artists
+            {'name': 'Bob Dylan', 'type': 'male', 'country': 'United States'},
+            {'name': 'Miles Davis', 'type': 'male', 'country': 'United States'},
+            {'name': 'Stevie Wonder', 'type': 'male', 'country': 'United States'},
+            {'name': 'David Bowie', 'type': 'male', 'country': 'United Kingdom'},
+            {'name': 'Prince', 'type': 'male', 'country': 'United States'},
+            {'name': 'Michael Jackson', 'type': 'male', 'country': 'United States'},
+            {'name': 'Elvis Presley', 'type': 'male', 'country': 'United States'},
+            {'name': 'Johnny Cash', 'type': 'male', 'country': 'United States'},
+            {'name': 'John Coltrane', 'type': 'male', 'country': 'United States'},
+            {'name': 'Kendrick Lamar', 'type': 'male', 'country': 'United States'},
+            {'name': '許冠傑', 'type': 'male', 'country': 'Hong Kong'}, 
+            {'name': '譚詠麟', 'type': 'male', 'country': 'Hong Kong'},
+            {'name': '張國榮', 'type': 'male', 'country': 'Hong Kong'},
+            {'name': '呂文成', 'type': 'male', 'country': 'China'},
+            {'name': '陳百強', 'type': 'male', 'country': 'Hong Kong'},
+            
+            # Female Artists
+            {'name': 'Aretha Franklin', 'type': 'female', 'country': 'United States'},
+            {'name': 'Madonna', 'type': 'female', 'country': 'United States'},
+            {'name': 'Joni Mitchell', 'type': 'female', 'country': 'Canada'},
+            {'name': 'Billie Holiday', 'type': 'female', 'country': 'United States'},
+            {'name': 'Amy Winehouse', 'type': 'female', 'country': 'United Kingdom'},
+            {'name': 'Beyoncé', 'type': 'female', 'country': 'United States'},
+            {'name': 'Adele', 'type': 'female', 'country': 'United Kingdom'},
+            {'name': 'Taylor Swift', 'type': 'female', 'country': 'United States'},
+            {'name': '鄧麗君', 'type': 'female', 'country': 'Taiwan'},
+            {'name': '梅艷芳', 'type': 'female', 'country': 'China'},
+            {'name': '徐小鳳', 'type': 'female', 'country': 'China'},
+            {'name': '蘇芮',   'type': 'female', 'country': 'China'},
+            {'name': '葉蒨文', 'type': 'female', 'country': 'China'},
+            {'name': '鳳飛飛', 'type': 'female', 'country': 'Taiwan'},
+            
+            # Bands
+            {'name': 'The Beatles', 'type': 'band', 'country': 'United Kingdom'},
+            {'name': 'Pink Floyd', 'type': 'band', 'country': 'United Kingdom'},
+            {'name': 'Led Zeppelin', 'type': 'band', 'country': 'United Kingdom'},
+            {'name': 'The Rolling Stones', 'type': 'band', 'country': 'United Kingdom'},
+            {'name': 'Queen', 'type': 'band', 'country': 'United Kingdom'},
+            {'name': 'The Beach Boys', 'type': 'band', 'country': 'United States'},
+            {'name': 'Radiohead', 'type': 'band', 'country': 'United Kingdom'},
+            {'name': 'Nirvana', 'type': 'band', 'country': 'United States'},
+            {'name': '合眾中西樂團', 'type': 'band', 'country': 'Taiwan'},
+            {'name': '風行國樂隊', 'type': 'band', 'country': 'Hong Kong'},
+            {'name': '民間舞曲', 'type': 'band', 'country': 'China'},
+            {'name': '鼓霸大樂隊', 'type': 'band', 'country': 'Taiwan'},
+            {'name': 'Banzaii', 'type': 'band', 'country': 'Hong Kong'},
+
+            # Assortments   
+            {'name': 'Sakura FM-1403', 'type': 'Assortment', 'country': 'Japan'},
+            {'name': 'Vintage B&W Records Cantonese Pop Promo', 'type': 'Assortment', 'country': 'Hong Kong'},
+            {'name': 'Chinese Pathe Collection', 'type': 'Assortment', 'country': 'China'},
+            {'name': 'Golden Era of Singaporean Pop', 'type': 'Assortment', 'country': 'Singapore'},
+            {'name': 'Cantonese Drama Soundtracks', 'type': 'Assortment', 'country': 'Hong Kong'},
+            {'name': 'Malaysian Chinese Promo Jukebox', 'type': 'Assortment', 'country': 'Malaysia'},
+
+            # Classical       
+            {'name': 'Herbert von Karajan & Berlin Philharmonic', 'type': 'Classical', 'country': 'Austria'},
+            {'name': 'Columbia Symphony Orchestra / Igor Stravinsky', 'type': 'Classical', 'country': 'USA'},
+            {'name': 'Sviatoslav Richter', 'type': 'Classical', 'country': 'Soviet Union'},
+            {'name': 'Salvatore Accardo, Gewandhausorchester Leipzig, Kurt Masur', 'type': 'Classical', 'country': 'Italy'},
+            {'name': 'Herbert von Karajan, Berlin Philharmonic', 'type': 'Classical', 'country': 'Austria'},
+            {'name': 'Various Orchestras & Conductors', 'type': 'Classical', 'country': 'International'},
+
         ]
         
         artists = []
@@ -250,14 +309,43 @@ class Command(BaseCommand):
             {'title': 'Back to Black', 'artist': 'Amy Winehouse', 'genre': 'Soul', 'year': 2006, 'price': 27},
             {'title': 'good kid, m.A.A.d city', 'artist': 'Kendrick Lamar', 'genre': 'Hip-Hop', 'year': 2012, 'price': 30},
             {'title': 'Lemonade', 'artist': 'Beyoncé', 'genre': 'R&B', 'year': 2016, 'price': 35},
+
+            #Chinese collections
+            {'title': '鬼馬雙星', 'artist': '許冠傑', 'genre': 'Pop', 'year': 1974, 'price': 420},
+            {'title': '半斤八兩', 'artist': '許冠傑', 'genre': 'Pop', 'year': 1976, 'price': 400},
+            {'title': '愛人女神', 'artist': '譚詠麟', 'genre': 'Pop', 'year': 1982, 'price': 600},
+            {'title': '風繼續吹', 'artist': '張國榮', 'genre': 'Pop', 'year': 1983, 'price': 720},
+            {'title': '中國傑作集', 'artist': '呂文成', 'genre': 'Folk', 'year': 1967, 'price': 430},
+            {'title': '眼淚為你流', 'artist': '陳百強', 'genre': 'Pop', 'year': 1979, 'price': 500},
+            {'title': '再見我的愛人', 'artist': '鄧麗君', 'genre': 'Pop', 'year': 1975, 'price': 2480},
+            {'title': '壞女孩', 'artist': '梅艷芳', 'genre': 'Pop', 'year': 1985, 'price': 3200},
+            {'title': '每一步', 'artist': '徐小鳳', 'genre': 'Pop', 'year': 1986, 'price': 1950},
+            {'title': '搭錯車電影原聲帶', 'artist': '蘇芮', 'genre': 'Soundtrack', 'year': 1983, 'price': 2850},
+            {'title': '祝福', 'artist': '葉蒨文', 'genre': 'Pop', 'year': 1988, 'price': 1780},
+            {'title': '我是一片雲', 'artist': '鳳飛飛', 'genre': 'Folk', 'year': 1977, 'price': 2100},
+            {'title': '雙鳳朝陽', 'artist': '合衆中西樂團', 'genre': 'Folk', 'year': 1967, 'price': 380},
+            {'title': '新編廣東音樂 娛樂昇平', 'artist': '風行國樂隊', 'genre': 'Folk', 'year': 1960, 'price': 420},
+            {'title': '金蛇狂舞', 'artist': '民間舞曲', 'genre': 'Folk', 'year': 1965, 'price': 300},
+            {'title': '四喜臨門', 'artist': '風行國樂隊', 'genre': 'Folk', 'year': 1971, 'price': 460},
+            {'title': '讓我慢慢告訴你', 'artist': '鼓霸大樂隊', 'genre': 'Jazz', 'year': 1970, 'price': 720},
+            {'title': 'Chinese Kung Fu', 'artist': 'Banzaii', 'genre': 'Funk', 'year': 1975, 'price': 80},
+            {'title': 'Sakura FM-1403', 'artist': 'Assortment', 'genre': 'Pop', 'year': 1965, 'price': 480},
+            {'title': 'Vintage B&W Records Cantonese Pop Promo', 'artist': 'Assortment', 'genre': 'Pop', 'year': 1987, 'price': 550},
+            {'title': 'Chinese Pathe Collection', 'artist': 'Assortment', 'genre': 'Folk', 'year': 1967, 'price': 300},
+            {'title': 'Golden Era of Singaporean Pop', 'artist': 'Assortment', 'genre': 'Pop', 'year': 1978, 'price': 400},
+            {'title': 'Cantonese Drama Soundtracks', 'artist': 'Assortment', 'genre': 'Soundtrack', 'year': 1985, 'price': 620},
+            {'title': 'Malaysian Chinese Promo Jukebox', 'artist': 'Assortment', 'genre': 'Pop', 'year': 1990, 'price': 180},
+
+            # Classical
+            {'title': 'Beethoven: IX. Symphonie', 'artist': 'Herbert von Karajan & Berlin Philharmonic', 'genre': 'Classical', 'year': 1963, 'price': 5070},
+            {'title': 'Stravinsky Conducts Le Sacre du printemps', 'artist': 'Columbia Symphony Orchestra / Igor Stravinsky', 'genre': 'Classical', 'year': 1961, 'price': 3900},
+            {'title': 'Chopin-Polonaises', 'artist': 'Sviatoslav Richter', 'genre': 'Classical', 'year': 1960, 'price': 430},
+            {'title': 'Beethoven-Violin Concerto', 'artist': 'Salvatore Accardo, Gewandhausorchester Leipzig, Kurt Masur', 'genre': 'Classical', 'year': 1981, 'price': 117},
+            {'title': 'Bruckner-The Symphonies', 'artist': 'Herbert von Karajan, Berlin Philharmonic', 'genre': 'Classical', 'year': 1976, 'price': 390},
+            {'title': 'Beethoven Bicentennial Collection', 'artist': 'Various Orchestras & Conductors', 'genre': 'Classical', 'year': 1970, 'price': 1170},
         ]
         
-        # Limit records based on requested count
-        selected_records = vinyl_records_data[:records_count]
-        self.stdout.write(f'Creating {len(selected_records)} vinyl records...')
-        
-        created_count = 0
-        for record_data in selected_records:
+        for record_data in vinyl_records_data:
             # Find the artist and genre objects
             try:
                 artist = Artist.objects.get(name=record_data['artist'])
