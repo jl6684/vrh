@@ -39,3 +39,10 @@ Remarks: After milestone of Django 5.2 kicked off, please refer to the requireme
 3. Applied latest style.css from Joel.
 4. Generate dropdow list style by AI and applied to style.css
 5. Git push named: "Step 5: Categories pull down frontend finished."
+
+issue:
+1.nav text
+2. login sign up
+3. empty cart layout 
+4.index explore categories layout 
+5.
