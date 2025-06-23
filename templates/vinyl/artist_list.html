@@ -1,30 +1,33 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ category_title }} - Vinyl Record House{% endblock %}
+{% block title %}{{ artist.name }} - Vinyl Record House{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
 <section class="hero-section">
     <div class="container text-center pt-5 mt-5">
         <img src="{% static 'img/VRHlogo.png' %}" width="100" alt="" class="logo-spin">
-        <h1 class="display-4 mb-3">{{ category_title }}</h1>
-        <p class="lead">Discover amazing vinyl records in this category</p>
+        <h1 class="display-4 mb-3">{{ artist.name }}</h1>
+        <p class="lead">Vinyl records by {{ artist.name }}</p>
     </div>
 </section>
 
 <!-- Content -->
 <div class="container-fluid mt-5 pt-5">
     <h1 class="display-4 bg-light ml-5 pl-5" id="projectAnchor">
-        {{ category_title }}
+        {{ artist.name }} Records
     </h1>
     
     <!-- Vinyl Records Grid -->
     {% if page_obj %}
-    <div class="row p-5">
+        <div class="card-deck p-5">
             {% for vinyl in page_obj %}
-            <div class="col-md-3 mb-4 d-flex align-items-stretch">
-                <div class="card w-100">
+                {% if forloop.counter0|divisibleby:3 and forloop.counter0 > 0 %}
+                    </div>
+                    <div class="card-deck p-5">
+                {% endif %}
+                <div class="card">
                     {% if vinyl.cover_image %}
                         <a href="{% url 'vinyl:detail' vinyl.slug %}">
                             <img class="card-img-top" src="{{ vinyl.cover_image.url }}" alt="{{ vinyl.title }}">
@@ -67,14 +70,13 @@
                             <h6>View Product</h6>
                         </a>
                     </div>
-                    </div>
                 </div>
             {% endfor %}
         </div>
     {% else %}
         <!-- No Records Found -->
         <div class="container text-center py-5">
-            <h3>No vinyl records found in this category</h3>
+            <h3>No vinyl records found for this artist</h3>
             <p class="text-muted">Check back later for new additions!</p>
             <a href="{% url 'vinyl:list' %}" class="btn btn-primary">View All Records</a>
         </div>

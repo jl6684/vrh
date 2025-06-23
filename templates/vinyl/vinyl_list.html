@@ -171,6 +171,10 @@
                                             </span>
                                             <small class="text-muted">({{ vinyl.review_count }})</small>
                                         </div>
+                                    {% else %}
+                                        <div class="mb-2">
+                                            <span class="text-muted small">No reviews yet</span>
+                                        </div>
                                     {% endif %}
                                     
                                     <!-- Price and Stock -->
