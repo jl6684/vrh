@@ -45,4 +45,6 @@ issue:
 2. login sign up
 3. empty cart layout 
 4.index explore categories layout 
-5.
+5. pressing year, catalog number, barcode, move release year to basic info
+6. order cancel
+7. rating mark
