@@ -21,13 +21,10 @@
     
     <!-- Vinyl Records Grid -->
     {% if page_obj %}
-        <div class="card-deck p-5">
+    <div class="row p-5">
             {% for vinyl in page_obj %}
-                {% if forloop.counter0|divisibleby:3 and forloop.counter0 > 0 %}
-                    </div>
-                    <div class="card-deck p-5">
-                {% endif %}
-                <div class="card">
+            <div class="col-md-3 mb-4 d-flex align-items-stretch">
+                <div class="card w-100">
                     {% if vinyl.cover_image %}
                         <a href="{% url 'vinyl:detail' vinyl.slug %}">
                             <img class="card-img-top" src="{{ vinyl.cover_image.url }}" alt="{{ vinyl.title }}">
@@ -48,6 +45,7 @@
                         <a class="btn btn-sm btn-dark h4" href="{% url 'vinyl:detail' vinyl.slug %}">
                             <h6>View Product</h6>
                         </a>
+                    </div>
                     </div>
                 </div>
             {% endfor %}

@@ -77,34 +77,28 @@
 <!-- Content -->
 <div class="container-fluid mt-5 pt-5">
     <h1 class="display-4 bg-light ml-5 pl-5" id="projectAnchor">
-        Explore
+        New Arrivals
     </h1>
     
     <!-- Featured Vinyl Records -->
     {% if featured_vinyl %}
-        <div class="card-deck p-5">
+        <div class="row p-5">
             {% for vinyl in featured_vinyl %}
-                {% if forloop.counter0|divisibleby:3 and forloop.counter0 > 0 %}
-                    </div>
-                    <div class="card-deck p-5">
-                {% endif %}
-                <div class="card">
+            <div class="col-md-3 mb-4 d-flex align-items-stretch">
+                <div class="card w-100 vinyl-card">
                     {% if vinyl.cover_image %}
                         <img class="card-img-top" src="{{ vinyl.cover_image.url }}" alt="{{ vinyl.title }}">
                     {% else %}
                         <img class="card-img-top" src="{% static 'img/projects/projects-macbook-stats.jpg' %}" alt="{{ vinyl.title }}">
                     {% endif %}
                     <div class="card-body">
-                        <h3 class="card-title">
-                            {{ vinyl.title }}
-                        </h3>
-                        <p class="card-text">
+                        <h3 class="card-title">{{ vinyl.title }}</h3>
                             <h5>{{ vinyl.artist.name }}</h5>
                             <p class="text-muted">${{ vinyl.price }}</p>
-                        </p>
                         <a class="btn btn-sm btn-dark h4" href="{% url 'vinyl:detail' vinyl.slug %}">
                             <h6>View Product</h6>
                         </a>
+                    </div>
                     </div>
                 </div>
             {% endfor %}
