@@ -82,9 +82,6 @@ class VinylRecord(models.Model):
     
     # Vinyl Specifications
     release_year = models.PositiveIntegerField()
-    pressing_year = models.PositiveIntegerField(null=True, blank=True)
-    catalog_number = models.CharField(max_length=100, blank=True)
-    barcode = models.CharField(max_length=50, blank=True)
     
     # Physical Details
     condition = models.CharField(max_length=20, choices=CONDITION_CHOICES, default='new')
