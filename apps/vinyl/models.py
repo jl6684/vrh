@@ -82,9 +82,6 @@ class VinylRecord(models.Model):
     
     # Vinyl Specifications
     release_year = models.PositiveIntegerField()
-    pressing_year = models.PositiveIntegerField(null=True, blank=True)
-    catalog_number = models.CharField(max_length=100, blank=True)
-    barcode = models.CharField(max_length=50, blank=True)
     
     # Physical Details
     condition = models.CharField(max_length=20, choices=CONDITION_CHOICES, default='new')
@@ -148,19 +145,3 @@ class VinylRecord(models.Model):
                 counter += 1
             self.slug = slug
         super().save(*args, **kwargs)
-
-
-class VinylImage(models.Model):
-    """Additional images for vinyl records (back cover, liner notes, etc.)"""
-    vinyl_record = models.ForeignKey(VinylRecord, on_delete=models.CASCADE, related_name='additional_images')
-    image = models.ImageField(upload_to='vinyl_covers/additional/')
-    title = models.CharField(max_length=200, blank=True)
-    is_back_cover = models.BooleanField(default=False)
-    order = models.PositiveIntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ['order', 'created_at']
-
-    def __str__(self):
-        return f"{self.vinyl_record.title} - {self.title or 'Image'}"

@@ -182,20 +182,32 @@
 </div>
 
 <script>
+function getCsrfToken() {
+    return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token }}';
+}
+
 function cancelOrder() {
     if (confirm('Are you sure you want to cancel this order?')) {
         fetch('{% url "orders:cancel" order.order_id %}', {
             method: 'POST',
             headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
+                'X-CSRFToken': getCsrfToken(),
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json',
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
+                alert(data.message || 'Order cancelled successfully!');
                 location.reload();
             } else {
-                alert('Error cancelling order. Please contact support.');
+                alert(data.error || 'Error cancelling order. Please contact support.');
             }
         })
         .catch(error => {

@@ -80,10 +80,10 @@
         New Arrivals
     </h1>
     
-    <!-- Featured Vinyl Records -->
-    {% if featured_vinyl %}
+    <!-- Latest Vinyl Records -->
+    {% if latest_vinyl %}
         <div class="row p-5">
-            {% for vinyl in featured_vinyl %}
+            {% for vinyl in latest_vinyl %}
             <div class="col-md-3 mb-4 d-flex align-items-stretch">
                 <div class="card w-100 vinyl-card">
                     {% if vinyl.cover_image %}
@@ -94,6 +94,27 @@
                     <div class="card-body">
                         <h3 class="card-title">{{ vinyl.title }}</h3>
                             <h5>{{ vinyl.artist.name }}</h5>
+                            
+                            <!-- Rating -->
+                            {% if vinyl.average_rating %}
+                                <div class="mb-2">
+                                    <span class="text-warning">
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= vinyl.average_rating %}
+                                                <i class="fas fa-star"></i>
+                                            {% else %}
+                                                <i class="far fa-star"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </span>
+                                    <small class="text-muted">({{ vinyl.review_count }})</small>
+                                </div>
+                            {% else %}
+                                <div class="mb-2">
+                                    <span class="text-muted small">No reviews yet</span>
+                                </div>
+                            {% endif %}
+                            
                             <p class="text-muted">${{ vinyl.price }}</p>
                         <a class="btn btn-sm btn-dark h4" href="{% url 'vinyl:detail' vinyl.slug %}">
                             <h6>View Product</h6>

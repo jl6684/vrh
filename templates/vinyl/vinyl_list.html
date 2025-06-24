@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load wishlist_tags %}
+{% load vinyl_tags %}
 
 {% block title %}Vinyl Records - Vinyl Record House{% endblock %}
 
@@ -81,53 +82,80 @@
                         <h4 class="mb-0"><i class="fas fa-compact-disc"></i> Vinyl Records Collection</h4>
                     </div>
                     <div class="col-md-6">
-                        <!-- Search and Filter -->
+                        <!-- Search Form -->
                         <form method="get" class="d-flex">
-                            <div class="input-group me-2">
-                                <input type="text" class="form-control form-control-sm" name="search" 
-                                       value="{{ search_query }}" placeholder="Search vinyl records...">
-                                <button class="btn btn-outline-secondary btn-sm" type="submit">
-                                    <i class="fas fa-search"></i>
-                                </button>
-                            </div>
+                            <!-- Preserve current filters -->
+                            {% if current_genre %}<input type="hidden" name="genre_id" value="{{ current_genre }}">{% endif %}
+                            {% if current_artist %}<input type="hidden" name="artist_id" value="{{ current_artist }}">{% endif %}
+                            {% if sort_by %}<input type="hidden" name="sort" value="{{ sort_by }}">{% endif %}
+                            
+                           
                         </form>
                     </div>
                 </div>
             </div>
             <div class="card-body">
-                <!-- Filters Row -->
-                <div class="row mb-4">
-                    <div class="col-md-3">
-                        <select class="form-select" name="genre" onchange="this.form.submit()">
-                            <option value="">All Genres</option>
-                            {% for genre in genres %}
-                                <option value="{{ genre.id }}" {% if current_genre == genre.id|stringformat:"s" %}selected{% endif %}>
-                                    {{ genre.name }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <select class="form-select" name="sort" onchange="this.form.submit()">
-                            <option value="-created_at" {% if sort_by == '-created_at' %}selected{% endif %}>Newest First</option>
-                            <option value="title" {% if sort_by == 'title' %}selected{% endif %}>Title A-Z</option>
-                            <option value="price" {% if sort_by == 'price' %}selected{% endif %}>Price Low-High</option>
-                            <option value="-price" {% if sort_by == '-price' %}selected{% endif %}>Price High-Low</option>
-                            <option value="-release_year" {% if sort_by == '-release_year' %}selected{% endif %}>Year New-Old</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6 text-end">
-                        <span class="text-muted">
-                            {% if page_obj %}
-                                Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ page_obj.paginator.count }} records
+                <!-- Filters Form -->
+                <form method="get" id="filtersForm">
+                    <!-- Preserve search query -->
+                    {% if search_query %}<input type="hidden" name="search" value="{{ search_query }}">{% endif %}
+                    
+                    <div class="row mb-4 align-items-center">
+                        <div class="col-md-2 mb-2 mb-md-0">
+                            <label for="genre-filter" class="form-label small text-muted mb-1">Genre</label>
+                            <select class="form-select" name="genre_id" id="genre-filter" onchange="this.form.submit()">
+                                <option value="">All Genres</option>
+                                {% for genre in genres %}
+                                    <option value="{{ genre.id }}" {% if current_genre == genre.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ genre.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2 mb-2 mb-md-0">
+                            <label for="artist-filter" class="form-label small text-muted mb-1">Artist</label>
+                            <select class="form-select" name="artist_id" id="artist-filter" onchange="this.form.submit()">
+                                <option value="">All Artists</option>
+                                {% for artist in artists %}
+                                    <option value="{{ artist.id }}" {% if current_artist == artist.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ artist.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2 mb-2 mb-md-0">
+                            <label for="sort-filter" class="form-label small text-muted mb-1">Sort by</label>
+                            <select class="form-select" name="sort" id="sort-filter" onchange="this.form.submit()">
+                                <option value="-created_at" {% if sort_by == '-created_at' %}selected{% endif %}>Newest First</option>
+                                <option value="title" {% if sort_by == 'title' %}selected{% endif %}>Title A-Z</option>
+                                <option value="price" {% if sort_by == 'price' %}selected{% endif %}>Price Low-High</option>
+                                <option value="-price" {% if sort_by == '-price' %}selected{% endif %}>Price High-Low</option>
+                                <option value="-release_year" {% if sort_by == '-release_year' %}selected{% endif %}>Year New-Old</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-2 mb-md-0">
+                            {% if current_genre or current_artist or search_query or sort_by != '-created_at' %}
+                                <label class="form-label small text-muted mb-1">&nbsp;</label>
+                                <div>
+                                    <a href="{% url 'vinyl:list' %}" class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-times"></i> Clear Filters
+                                    </a>
+                                </div>
                             {% endif %}
-                        </span>
+                        </div>
+                        <div class="col-md-3 text-end">
+                            <span class="text-muted small">
+                                {% if page_obj %}
+                                    Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ page_obj.paginator.count }} records
+                                {% endif %}
+                            </span>
+                        </div>
                     </div>
-                </div>
+                </form>
 
                 <!-- Vinyl Records Grid -->
                 {% if page_obj %}
-                    <div class="row">
+                    <div class="row vinyl-records-grid">
                         {% for vinyl in page_obj %}
                         <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
                             <div class="card h-100 vinyl-card">
@@ -171,6 +199,10 @@
                                             </span>
                                             <small class="text-muted">({{ vinyl.review_count }})</small>
                                         </div>
+                                    {% else %}
+                                        <div class="mb-2">
+                                            <span class="text-muted small">No reviews yet</span>
+                                        </div>
                                     {% endif %}
                                     
                                     <!-- Price and Stock -->
@@ -203,39 +235,7 @@
                     </div>
 
                     <!-- Pagination -->
-                    {% if page_obj.has_other_pages %}
-                    <nav aria-label="Vinyl records pagination" class="mt-4">
-                        <ul class="pagination justify-content-center">
-                            {% if page_obj.has_previous %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}&{{ request.GET.urlencode }}">
-                                        <i class="fas fa-chevron-left"></i> Previous
-                                    </a>
-                                </li>
-                            {% endif %}
-                            
-                            {% for num in page_obj.paginator.page_range %}
-                                {% if page_obj.number == num %}
-                                    <li class="page-item active">
-                                        <span class="page-link">{{ num }}</span>
-                                    </li>
-                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page={{ num }}&{{ request.GET.urlencode }}">{{ num }}</a>
-                                    </li>
-                                {% endif %}
-                            {% endfor %}
-                            
-                            {% if page_obj.has_next %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}&{{ request.GET.urlencode }}">
-                                        Next <i class="fas fa-chevron-right"></i>
-                                    </a>
-                                </li>
-                            {% endif %}
-                        </ul>
-                    </nav>
-                    {% endif %}
+                    {% render_pagination page_obj request %}
                 {% else %}
                     <!-- No Results -->
                     <div class="text-center py-5">

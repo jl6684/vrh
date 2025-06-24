@@ -161,6 +161,8 @@ def cancel_order(request, order_id):
     order = get_object_or_404(Order, order_id=order_id, user=request.user)
     
     if order.status not in ['pending', 'confirmed']:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'error': 'This order cannot be cancelled'})
         messages.error(request, 'This order cannot be cancelled')
         return redirect('orders:detail', order_id=order.order_id)
     
@@ -176,9 +178,14 @@ def cancel_order(request, order_id):
             order.status = 'cancelled'
             order.save()
             
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': True, 'message': f'Order #{order.order_number} has been cancelled'})
+            
             messages.success(request, f'Order #{order.order_number} has been cancelled')
             
     except Exception as e:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'error': 'An error occurred while cancelling your order'})
         messages.error(request, 'An error occurred while cancelling your order')
     
     return redirect('orders:detail', order_id=order.order_id)

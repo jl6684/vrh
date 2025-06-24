@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Artist, Genre, Label, VinylRecord, VinylImage
+from .models import Artist, Genre, Label, VinylRecord
 
 
 @admin.register(Genre)
@@ -25,27 +25,18 @@ class ArtistAdmin(admin.ModelAdmin):
     ordering = ['name']
 
 
-class VinylImageInline(admin.TabularInline):
-    model = VinylImage
-    extra = 1
-
-
 @admin.register(VinylRecord)
 class VinylRecordAdmin(admin.ModelAdmin):
     list_display = ['title', 'artist', 'genre', 'release_year', 'price', 'stock_quantity', 'is_available', 'featured']
     list_filter = ['genre', 'label', 'condition', 'speed', 'size', 'is_available', 'featured', 'release_year']
-    search_fields = ['title', 'artist__name', 'catalog_number', 'barcode']
+    search_fields = ['title', 'artist__name']
     list_editable = ['price', 'stock_quantity', 'is_available', 'featured']
     readonly_fields = ['slug', 'created_at', 'updated_at']
     ordering = ['-created_at']
-    inlines = [VinylImageInline]
     
     fieldsets = (
         ('Basic Information', {
-            'fields': ('title', 'artist', 'genre', 'label', 'description')
-        }),
-        ('Vinyl Details', {
-            'fields': ('release_year', 'pressing_year', 'catalog_number', 'barcode')
+            'fields': ('title', 'artist', 'genre', 'label', 'release_year', 'description')
         }),
         ('Physical Properties', {
             'fields': ('condition', 'speed', 'size', 'weight')
