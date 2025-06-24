@@ -5,9 +5,9 @@ from apps.accounts.models import UserProfile
 
 
 def index(request):
-    """Home page with featured vinyl records"""
-    # Get featured vinyl records (use latest if no featured field)
-    featured_vinyl = VinylRecord.objects.filter(
+    """Home page with latest vinyl records"""
+    # Get latest vinyl records for hero section
+    latest_vinyl = VinylRecord.objects.filter(
         is_available=True,
         stock_quantity__gt=0
     ).select_related('artist', 'genre').annotate(
@@ -15,8 +15,8 @@ def index(request):
         review_count=Count('reviews', distinct=True)
     ).order_by('-created_at')[:8]
     
-    # Get latest vinyl records
-    latest_vinyl = VinylRecord.objects.filter(is_available=True).order_by('-created_at')[:6]
+    # Get newest vinyl records for separate section
+    newest_vinyl = VinylRecord.objects.filter(is_available=True).order_by('-created_at')[:6]
     
     # Get popular genres
     popular_genres = Genre.objects.all()[:6]
@@ -30,8 +30,8 @@ def index(request):
     }
     
     context = {
-        'featured_vinyl': featured_vinyl,
         'latest_vinyl': latest_vinyl,
+        'newest_vinyl': newest_vinyl,
         'popular_genres': popular_genres,
         **stats
     }
