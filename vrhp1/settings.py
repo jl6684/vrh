@@ -175,7 +175,6 @@ MEDIA_URL = '/media/'
 import os
 media_dirs = [
     'vinyl_covers',
-    'vinyl_covers/additional',
     'audio_samples',
     'profile_pics',
     'user_uploads'
