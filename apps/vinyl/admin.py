@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Artist, Genre, Label, VinylRecord, VinylImage
+from .models import Artist, Genre, Label, VinylRecord
 
 
 @admin.register(Genre)
@@ -25,11 +25,6 @@ class ArtistAdmin(admin.ModelAdmin):
     ordering = ['name']
 
 
-class VinylImageInline(admin.TabularInline):
-    model = VinylImage
-    extra = 1
-
-
 @admin.register(VinylRecord)
 class VinylRecordAdmin(admin.ModelAdmin):
     list_display = ['title', 'artist', 'genre', 'release_year', 'price', 'stock_quantity', 'is_available', 'featured']
@@ -38,7 +33,6 @@ class VinylRecordAdmin(admin.ModelAdmin):
     list_editable = ['price', 'stock_quantity', 'is_available', 'featured']
     readonly_fields = ['slug', 'created_at', 'updated_at']
     ordering = ['-created_at']
-    inlines = [VinylImageInline]
     
     fieldsets = (
         ('Basic Information', {
