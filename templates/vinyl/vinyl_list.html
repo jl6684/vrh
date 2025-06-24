@@ -82,8 +82,12 @@
                         <h4 class="mb-0"><i class="fas fa-compact-disc"></i> Vinyl Records Collection</h4>
                     </div>
                     <div class="col-md-6">
-                        <!-- Search and Filter -->
+                        <!-- Search Form -->
                         <form method="get" class="d-flex">
+                            <!-- Preserve current filters -->
+                            {% if current_genre %}<input type="hidden" name="genre_id" value="{{ current_genre }}">{% endif %}
+                            {% if sort_by %}<input type="hidden" name="sort" value="{{ sort_by }}">{% endif %}
+                            
                             <div class="input-group me-2">
                                 <input type="text" class="form-control form-control-sm" name="search" 
                                        value="{{ search_query }}" placeholder="Search vinyl records...">
@@ -96,39 +100,56 @@
                 </div>
             </div>
             <div class="card-body">
-                <!-- Filters Row -->
-                <div class="row mb-4">
-                    <div class="col-md-3">
-                        <select class="form-select" name="genre" onchange="this.form.submit()">
-                            <option value="">All Genres</option>
-                            {% for genre in genres %}
-                                <option value="{{ genre.id }}" {% if current_genre == genre.id|stringformat:"s" %}selected{% endif %}>
-                                    {{ genre.name }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <select class="form-select" name="sort" onchange="this.form.submit()">
-                            <option value="-created_at" {% if sort_by == '-created_at' %}selected{% endif %}>Newest First</option>
-                            <option value="title" {% if sort_by == 'title' %}selected{% endif %}>Title A-Z</option>
-                            <option value="price" {% if sort_by == 'price' %}selected{% endif %}>Price Low-High</option>
-                            <option value="-price" {% if sort_by == '-price' %}selected{% endif %}>Price High-Low</option>
-                            <option value="-release_year" {% if sort_by == '-release_year' %}selected{% endif %}>Year New-Old</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6 text-end">
-                        <span class="text-muted">
-                            {% if page_obj %}
-                                Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ page_obj.paginator.count }} records
+                <!-- Filters Form -->
+                <form method="get" id="filtersForm">
+                    <!-- Preserve search query -->
+                    {% if search_query %}<input type="hidden" name="search" value="{{ search_query }}">{% endif %}
+                    
+                    <div class="row mb-4 align-items-center">
+                        <div class="col-md-3 mb-2 mb-md-0">
+                            <label for="genre-filter" class="form-label small text-muted mb-1">Genre</label>
+                            <select class="form-select" name="genre_id" id="genre-filter" onchange="this.form.submit()">
+                                <option value="">All Genres</option>
+                                {% for genre in genres %}
+                                    <option value="{{ genre.id }}" {% if current_genre == genre.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ genre.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-2 mb-md-0">
+                            <label for="sort-filter" class="form-label small text-muted mb-1">Sort by</label>
+                            <select class="form-select" name="sort" id="sort-filter" onchange="this.form.submit()">
+                                <option value="-created_at" {% if sort_by == '-created_at' %}selected{% endif %}>Newest First</option>
+                                <option value="title" {% if sort_by == 'title' %}selected{% endif %}>Title A-Z</option>
+                                <option value="price" {% if sort_by == 'price' %}selected{% endif %}>Price Low-High</option>
+                                <option value="-price" {% if sort_by == '-price' %}selected{% endif %}>Price High-Low</option>
+                                <option value="-release_year" {% if sort_by == '-release_year' %}selected{% endif %}>Year New-Old</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-2 mb-md-0">
+                            {% if current_genre or search_query or sort_by != '-created_at' %}
+                                <label class="form-label small text-muted mb-1">&nbsp;</label>
+                                <div>
+                                    <a href="{% url 'vinyl:list' %}" class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-times"></i> Clear Filters
+                                    </a>
+                                </div>
                             {% endif %}
-                        </span>
+                        </div>
+                        <div class="col-md-3 text-end">
+                            <span class="text-muted small">
+                                {% if page_obj %}
+                                    Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ page_obj.paginator.count }} records
+                                {% endif %}
+                            </span>
+                        </div>
                     </div>
-                </div>
+                </form>
 
                 <!-- Vinyl Records Grid -->
                 {% if page_obj %}
-                    <div class="row">
+                    <div class="row vinyl-records-grid">
                         {% for vinyl in page_obj %}
                         <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
                             <div class="card h-100 vinyl-card">
