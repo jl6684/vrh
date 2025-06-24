@@ -7,8 +7,6 @@ urlpatterns = [
     # Vinyl listing and search
     path('', views.vinyl_list, name='list'),
     path('search/', views.vinyl_search, name='search'),
-    path('genre/<int:genre_id>/', views.vinyl_by_genre, name='by_genre'),
-    path('artist/<int:artist_id>/', views.vinyl_by_artist, name='by_artist'),
     
     # Individual vinyl detail
     path('<slug:slug>/', views.vinyl_detail, name='detail'),
