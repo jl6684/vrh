@@ -100,8 +100,8 @@
                     <!-- Preserve search query -->
                     {% if search_query %}<input type="hidden" name="search" value="{{ search_query }}">{% endif %}
                     
-                    <div class="row mb-4 align-items-center">
-                        <div class="col-md-2 mb-2 mb-md-0">
+                    <div class="row mb-2 align-items-center">
+                        <div class="col-md-2 mb-2 mb-md-0" >
                             <label for="genre-filter" class="form-label small text-muted mb-1">Genre</label>
                             <select class="form-select" name="genre_id" id="genre-filter" onchange="this.form.submit()">
                                 <option value="">All Genres</option>
@@ -112,7 +112,7 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="col-md-2 mb-2 mb-md-0">
+                        <div class="col-md-5 mb-2 mb-md-0">
                             <label for="artist-filter" class="form-label small text-muted mb-1">Artist</label>
                             <select class="form-select" name="artist_id" id="artist-filter" onchange="this.form.submit()">
                                 <option value="">All Artists</option>
@@ -135,15 +135,13 @@
                         </div>
                         <div class="col-md-3 mb-2 mb-md-0">
                             {% if current_genre or current_artist or search_query or sort_by != '-created_at' %}
-                                <label class="form-label small text-muted mb-1">&nbsp;</label>
-                                <div>
+                                <label class="form-label small text-muted mb-1"></label>
                                     <a href="{% url 'vinyl:list' %}" class="btn btn-outline-secondary btn-sm">
                                         <i class="fas fa-times"></i> Clear Filters
                                     </a>
-                                </div>
                             {% endif %}
                         </div>
-                        <div class="col-md-3 text-end">
+                        <div class="col-md-12 text-end">
                             <span class="text-muted small">
                                 {% if page_obj %}
                                     Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ page_obj.paginator.count }} records
