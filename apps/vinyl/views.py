@@ -11,6 +11,8 @@ def vinyl_list(request):
     # Get filter parameters
     genre_id = request.GET.get('genre_id')
     genre_name = request.GET.get('genre')
+    artist_id = request.GET.get('artist_id')
+    artist_name = request.GET.get('artist')
     condition = request.GET.get('condition')
     search_query = request.GET.get('q') or request.GET.get('search')
     sort_by = request.GET.get('sort', '-created_at')
@@ -21,6 +23,12 @@ def vinyl_list(request):
     
     if genre_name:
         vinyl_records = vinyl_records.filter(genre__name__icontains=genre_name)
+    
+    if artist_id:
+        vinyl_records = vinyl_records.filter(artist_id=artist_id)
+    
+    if artist_name:
+        vinyl_records = vinyl_records.filter(artist__name__icontains=artist_name)
     
     if condition:
         vinyl_records = vinyl_records.filter(condition=condition)
@@ -48,14 +56,18 @@ def vinyl_list(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
-    # Get all genres for filter dropdown
+    # Get all genres and artists for filter dropdown
     genres = Genre.objects.all()
+    artists = Artist.objects.all().order_by('name')
     
     context = {
         'page_obj': page_obj,
         'genres': genres,
+        'artists': artists,
         'current_genre': genre_id,
         'current_genre_name': genre_name,
+        'current_artist': artist_id,
+        'current_artist_name': artist_name,
         'current_condition': condition,
         'search_query': search_query,
         'sort_by': sort_by,
@@ -147,50 +159,6 @@ def vinyl_search(request):
         'search_form_data': request.GET,
     }
     return render(request, 'vinyl/vinyl_search.html', context)
-
-
-def vinyl_by_genre(request, genre_id):
-    """Show vinyl records by specific genre"""
-    genre = get_object_or_404(Genre, id=genre_id)
-    vinyl_records = VinylRecord.objects.filter(
-        genre=genre, 
-        is_available=True
-    ).select_related('artist', 'genre', 'label').annotate(
-        average_rating=Avg('reviews__rating'),
-        review_count=Count('reviews', distinct=True)
-    )
-    
-    paginator = Paginator(vinyl_records, 12)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    
-    context = {
-        'genre': genre,
-        'page_obj': page_obj,
-    }
-    return render(request, 'vinyl/genre_list.html', context)
-
-
-def vinyl_by_artist(request, artist_id):
-    """Show vinyl records by specific artist"""
-    artist = get_object_or_404(Artist, id=artist_id)
-    vinyl_records = VinylRecord.objects.filter(
-        artist=artist, 
-        is_available=True
-    ).select_related('artist', 'genre', 'label').annotate(
-        average_rating=Avg('reviews__rating'),
-        review_count=Count('reviews', distinct=True)
-    )
-    
-    paginator = Paginator(vinyl_records, 12)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    
-    context = {
-        'artist': artist,
-        'page_obj': page_obj,
-    }
-    return render(request, 'vinyl/artist_list.html', context)
 
 
 # Category views (matching your existing templates)
