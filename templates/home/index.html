@@ -80,15 +80,12 @@
         Explore
     </h1>
     
-    <!-- Featured Vinyl Records -->
-    {% if featured_vinyl %}
-        <div class="card-deck p-5">
-            {% for vinyl in featured_vinyl %}
-                {% if forloop.counter0|divisibleby:3 and forloop.counter0 > 0 %}
-                    </div>
-                    <div class="card-deck p-5">
-                {% endif %}
-                <div class="card">
+    <!-- Latest Vinyl Records -->
+    {% if latest_vinyl %}
+        <div class="row p-5">
+            {% for vinyl in latest_vinyl %}
+            <div class="col-md-3 mb-4 d-flex align-items-stretch">
+                <div class="card w-100 vinyl-card">
                     {% if vinyl.cover_image %}
                         <img class="card-img-top" src="{{ vinyl.cover_image.url }}" alt="{{ vinyl.title }}">
                     {% else %}
