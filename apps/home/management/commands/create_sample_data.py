@@ -348,20 +348,27 @@ class Command(BaseCommand):
                 genre = Genre.objects.get(name=record_data['genre'])
                 label = random.choice(labels)
                 
+                # Add some variety to conditions and physical properties
+                conditions = ['new', 'mint', 'very_good', 'good']
+                sizes = ['12', '12', '12', '7']  # Mostly 12" with some 7"
+                speeds = ['33', '33', '45'] if random.choice(sizes) == '7' else ['33']
+                
                 vinyl, created = VinylRecord.objects.get_or_create(
                     title=record_data['title'],
                     artist=artist,
                     defaults={
                         'genre': genre,
                         'label': label,
-                        'price': Decimal(str(record_data['price'])),
+                        'price': record_data['price'],
                         'release_year': record_data['year'],
                         'stock_quantity': random.randint(5, 50),
                         'is_available': True,
-                        'condition': 'new',
-                        'speed': '33',
-                        'size': '12',
-                        'description': f"Classic album {record_data['title']} by {record_data['artist']} from {record_data['year']}.",
+                        'condition': random.choice(conditions),
+                        'speed': random.choice(speeds),
+                        'size': random.choice(sizes),
+                        'description': f"Classic album {record_data['title']} by {record_data['artist']} from {record_data['year']}. A must-have for any vinyl collection.",
+                        'featured': random.choice([True, False]) if random.random() < 0.3 else False,
+                        'weight': round(random.uniform(120, 180), 2),  # Typical vinyl weight in grams
                     }
                 )
                 
@@ -378,8 +385,11 @@ class Command(BaseCommand):
                 f'- {Label.objects.count()} labels\n'
                 f'- {Artist.objects.count()} artists\n'
                 f'- {VinylRecord.objects.count()} vinyl records\n'
+                f'- {User.objects.count()} users\n'
+                f'- {UserProfile.objects.count()} user profiles\n'
                 f'\nLogin credentials:\n'
                 f'Admin: admin / admin123\n'
-                f'User: testuser / testpass123'
+                f'User: testuser / testpass123\n'
+                f'\nTo clear and recreate data, use: python manage.py create_sample_data --clear'
             )
         )

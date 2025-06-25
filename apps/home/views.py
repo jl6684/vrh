@@ -5,8 +5,24 @@ from apps.accounts.models import UserProfile
 
 
 def index(request):
-    """Home page with latest vinyl records"""
-    # Get latest vinyl records for hero section
+    """Home page with personalized vinyl records based on user preferences"""
+    
+    # Check if user is authenticated and has favorite genres
+    recommended_vinyl = None
+    if request.user.is_authenticated and hasattr(request.user, 'profile'):
+        user_favorite_genres = request.user.profile.favorite_genres.all()
+        if user_favorite_genres.exists():
+            # Get vinyl records from user's favorite genres
+            recommended_vinyl = VinylRecord.objects.filter(
+                is_available=True,
+                stock_quantity__gt=0,
+                genre__in=user_favorite_genres
+            ).select_related('artist', 'genre').annotate(
+                average_rating=Avg('reviews__rating'),
+                review_count=Count('reviews', distinct=True)
+            ).order_by('-average_rating', '-created_at')[:8]
+    
+    # Get latest vinyl records for hero section (fallback or additional content)
     latest_vinyl = VinylRecord.objects.filter(
         is_available=True,
         stock_quantity__gt=0
@@ -31,8 +47,10 @@ def index(request):
     
     context = {
         'latest_vinyl': latest_vinyl,
+        'recommended_vinyl': recommended_vinyl,
         'newest_vinyl': newest_vinyl,
         'popular_genres': popular_genres,
+        'user_has_preferences': request.user.is_authenticated and hasattr(request.user, 'profile') and request.user.profile.favorite_genres.exists(),
         **stats
     }
     return render(request, 'home/index.html', context)

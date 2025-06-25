@@ -17,11 +17,16 @@
 }
 
 .card-img-top {
-    transition: opacity 0.3s ease;
+    transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .vinyl-card:hover .card-img-top {
     opacity: 0.9;
+    transform: scale(1.02);
+}
+
+.vinyl-card a:hover .card-img-top {
+    opacity: 0.85;
 }
 
 .wishlist-btn {
@@ -114,11 +119,17 @@
                         </div>
                         <div class="col-md-2 mb-2 mb-md-0">
                             <label for="artist-filter" class="form-label small text-muted mb-1">Artist</label>
-                            <select class="form-select" name="artist_id" id="artist-filter" onchange="this.form.submit()">
+                            <select class="form-select" name="artist_id" id="artist-filter" onchange="this.form.submit()" style="max-width: 150px;">
                                 <option value="">All Artists</option>
                                 {% for artist in artists %}
-                                    <option value="{{ artist.id }}" {% if current_artist == artist.id|stringformat:"s" %}selected{% endif %}>
-                                        {{ artist.name }}
+                                    <option value="{{ artist.id }}" 
+                                            title="{{ artist.name }}"
+                                            {% if current_artist == artist.id|stringformat:"s" %}selected{% endif %}>
+                                        {% if artist.name|length > 15 %}
+                                            {{ artist.name|slice:":12" }}...
+                                        {% else %}
+                                            {{ artist.name }}
+                                        {% endif %}
                                     </option>
                                 {% endfor %}
                             </select>
@@ -160,13 +171,15 @@
                         <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
                             <div class="card h-100 vinyl-card">
                                 <div class="position-relative">
-                                    {% if vinyl.cover_image %}
-                                        <img src="{{ vinyl.cover_image.url }}" class="card-img-top" alt="{{ vinyl.title }}" style="height: 250px; object-fit: cover;">
-                                    {% else %}
-                                        <div class="bg-light d-flex align-items-center justify-content-center" style="height: 250px;">
-                                            <i class="fas fa-compact-disc fa-3x text-muted"></i>
-                                        </div>
-                                    {% endif %}
+                                    <a href="{% url 'vinyl:detail' vinyl.slug %}" class="text-decoration-none">
+                                        {% if vinyl.cover_image %}
+                                            <img src="{{ vinyl.cover_image.url }}" class="card-img-top" alt="{{ vinyl.title }}" style="height: 250px; object-fit: cover; cursor: pointer;">
+                                        {% else %}
+                                            <div class="bg-light d-flex align-items-center justify-content-center" style="height: 250px; cursor: pointer;">
+                                                <i class="fas fa-compact-disc fa-3x text-muted"></i>
+                                            </div>
+                                        {% endif %}
+                                    </a>
                                     
                                     <!-- Quick Actions Overlay -->
                                     <div class="position-absolute top-0 end-0 p-2" style="z-index: 10;">
@@ -213,10 +226,7 @@
                                         </div>
                                         
                                         <!-- Action Buttons -->
-                                        <div class="d-grid gap-2">
-                                            <a href="{% url 'vinyl:detail' vinyl.slug %}" class="btn btn-outline-primary btn-sm">
-                                                <i class="fas fa-eye"></i> View Details
-                                            </a>
+                                        <div class="d-grid">
                                             {% if vinyl.stock_quantity > 0 %}
                                                 <button class="btn btn-primary btn-sm add-to-cart-btn" data-vinyl-id="{{ vinyl.id }}">
                                                     <i class="fas fa-cart-plus"></i> Add to Cart

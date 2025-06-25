@@ -127,6 +127,41 @@
                         
                         <!-- Preferences -->
                         <h6 class="text-primary mb-3">Preferences</h6>
+                        
+                        <!-- Favorite Genres Section -->
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <i class="fas fa-heart text-danger"></i> Favorite Music Genres
+                            </label>
+                            <small class="form-text text-muted d-block mb-3">
+                                Select your favorite genres to get personalized vinyl recommendations on the homepage.
+                            </small>
+                            <div class="row">
+                                {% for genre in all_genres %}
+                                    <div class="col-md-3 col-sm-4 col-6 mb-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" 
+                                                   id="genre_{{ genre.id }}" 
+                                                   name="favorite_genres" 
+                                                   value="{{ genre.id }}"
+                                                   {% if genre in profile.favorite_genres.all %}checked{% endif %}>
+                                            <label class="form-check-label" for="genre_{{ genre.id }}">
+                                                {{ genre.name }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                {% empty %}
+                                    <div class="col-12">
+                                        <p class="text-muted">No genres available yet.</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <!-- Other Preferences -->
+                        <h6 class="text-primary mb-3">Notifications</h6>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <div class="form-check">
