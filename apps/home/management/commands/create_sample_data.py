@@ -2,14 +2,30 @@ from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
 from apps.vinyl.models import VinylRecord, Artist, Genre, Label
 from apps.accounts.models import UserProfile
-from decimal import Decimal
 import random
 
 
 class Command(BaseCommand):
     help = 'Create sample data for testing the vinyl shop'
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--clear',
+            action='store_true',
+            help='Clear existing data before creating sample data',
+        )
+
     def handle(self, *args, **options):
+        if options['clear']:
+            self.stdout.write('Clearing existing data...')
+            VinylRecord.objects.all().delete()
+            Artist.objects.all().delete()
+            Genre.objects.all().delete()
+            Label.objects.all().delete()
+            # Keep users but remove their profiles for recreation
+            UserProfile.objects.all().delete()
+            self.stdout.write('Existing data cleared.')
+        
         self.stdout.write('Creating sample data...')
         
         # Create admin user if it doesn't exist
@@ -21,6 +37,19 @@ class Command(BaseCommand):
                 first_name='Admin',
                 last_name='User'
             )
+            # Create admin profile
+            UserProfile.objects.get_or_create(
+                user=admin_user,
+                defaults={
+                    'phone': '+1-555-0100',
+                    'address': '123 Admin Street',
+                    'city': 'New York',
+                    'country': 'United States',
+                    'postal_code': '10001',
+                    'newsletter_subscription': True,
+                    'email_notifications': True,
+                }
+            )
             self.stdout.write(f'Created admin user: admin/admin123')
         
         # Create sample regular user
@@ -31,6 +60,19 @@ class Command(BaseCommand):
                 password='testpass123',
                 first_name='Test',
                 last_name='User'
+            )
+            # Create test user profile
+            UserProfile.objects.get_or_create(
+                user=test_user,
+                defaults={
+                    'phone': '+1-555-0200',
+                    'address': '456 Test Avenue',
+                    'city': 'Los Angeles',
+                    'country': 'United States',
+                    'postal_code': '90210',
+                    'newsletter_subscription': True,
+                    'email_notifications': False,
+                }
             )
             self.stdout.write(f'Created test user: testuser/testpass123')
         
@@ -166,6 +208,17 @@ class Command(BaseCommand):
             {'title': 'Back to Black', 'artist': 'Amy Winehouse', 'genre': 'Soul', 'year': 2006, 'price': 27},
             {'title': 'good kid, m.A.A.d city', 'artist': 'Kendrick Lamar', 'genre': 'Hip-Hop', 'year': 2012, 'price': 30},
             {'title': 'Lemonade', 'artist': 'Beyoncé', 'genre': 'R&B', 'year': 2016, 'price': 35},
+            
+            # Additional classics
+            {'title': 'Pet Sounds', 'artist': 'The Beach Boys', 'genre': 'Pop', 'year': 1966, 'price': 34},
+            {'title': 'A Night at the Opera', 'artist': 'Queen', 'genre': 'Rock', 'year': 1975, 'price': 33},
+            {'title': 'Lady Soul', 'artist': 'Aretha Franklin', 'genre': 'Soul', 'year': 1968, 'price': 26},
+            {'title': 'The Sun Sessions', 'artist': 'Elvis Presley', 'genre': 'Rock', 'year': 1976, 'price': 31},
+            {'title': 'At Folsom Prison', 'artist': 'Johnny Cash', 'genre': 'Country', 'year': 1968, 'price': 29},
+            {'title': 'A Love Supreme', 'artist': 'John Coltrane', 'genre': 'Jazz', 'year': 1965, 'price': 37},
+            {'title': 'Lady in Satin', 'artist': 'Billie Holiday', 'genre': 'Jazz', 'year': 1958, 'price': 32},
+            {'title': '21', 'artist': 'Adele', 'genre': 'Pop', 'year': 2011, 'price': 28},
+            {'title': '1989', 'artist': 'Taylor Swift', 'genre': 'Pop', 'year': 2014, 'price': 30},
         ]
         
         for record_data in vinyl_records_data:
@@ -175,20 +228,27 @@ class Command(BaseCommand):
                 genre = Genre.objects.get(name=record_data['genre'])
                 label = random.choice(labels)
                 
+                # Add some variety to conditions and physical properties
+                conditions = ['new', 'mint', 'very_good', 'good']
+                sizes = ['12', '12', '12', '7']  # Mostly 12" with some 7"
+                speeds = ['33', '33', '45'] if random.choice(sizes) == '7' else ['33']
+                
                 vinyl, created = VinylRecord.objects.get_or_create(
                     title=record_data['title'],
                     artist=artist,
                     defaults={
                         'genre': genre,
                         'label': label,
-                        'price': Decimal(str(record_data['price'])),
+                        'price': record_data['price'],
                         'release_year': record_data['year'],
                         'stock_quantity': random.randint(5, 50),
                         'is_available': True,
-                        'condition': 'new',
-                        'speed': '33',
-                        'size': '12',
-                        'description': f"Classic album {record_data['title']} by {record_data['artist']} from {record_data['year']}.",
+                        'condition': random.choice(conditions),
+                        'speed': random.choice(speeds),
+                        'size': random.choice(sizes),
+                        'description': f"Classic album {record_data['title']} by {record_data['artist']} from {record_data['year']}. A must-have for any vinyl collection.",
+                        'featured': random.choice([True, False]) if random.random() < 0.3 else False,
+                        'weight': round(random.uniform(120, 180), 2),  # Typical vinyl weight in grams
                     }
                 )
                 
@@ -205,8 +265,11 @@ class Command(BaseCommand):
                 f'- {Label.objects.count()} labels\n'
                 f'- {Artist.objects.count()} artists\n'
                 f'- {VinylRecord.objects.count()} vinyl records\n'
+                f'- {User.objects.count()} users\n'
+                f'- {UserProfile.objects.count()} user profiles\n'
                 f'\nLogin credentials:\n'
                 f'Admin: admin / admin123\n'
-                f'User: testuser / testpass123'
+                f'User: testuser / testpass123\n'
+                f'\nTo clear and recreate data, use: python manage.py create_sample_data --clear'
             )
         )
