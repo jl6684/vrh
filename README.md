@@ -48,4 +48,4 @@ issue:
 5. pressing year, catalog number, barcode, move release year to basic info
 6. order cancel
 7. rating mark
-8. oder list cancel, index view product, male artist according vinyl_list
+8. oder list cancel, index view product, categories artist type page according vinyl_list, modify the layout.
