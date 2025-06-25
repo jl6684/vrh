@@ -3,44 +3,301 @@ from django.contrib.auth.models import User
 from apps.vinyl.models import VinylRecord, Artist, Genre, Label
 from apps.accounts.models import UserProfile
 from decimal import Decimal
-import random
+import random, os, csv, pandas as pd, re, gspread
+from oauth2client.service_account import ServiceAccountCredentials
+
+# ============================================================================
+# METHOD 1: CSV FILE IMPORT FUNCTIONS
+# ============================================================================
+
+def read_csv_data(csv_path):
+    """Read CSV using pandas with better error handling."""
+    try:
+        df = pd.read_csv(csv_path, encoding='utf-8')
+        return df.to_dict(orient='records')
+    except pd.errors.ParserError as e:
+        # Try with different parsing options
+        try:
+            df = pd.read_csv(csv_path, encoding='utf-8', quoting=csv.QUOTE_ALL)
+            return df.to_dict(orient='records')
+        except pd.errors.ParserError:
+            # If still failing, provide detailed error information
+            raise Exception(f"CSV parsing error in {csv_path}. Please check:\n"
+                f"1. All fields with commas are properly quoted\n"
+                f"2. Each row has exactly 8 columns\n"
+                f"3. No extra commas in data fields\n"
+                f"Original error: {str(e)}")
+
+
+def validate_csv_structure(csv_rows):
+    """Validate that CSV has the expected structure and provide helpful error messages."""
+    expected_columns = ['title', 'artist', 'genre', 'year', 'price', 'type', 'country', 'label']
+    
+    if not csv_rows:
+        raise Exception("CSV file is empty or could not be parsed")
+    
+    # Check if all expected columns are present
+    first_row = csv_rows[0]
+    missing_columns = [col for col in expected_columns if col not in first_row]
+    if missing_columns:
+        raise Exception(f"Missing required columns: {missing_columns}")
+    
+    # Check for rows with wrong number of fields
+    for i, row in enumerate(csv_rows, start=2):  # start=2 because row 1 is header
+        if len(row) != len(expected_columns):
+            raise Exception(f"Row {i} has {len(row)} fields, expected {len(expected_columns)}. "
+                f"Check for unquoted commas in: {row}")
+    
+    return True
+
+
+def validate_data_types(csv_rows):
+    """Validate that all required fields contain string data, not NaN/float."""
+    for i, row in enumerate(csv_rows, start=2):  # start=2 because row 1 is header
+        for field in ['title', 'artist', 'genre', 'type', 'country', 'label']:
+            if pd.isna(row.get(field)) or not isinstance(row.get(field), str):
+                raise Exception(f"Row {i}: Field '{field}' contains invalid data: {row.get(field)}. "
+                    f"Expected string, got {type(row.get(field)).__name__}. "
+                    f"This indicates commas appeared in data fields but unquoted. Please review the CSV file.")
+
+
+def extract_genres_data(csv_rows):
+    """Extract unique genres from CSV rows."""
+    return list({str(row['genre']).strip() for row in csv_rows if row.get('genre') and pd.notna(row.get('genre'))})
+
+
+def extract_labels_data(csv_rows):
+    """Extract unique labels from CSV rows."""
+    return list({str(row['label']).strip() for row in csv_rows if row.get('label') and pd.notna(row.get('label'))})
+
+
+def extract_artists_data(csv_rows):
+    """Extract artist info as list of dicts from CSV rows."""
+    seen = set()
+    artists = []
+    for row in csv_rows:
+        # Convert to string and handle NaN values
+        artist_name = str(row['artist']).strip() if pd.notna(row.get('artist')) else ''
+        artist_type = str(row['type']).strip() if pd.notna(row.get('type')) else ''
+        artist_country = str(row['country']).strip() if pd.notna(row.get('country')) else ''
+        
+        if artist_name and artist_type and artist_country:
+            key = (artist_name, artist_type, artist_country)
+            if key not in seen:
+                artists.append({
+                    'name': artist_name,
+                    'type': artist_type,
+                    'country': artist_country,
+                })
+                seen.add(key)
+    return artists
+
+
+def extract_vinyl_records_data(csv_rows):
+    """Extract vinyl record info as list of dicts from CSV rows."""
+    records = []
+    for row in csv_rows:
+        # Convert to string and handle NaN values
+        title = str(row['title']).strip() if pd.notna(row.get('title')) else ''
+        artist = str(row['artist']).strip() if pd.notna(row.get('artist')) else ''
+        genre = str(row['genre']).strip() if pd.notna(row.get('genre')) else ''
+        
+        # Handle numeric fields
+        try:
+            year = int(row['year']) if pd.notna(row.get('year')) else 0
+            price = int(row['price']) if pd.notna(row.get('price')) else 0
+        except (ValueError, TypeError):
+            continue  # Skip rows with invalid numeric data
+        
+        if title and artist and genre and year > 0 and price > 0:
+            records.append({
+                'title': title,
+                'artist': artist,
+                'genre': genre,
+                'year': year,
+                'price': price,
+            })
+    return records
+
+
+# ============================================================================
+# METHOD 2: GOOGLE SHEETS IMPORT FUNCTIONS
+# ============================================================================
+
+def read_excel_data(excel_path):
+    """Read Excel file with error handling."""
+    try:
+        df = pd.read_excel(excel_path)
+        return df.to_dict(orient='records')
+    except FileNotFoundError:
+        raise Exception(f"Excel file not found: {excel_path}")
+    except Exception as e:
+        raise Exception(f"Error reading Excel file: {str(e)}")
+
+def read_gsheet_data(sheet_id, worksheet_name='Sheet1'):
+    """Read Google Sheet data with error handling."""
+    try:
+        scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+        creds = ServiceAccountCredentials.from_json_keyfile_name('credentials.json', scope)
+        client = gspread.authorize(creds)
+        sheet = client.open_by_key(sheet_id)
+        worksheet = sheet.worksheet(worksheet_name)
+        rows = worksheet.get_all_records()
+        return rows
+    except FileNotFoundError:
+        raise Exception("credentials.json file not found. Please ensure Google Sheets credentials are properly configured.")
+    except gspread.SpreadsheetNotFound:
+        raise Exception(f"Google Sheet with ID '{sheet_id}' not found or not accessible.")
+    except gspread.WorksheetNotFound:
+        raise Exception(f"Worksheet '{worksheet_name}' not found in the Google Sheet.")
+    except Exception as e:
+        raise Exception(f"Error accessing Google Sheet: {str(e)}")
+
+
+def normalize_field_delimiters(csv_rows):
+    """
+    Normalize delimiters in artist, genre, and label fields:
+    - Replace ",", "|", "and" with "&"
+    - Keep existing "&" unchanged
+    - Ensure single space before and after "&"
+    """
+    normalized_rows = []
+    for i, row in enumerate(csv_rows):
+        normalized_row = row.copy()
+        fields_to_normalize = ['artist', 'genre', 'label']
+        for field in fields_to_normalize:
+            if field in normalized_row and pd.notna(normalized_row[field]):
+                value = str(normalized_row[field]).strip()
+                if not value:
+                    continue
+                # Step 1: Replace all delimiters (comma, pipe, and "and") with " & "
+                # Use regex to replace all at once, including cases with/without spaces
+                value = re.sub(r'\s*(,|\||\\band\\b)\s*', ' & ', value, flags=re.IGNORECASE)
+                # Step 2: Normalize spacing around "&"
+                value = re.sub(r'\s*&\s*', ' & ', value)
+                # Step 3: Clean up any remaining multiple spaces
+                value = re.sub(r'\s+', ' ', value)
+                # Step 4: Strip leading/trailing spaces
+                value = value.strip()
+                normalized_row[field] = value
+        normalized_rows.append(normalized_row)
+    return normalized_rows
+
+
+def validate_normalized_data(csv_rows):
+    """
+    Validate that normalized data meets the formatting requirements.
+    """
+    for i, row in enumerate(csv_rows, start=2):
+        for field in ['artist', 'genre', 'label']:
+            if field in row and pd.notna(row[field]):
+                value = str(row[field]).strip()
+                
+                # Check for proper "&" formatting
+                if '&' in value:
+                    # Should match: "A & B", "A & B & C", etc. (no leading/trailing &, single space around each &)
+                    if not re.match(r'^[^&]+( & [^&]+)+$', value):
+                        raise Exception(
+                            f"Row {i}: Field '{field}' has improper spacing around '&': '{value}'. "
+                            f"Expected format: 'Artist1 & Artist2 [ & Artist3 ...]'"
+                        )
+                
+                # Check for remaining commas, pipes, or "and"
+                if ',' in value or '|' in value or re.search(r'\band\b', value, re.IGNORECASE):
+                    raise Exception(
+                        f"Row {i}: Field '{field}' still contains unnormalized delimiters: '{value}'. "
+                        f"Expected only '&' as delimiter."
+                    )
+
+
+def validate_and_normalize_data(csv_rows):
+    """
+    Comprehensive data validation and normalization:
+    1. Validate structure and data types
+    2. Normalize delimiters in artist, genre, and label fields
+    3. Validate normalized data
+    """
+    # First, validate the original structure
+    validate_csv_structure(csv_rows)
+    validate_data_types(csv_rows)
+    
+    # Then normalize the delimiters
+    normalized_rows = normalize_field_delimiters(csv_rows)
+    
+    # Validate the normalized data
+    validate_normalized_data(normalized_rows)
+    
+    return normalized_rows
 
 
 class Command(BaseCommand):
     help = 'Create sample data for testing the vinyl shop'
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--csv-file',
+            type=str,
+            default='vinyldata.csv',
+            help='Name of the CSV file in data-for-import folder (default: vinyldata.csv)'
+        )
+        parser.add_argument(
+            '--gs-file',
+            type=str,
+            nargs='?',
+            const='vinyldata-gs.xlsx',
+            default=None,
+            help='Google Sheet ID to import data from. If not provided, defaults to vinyldata-gs.xlsx.'
+        )
+
     def handle(self, *args, **options):
-        self.stdout.write('Creating sample data...')
-        
-        # Create admin user if it doesn't exist
-        if not User.objects.filter(username='admin').exists():
-            admin_user = User.objects.create_superuser(
-                username='admin',
-                email='admin@vinylhouse.com',
-                password='admin123',
-                first_name='Admin',
-                last_name='User'
-            )
-            self.stdout.write(f'Created admin user: admin/admin123')
-        
-        # Create sample regular user
-        if not User.objects.filter(username='testuser').exists():
-            test_user = User.objects.create_user(
-                username='testuser',
-                email='test@example.com',
-                password='testpass123',
-                first_name='Test',
-                last_name='User'
-            )
-            self.stdout.write(f'Created test user: testuser/testpass123')
+        gs_file = options.get('gs_file')
+        if gs_file:
+            # METHOD 2: Google Sheets Import
+            sheet_id = gs_file if gs_file != 'vinyldata-gs.xlsx' else 'vinyldata-gs.xlsx'
+            worksheet_name = 'Sheet1'
+            self.stdout.write(f'Creating sample data from Google Sheet: {sheet_id} (worksheet: {worksheet_name})...')
+            
+            try:
+                csv_rows = read_gsheet_data(sheet_id, worksheet_name)
+                # Use the new comprehensive validation and normalization
+                csv_rows = validate_and_normalize_data(csv_rows)
+            except Exception as e:
+                self.stdout.write(self.style.ERROR(f'Google Sheet error: {e}'))
+                return
+            self.stdout.write(f'Successfully loaded {len(csv_rows)} records from Google Sheet {sheet_id}')
+        else:
+            # METHOD 1: CSV File Import
+            csv_filename = options['csv_file']
+            self.stdout.write(f'Creating sample data from {csv_filename}...')
+            csv_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))), 'data-for-import', csv_filename)
+            if not os.path.exists(csv_path):
+                self.stdout.write(self.style.ERROR(f'Error: CSV file not found at {csv_path}'))
+                self.stdout.write(f'Available files in data-for-import folder:')
+                data_import_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))), 'data-for-import')
+                if os.path.exists(data_import_dir):
+                    for file in os.listdir(data_import_dir):
+                        if file.endswith('.csv'):
+                            self.stdout.write(f'  - {file}')
+                return
+            
+            try:
+                csv_rows = read_csv_data(csv_path)
+                # Use the new comprehensive validation and normalization
+                csv_rows = validate_and_normalize_data(csv_rows)
+            except Exception as e:
+                self.stdout.write(self.style.ERROR(f'CSV validation error: {e}'))
+                return
+            self.stdout.write(f'Successfully loaded {len(csv_rows)} records from {csv_filename}')
+
+        genres_data = extract_genres_data(csv_rows)
+
+        labels_data = extract_labels_data(csv_rows)
+
+        artists_data = extract_artists_data(csv_rows)
+
+        vinyl_records_data = extract_vinyl_records_data(csv_rows)
         
         # Create genres
-        genres_data = [
-            'Rock', 'Pop', 'Jazz', 'Blues', 'Classical', 'Electronic',
-            'Hip-Hop', 'R&B', 'Country', 'Folk', 'Reggae', 'Punk',
-            'Alternative', 'Indie', 'Funk', 'Soul','Soundtrack'
-        ]
-        
         genres = []
         for genre_name in genres_data:
             genre, created = Genre.objects.get_or_create(
@@ -50,14 +307,6 @@ class Command(BaseCommand):
             genres.append(genre)
             if created:
                 self.stdout.write(f'Created genre: {genre_name}')
-        
-        # Create labels
-        labels_data = [
-            'Atlantic Records', 'Columbia Records', 'EMI', 'Universal Music',
-            'Warner Bros. Records', 'Capitol Records', 'Sony Music', 'RCA Records',
-            'Motown Records', 'Blue Note Records', 'Verve Records', 'Def Jam',
-            'Polydor', '風行唱片', 'Deutsche Grammophon'
-        ]
         
         labels = []
         for label_name in labels_data:
@@ -71,74 +320,6 @@ class Command(BaseCommand):
             labels.append(label)
             if created:
                 self.stdout.write(f'Created label: {label_name}')
-        
-        # Create artists with types
-        artists_data = [
-            # Male Artists
-            {'name': 'Bob Dylan', 'type': 'male', 'country': 'United States'},
-            {'name': 'Miles Davis', 'type': 'male', 'country': 'United States'},
-            {'name': 'Stevie Wonder', 'type': 'male', 'country': 'United States'},
-            {'name': 'David Bowie', 'type': 'male', 'country': 'United Kingdom'},
-            {'name': 'Prince', 'type': 'male', 'country': 'United States'},
-            {'name': 'Michael Jackson', 'type': 'male', 'country': 'United States'},
-            {'name': 'Elvis Presley', 'type': 'male', 'country': 'United States'},
-            {'name': 'Johnny Cash', 'type': 'male', 'country': 'United States'},
-            {'name': 'John Coltrane', 'type': 'male', 'country': 'United States'},
-            {'name': 'Kendrick Lamar', 'type': 'male', 'country': 'United States'},
-            {'name': '許冠傑', 'type': 'male', 'country': 'Hong Kong'}, 
-            {'name': '譚詠麟', 'type': 'male', 'country': 'Hong Kong'},
-            {'name': '張國榮', 'type': 'male', 'country': 'Hong Kong'},
-            {'name': '呂文成', 'type': 'male', 'country': 'China'},
-            {'name': '陳百強', 'type': 'male', 'country': 'Hong Kong'},
-            
-            # Female Artists
-            {'name': 'Aretha Franklin', 'type': 'female', 'country': 'United States'},
-            {'name': 'Madonna', 'type': 'female', 'country': 'United States'},
-            {'name': 'Joni Mitchell', 'type': 'female', 'country': 'Canada'},
-            {'name': 'Billie Holiday', 'type': 'female', 'country': 'United States'},
-            {'name': 'Amy Winehouse', 'type': 'female', 'country': 'United Kingdom'},
-            {'name': 'Beyoncé', 'type': 'female', 'country': 'United States'},
-            {'name': 'Adele', 'type': 'female', 'country': 'United Kingdom'},
-            {'name': 'Taylor Swift', 'type': 'female', 'country': 'United States'},
-            {'name': '鄧麗君', 'type': 'female', 'country': 'Taiwan'},
-            {'name': '梅艷芳', 'type': 'female', 'country': 'China'},
-            {'name': '徐小鳳', 'type': 'female', 'country': 'China'},
-            {'name': '蘇芮',   'type': 'female', 'country': 'China'},
-            {'name': '葉蒨文', 'type': 'female', 'country': 'China'},
-            {'name': '鳳飛飛', 'type': 'female', 'country': 'Taiwan'},
-            
-            # Bands
-            {'name': 'The Beatles', 'type': 'band', 'country': 'United Kingdom'},
-            {'name': 'Pink Floyd', 'type': 'band', 'country': 'United Kingdom'},
-            {'name': 'Led Zeppelin', 'type': 'band', 'country': 'United Kingdom'},
-            {'name': 'The Rolling Stones', 'type': 'band', 'country': 'United Kingdom'},
-            {'name': 'Queen', 'type': 'band', 'country': 'United Kingdom'},
-            {'name': 'The Beach Boys', 'type': 'band', 'country': 'United States'},
-            {'name': 'Radiohead', 'type': 'band', 'country': 'United Kingdom'},
-            {'name': 'Nirvana', 'type': 'band', 'country': 'United States'},
-            {'name': '合眾中西樂團', 'type': 'band', 'country': 'Taiwan'},
-            {'name': '風行國樂隊', 'type': 'band', 'country': 'Hong Kong'},
-            {'name': '民間舞曲', 'type': 'band', 'country': 'China'},
-            {'name': '鼓霸大樂隊', 'type': 'band', 'country': 'Taiwan'},
-            {'name': 'Banzaii', 'type': 'band', 'country': 'Hong Kong'},
-
-            # Assortments   
-            {'name': 'Sakura FM-1403', 'type': 'Assortment', 'country': 'Japan'},
-            {'name': 'Vintage B&W Records Cantonese Pop Promo', 'type': 'Assortment', 'country': 'Hong Kong'},
-            {'name': 'Chinese Pathe Collection', 'type': 'Assortment', 'country': 'China'},
-            {'name': 'Golden Era of Singaporean Pop', 'type': 'Assortment', 'country': 'Singapore'},
-            {'name': 'Cantonese Drama Soundtracks', 'type': 'Assortment', 'country': 'Hong Kong'},
-            {'name': 'Malaysian Chinese Promo Jukebox', 'type': 'Assortment', 'country': 'Malaysia'},
-
-            # Classical       
-            {'name': 'Herbert von Karajan & Berlin Philharmonic', 'type': 'Classical', 'country': 'Austria'},
-            {'name': 'Columbia Symphony Orchestra / Igor Stravinsky', 'type': 'Classical', 'country': 'USA'},
-            {'name': 'Sviatoslav Richter', 'type': 'Classical', 'country': 'Soviet Union'},
-            {'name': 'Salvatore Accardo, Gewandhausorchester Leipzig, Kurt Masur', 'type': 'Classical', 'country': 'Italy'},
-            {'name': 'Herbert von Karajan, Berlin Philharmonic', 'type': 'Classical', 'country': 'Austria'},
-            {'name': 'Various Orchestras & Conductors', 'type': 'Classical', 'country': 'International'},
-
-        ]
         
         artists = []
         for artist_data in artists_data:
@@ -159,82 +340,6 @@ class Command(BaseCommand):
             artists.append(artist)
             if created:
                 self.stdout.write(f'Created artist: {artist_data["name"]} ({artist_data["type"]})')
-        
-        # Create vinyl records
-        vinyl_records_data = [
-            # Beatles
-            {'title': 'Abbey Road', 'artist': 'The Beatles', 'genre': 'Rock', 'year': 1969, 'price': 30},
-            {'title': 'Sgt. Pepper\'s Lonely Hearts Club Band', 'artist': 'The Beatles', 'genre': 'Rock', 'year': 1967, 'price': 35},
-            {'title': 'Revolver', 'artist': 'The Beatles', 'genre': 'Rock', 'year': 1966, 'price': 32},
-            
-            # Bob Dylan
-            {'title': 'Highway 61 Revisited', 'artist': 'Bob Dylan', 'genre': 'Folk', 'year': 1965, 'price': 28},
-            {'title': 'Blood on the Tracks', 'artist': 'Bob Dylan', 'genre': 'Folk', 'year': 1975, 'price': 29},
-            
-            # Miles Davis
-            {'title': 'Kind of Blue', 'artist': 'Miles Davis', 'genre': 'Jazz', 'year': 1959, 'price': 33},
-            {'title': 'Bitches Brew', 'artist': 'Miles Davis', 'genre': 'Jazz', 'year': 1970, 'price': 36},
-            
-            # Pink Floyd
-            {'title': 'The Dark Side of the Moon', 'artist': 'Pink Floyd', 'genre': 'Rock', 'year': 1973, 'price': 34},
-            {'title': 'The Wall', 'artist': 'Pink Floyd', 'genre': 'Rock', 'year': 1979, 'price': 40},
-            {'title': 'Wish You Were Here', 'artist': 'Pink Floyd', 'genre': 'Rock', 'year': 1975, 'price': 32},
-            
-            # Led Zeppelin
-            {'title': 'Led Zeppelin IV', 'artist': 'Led Zeppelin', 'genre': 'Rock', 'year': 1971, 'price': 31},
-            {'title': 'Physical Graffiti', 'artist': 'Led Zeppelin', 'genre': 'Rock', 'year': 1975, 'price': 43},
-            
-            # More diverse collection
-            {'title': 'Songs in the Key of Life', 'artist': 'Stevie Wonder', 'genre': 'Soul', 'year': 1976, 'price': 38},
-            {'title': 'I Never Loved a Man the Way I Love You', 'artist': 'Aretha Franklin', 'genre': 'Soul', 'year': 1967, 'price': 27},
-            {'title': 'The Rise and Fall of Ziggy Stardust', 'artist': 'David Bowie', 'genre': 'Rock', 'year': 1972, 'price': 30},
-            {'title': 'Purple Rain', 'artist': 'Prince', 'genre': 'Pop', 'year': 1984, 'price': 29},
-            {'title': 'Like a Virgin', 'artist': 'Madonna', 'genre': 'Pop', 'year': 1984, 'price': 25},
-            {'title': 'Thriller', 'artist': 'Michael Jackson', 'genre': 'Pop', 'year': 1982, 'price': 33},
-            {'title': 'Blue', 'artist': 'Joni Mitchell', 'genre': 'Folk', 'year': 1971, 'price': 31},
-            {'title': 'Let It Bleed', 'artist': 'The Rolling Stones', 'genre': 'Rock', 'year': 1969, 'price': 30},
-            
-            # Modern artists
-            {'title': 'OK Computer', 'artist': 'Radiohead', 'genre': 'Alternative', 'year': 1997, 'price': 32},
-            {'title': 'Nevermind', 'artist': 'Nirvana', 'genre': 'Alternative', 'year': 1991, 'price': 28},
-            {'title': 'Back to Black', 'artist': 'Amy Winehouse', 'genre': 'Soul', 'year': 2006, 'price': 27},
-            {'title': 'good kid, m.A.A.d city', 'artist': 'Kendrick Lamar', 'genre': 'Hip-Hop', 'year': 2012, 'price': 30},
-            {'title': 'Lemonade', 'artist': 'Beyoncé', 'genre': 'R&B', 'year': 2016, 'price': 35},
-
-            #Chinese collections
-            {'title': '鬼馬雙星', 'artist': '許冠傑', 'genre': 'Pop', 'year': 1974, 'price': 420},
-            {'title': '半斤八兩', 'artist': '許冠傑', 'genre': 'Pop', 'year': 1976, 'price': 400},
-            {'title': '愛人女神', 'artist': '譚詠麟', 'genre': 'Pop', 'year': 1982, 'price': 600},
-            {'title': '風繼續吹', 'artist': '張國榮', 'genre': 'Pop', 'year': 1983, 'price': 720},
-            {'title': '中國傑作集', 'artist': '呂文成', 'genre': 'Folk', 'year': 1967, 'price': 430},
-            {'title': '眼淚為你流', 'artist': '陳百強', 'genre': 'Pop', 'year': 1979, 'price': 500},
-            {'title': '再見我的愛人', 'artist': '鄧麗君', 'genre': 'Pop', 'year': 1975, 'price': 2480},
-            {'title': '壞女孩', 'artist': '梅艷芳', 'genre': 'Pop', 'year': 1985, 'price': 3200},
-            {'title': '每一步', 'artist': '徐小鳳', 'genre': 'Pop', 'year': 1986, 'price': 1950},
-            {'title': '搭錯車電影原聲帶', 'artist': '蘇芮', 'genre': 'Soundtrack', 'year': 1983, 'price': 2850},
-            {'title': '祝福', 'artist': '葉蒨文', 'genre': 'Pop', 'year': 1988, 'price': 1780},
-            {'title': '我是一片雲', 'artist': '鳳飛飛', 'genre': 'Folk', 'year': 1977, 'price': 2100},
-            {'title': '雙鳳朝陽', 'artist': '合衆中西樂團', 'genre': 'Folk', 'year': 1967, 'price': 380},
-            {'title': '新編廣東音樂 娛樂昇平', 'artist': '風行國樂隊', 'genre': 'Folk', 'year': 1960, 'price': 420},
-            {'title': '金蛇狂舞', 'artist': '民間舞曲', 'genre': 'Folk', 'year': 1965, 'price': 300},
-            {'title': '四喜臨門', 'artist': '風行國樂隊', 'genre': 'Folk', 'year': 1971, 'price': 460},
-            {'title': '讓我慢慢告訴你', 'artist': '鼓霸大樂隊', 'genre': 'Jazz', 'year': 1970, 'price': 720},
-            {'title': 'Chinese Kung Fu', 'artist': 'Banzaii', 'genre': 'Funk', 'year': 1975, 'price': 80},
-            {'title': 'Sakura FM-1403', 'artist': 'Assortment', 'genre': 'Pop', 'year': 1965, 'price': 480},
-            {'title': 'Vintage B&W Records Cantonese Pop Promo', 'artist': 'Assortment', 'genre': 'Pop', 'year': 1987, 'price': 550},
-            {'title': 'Chinese Pathe Collection', 'artist': 'Assortment', 'genre': 'Folk', 'year': 1967, 'price': 300},
-            {'title': 'Golden Era of Singaporean Pop', 'artist': 'Assortment', 'genre': 'Pop', 'year': 1978, 'price': 400},
-            {'title': 'Cantonese Drama Soundtracks', 'artist': 'Assortment', 'genre': 'Soundtrack', 'year': 1985, 'price': 620},
-            {'title': 'Malaysian Chinese Promo Jukebox', 'artist': 'Assortment', 'genre': 'Pop', 'year': 1990, 'price': 180},
-
-            # Classical
-            {'title': 'Beethoven: IX. Symphonie', 'artist': 'Herbert von Karajan & Berlin Philharmonic', 'genre': 'Classical', 'year': 1963, 'price': 5070},
-            {'title': 'Stravinsky Conducts Le Sacre du printemps', 'artist': 'Columbia Symphony Orchestra / Igor Stravinsky', 'genre': 'Classical', 'year': 1961, 'price': 3900},
-            {'title': 'Chopin-Polonaises', 'artist': 'Sviatoslav Richter', 'genre': 'Classical', 'year': 1960, 'price': 430},
-            {'title': 'Beethoven-Violin Concerto', 'artist': 'Salvatore Accardo, Gewandhausorchester Leipzig, Kurt Masur', 'genre': 'Classical', 'year': 1981, 'price': 117},
-            {'title': 'Bruckner-The Symphonies', 'artist': 'Herbert von Karajan, Berlin Philharmonic', 'genre': 'Classical', 'year': 1976, 'price': 390},
-            {'title': 'Beethoven Bicentennial Collection', 'artist': 'Various Orchestras & Conductors', 'genre': 'Classical', 'year': 1970, 'price': 1170},
-        ]
         
         for record_data in vinyl_records_data:
             # Find the artist and genre objects
