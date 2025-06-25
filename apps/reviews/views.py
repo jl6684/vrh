@@ -144,7 +144,7 @@ def edit_review_view(request, review_id):
 def delete_review(request, review_id):
     """Delete a review"""
     review = get_object_or_404(Review, id=review_id, user=request.user)
-    vinyl_id = review.vinyl_record.id
+    vinyl_record = review.vinyl_record
     
     review.delete()
     
@@ -155,7 +155,7 @@ def delete_review(request, review_id):
         })
     else:
         messages.success(request, 'Your review has been deleted')
-        return redirect('vinyl:detail', vinyl_id=vinyl_id)
+        return redirect('vinyl:detail', slug=vinyl_record.slug)
 
 
 @login_required
