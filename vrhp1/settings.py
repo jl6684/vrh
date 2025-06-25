@@ -38,6 +38,12 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    # Django JET Dashboard (must be before jet)
+    'jet.dashboard',
+    
+    # Django JET (must be before django.contrib.admin)
+    'jet',
+    
     # Base Packages
     'django.contrib.admin',
     'django.contrib.auth',          # Login/logout
