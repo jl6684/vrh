@@ -124,6 +124,9 @@ def extract_vinyl_records_data(csv_rows):
 # METHOD 2: GOOGLE SHEETS IMPORT FUNCTIONS
 # ============================================================================
 
+DEFAULT_SHEET_ID = "1VmJAB5tM0mok7j5ma15qw8Ozshlp-kBnPKG5oa-D1rM"
+VALID_WORKSHEETS = ["Sheet1", "Sheet2", "dupSheet2"]
+
 def read_excel_data(excel_path):
     """Read Excel file with error handling."""
     try:
@@ -138,14 +141,14 @@ def read_gsheet_data(sheet_id, worksheet_name='Sheet1'):
     """Read Google Sheet data with error handling."""
     try:
         scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-        creds = ServiceAccountCredentials.from_json_keyfile_name('credentials.json', scope)
+        creds = ServiceAccountCredentials.from_json_keyfile_name('gscredentials.json', scope)
         client = gspread.authorize(creds)
         sheet = client.open_by_key(sheet_id)
         worksheet = sheet.worksheet(worksheet_name)
         rows = worksheet.get_all_records()
         return rows
     except FileNotFoundError:
-        raise Exception("credentials.json file not found. Please ensure Google Sheets credentials are properly configured.")
+        raise Exception("gscredentials.json file not found. Please ensure Google Sheets credentials are properly configured.")
     except gspread.SpreadsheetNotFound:
         raise Exception(f"Google Sheet with ID '{sheet_id}' not found or not accessible.")
     except gspread.WorksheetNotFound:
@@ -229,7 +232,6 @@ def validate_and_normalize_data(csv_rows):
     
     return normalized_rows
 
-
 class Command(BaseCommand):
     help = 'Create sample data for testing the vinyl shop'
 
@@ -252,9 +254,11 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         gs_file = options.get('gs_file')
         if gs_file:
-            # METHOD 2: Google Sheets Import
-            sheet_id = gs_file if gs_file != 'vinyldata-gs.xlsx' else 'vinyldata-gs.xlsx'
-            worksheet_name = 'Sheet1'
+            if gs_file not in VALID_WORKSHEETS:
+                self.stdout.write(self.style.ERROR(f"Please input worksheet name of '{gs_file}' you want to import."))
+                return
+            sheet_id = DEFAULT_SHEET_ID
+            worksheet_name = gs_file
             self.stdout.write(f'Creating sample data from Google Sheet: {sheet_id} (worksheet: {worksheet_name})...')
             
             try:
