@@ -1,78 +1,86 @@
-# Data Handling Menu - JL6684_VRH2
+# Data Handling Menu
 
 ## Overview
-This document provides instructions for importing vinyl record data into the Django application using CSV files stored in the `data-for-import` folder.
+This document provides instructions for importing vinyl record data into the Django application using the `import_vinyl_data` management command. Data can be imported from CSV, Google Sheets, or Excel files stored in the `data-for-import` folder.
 
 ## Prerequisites
 - Django project is set up and running
-- CSV files are placed in the `data-for-import` folder
-- CSV files must have the following column structure:
+- Data files are placed in the `data-for-import` folder
+- Data files must have the following column structure:
   - `title` - Album/record title
   - `artist` - Artist or band name
   - `genre` - Music genre
-  - `year` - Release year
-  - `price` - Price in integer format
+  - `year` - Release year (integer)
+  - `price` - Price (integer)
   - `type` - Artist type (male, female, band, Classical, Assortment, etc.)
   - `country` - Artist's country of origin
   - `label` - Record label (can be left blank)
 
-## Available CSV Files
-The following CSV files are available in the `data-for-import` folder:
+## Available Data Files
+The following files are available in the `data-for-import` folder:
 - `vinyldata.csv` (default)
 - `vinyldata1.csv`
-- `vinyldata2.csv`
-- `vinyldata_gsheet_template.csv` (template for Google Sheets)
+- `df-comma-error.csv`
+- `vinyldata-ex.xlsx`
+- `vinyldata-ex1.xlsx`
+- `vinyldata-dup.xlsx`
 
 ## Usage Instructions
 
 ### 1. Import Data Using Default CSV File
-To import data from the default CSV file (`vinyldata.csv`):
-```project folder on terminal
-python manage.py create_sample_data
+```sh
+python manage.py import_vinyl_data
 ```
 
-### 2. Import Data Using Specific CSV File
-To import data from a specific CSV file:
-```project folder on terminal
-python manage.py create_sample_data --csv-file vinyldata1.csv
+### 2. Import Data Using a Specific CSV File
+```sh
+python manage.py import_vinyl_data --csv-file vinyldata1.csv
 ```
 
-### 3. Get Help
-To see all available options and help information:
-```project folder on terminal
-python manage.py create_sample_data --help
+### 3. Import Data from Google Sheets
+```sh
+python manage.py import_vinyl_data --gs-file Sheet1
+```
+- The worksheet name must be one of: `Sheet1`, `Sheet2`, `dupSheet2`.
+
+### 4. Import Data from Excel File
+```sh
+python manage.py import_vinyl_data --ex-file vinyldata-ex.xlsx
 ```
 
-## What the Command Does
-
-When you run the `create_sample_data` command, it will:
+### 5. Get Help
+```sh
+python manage.py import_vinyl_data --help
+```
 
 1. **Create Admin Users** (if they don't exist):
    - Admin user: `admin` / `admin123`
    - Test user: `testuser` / `testpass123`
 
-2. **Read CSV Data**:
-   - Load the specified CSV file
+When you run the `import_vinyl_data` command, it will:
+
+1. **Read Data**:
+   - Load the specified file (CSV, Google Sheet, or Excel)
    - Extract unique genres, labels, artists, and vinyl records
    - Display the number of records loaded
 
-3. **Create Database Records**:
+2. **Create Database Records**:
    - Create Genre objects from unique genres
    - Create Label objects from unique labels
    - Create Artist objects with type and country information
    - Create VinylRecord objects with all details
 
-4. **Provide Feedback**:
+3. **Provide Feedback**:
    - Show which records were created
    - Display summary statistics
    - List any errors encountered
 
 ## Error Handling
 
-If the specified CSV file doesn't exist, the command will:
+If the specified file doesn't exist, the command will:
 - Display an error message
 - Show the full path where it looked for the file
-- List all available CSV files in the `data-for-import` folder
+- List all available files in the `data-for-import` folder
 
 ## Example Output
 
@@ -98,11 +106,13 @@ Sample data created successfully!
 Login credentials:
 Admin: admin / admin123
 User: testuser / testpass123
+
+To clear and recreate data, use: python manage.py import_vinyl_data --clear
 ```
 
-## Tips for CSV File Preparation
+## Tips for Data File Preparation
 
-1. **Column Headers**: Ensure your CSV file has the exact column names shown above
+1. **Column Headers**: Ensure your file has the exact column names shown above
 2. **Data Format**: 
    - `year` and `price` should be integers
    - `title`, `artist`, `genre`, `type`, `country` should be text
@@ -114,12 +124,7 @@ User: testuser / testpass123
 ## Common Data Input Errors and Solutions
 
 ### Error: "Expected 8 fields in line X, saw Y"
-**Cause**: A field contains unquoted commas, causing the CSV parser to split it into multiple fields.
-
-**Example of Problematic Data**:
-```
-Beethoven-Violin Concerto,Salvatore Accardo,Gewandhausorchester Leipzig, Kurt Masur,Classical,1981,117,Classical,Italy,Philips
-```
+**Cause**: A field contains unquoted commas, causing the parser to split it into multiple fields.
 
 **Solution**: Quote fields that contain commas:
 ```
@@ -129,34 +134,29 @@ Beethoven-Violin Concerto,Salvatore Accardo,Gewandhausorchester Leipzig, Kurt Ma
 ### How to Handle Fields with Commas
 
 1. **Wrap the entire field in double quotes**
-   - Wrong: `Artist Name, Band Name`
-   - Correct: `"Artist Name, Band Name"`
-
 2. **Use consistent quoting style**
    - You can quote all text fields for consistency
    - Example: `"Album Title","Artist Name","Rock",1970,25,"band","Country","Label"`
 
 3. **Check for trailing commas**
-   - Ensure no extra commas at the end of lines
-   - Each row should have exactly 8 fields
 
 ### Validation Features
 
-The import command now includes:
-- **Automatic CSV structure validation**
-- **Detailed error messages** pointing to specific problematic rows
-- **Multiple parsing attempts** with different quote handling
+The import command includes:
+- **Automatic structure validation**
+- **Detailed error messages** for problematic rows
+- **Multiple parsing attempts** for CSVs
 - **Column count verification** for each row
 
 ## Troubleshooting
 
 ### Common Issues:
-1. **File Not Found**: Check that the CSV file exists in the `data-for-import` folder
-2. **Permission Errors**: Ensure the Django application has read access to the CSV file
+1. **File Not Found**: Check that the file exists in the `data-for-import` folder
+2. **Permission Errors**: Ensure the Django application has read access to the file
 3. **Data Format Errors**: Verify that `year` and `price` columns contain valid integers
-4. **Encoding Issues**: Make sure the CSV file is saved with UTF-8 encoding
+4. **Encoding Issues**: Make sure the file is saved with UTF-8 encoding
 
 ### Getting Help:
-- Use `python manage.py create_sample_data --help` for command options
+- Use `python manage.py import_vinyl_data --help` for command options
 - Check the console output for specific error messages
-- Verify CSV file format matches the required structure 
+- Verify file format matches the required structure 

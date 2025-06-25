@@ -168,9 +168,9 @@ class Command(BaseCommand):
         
         # Create artists
         artists = []
-        for artist_name in artists_data:
+        for artist_data in artists_data:
             artist, created = Artist.objects.get_or_create(
-                name=artist_name,
+                name=artist_data['name'],
                 defaults={
                     'artist_type': artist_data['type'],
                     'biography': f'{artist_data["name"]} is a renowned musical artist known for their exceptional contributions to music.',
@@ -184,7 +184,7 @@ class Command(BaseCommand):
                 self.stdout.write(f'Updated artist type for: {artist_data["name"]}')
             artists.append(artist)
             if created:
-                self.stdout.write(f'Created artist: {artist_name}')
+                self.stdout.write(f'Created artist: {artist_data["name"]} ({artist_data["type"]})')
         
         # Create vinyl records
         for record_data in vinyl_records_data:
@@ -204,33 +204,37 @@ class Command(BaseCommand):
                     defaults={
                         'genre': genre,
                         'label': label,
-                        'price': Decimal(str(record_data['price'])),
+                        'price': record_data['price'],
                         'release_year': record_data['year'],
                         'stock_quantity': random.randint(5, 50),
                         'is_available': True,
-                        'condition': 'new',
-                        'speed': '33',
-                        'size': '12',
-                        'description': f"Classic album {record_data['title']} by {record_data['artist']} from {record_data['year']}.",
+                        'condition': random.choice(conditions),
+                        'speed': random.choice(speeds),
+                        'size': random.choice(sizes),
+                        'description': f"Classic album {record_data['title']} by {record_data['artist']} from {record_data['year']}. A must-have for any vinyl collection.",
+                        'featured': random.choice([True, False]) if random.random() < 0.3 else False,
+                        'weight': round(random.uniform(120, 180), 2),  # Typical vinyl weight in grams
                     }
                 )
                                 
                 if created:
                     self.stdout.write(f'Created vinyl: {record_data["title"]} by {record_data["artist"]}')
             except (Artist.DoesNotExist, Genre.DoesNotExist) as e:
-                self.stdout.write(f'❌ Error creating {record_data["title"]}: {e}')
+                self.stdout.write(f'Error creating {record_data["title"]}: {e}')
         
         # Print summary of created data
         self.stdout.write(
             self.style.SUCCESS(
-                f'\n🎉 Sample data creation completed!\n'
-                f'📊 Summary:\n'
+                f'\nSample data created successfully!\n'
                 f'- {Genre.objects.count()} genres\n'
                 f'- {Label.objects.count()} labels\n'
                 f'- {Artist.objects.count()} artists\n'
-                f'- {VinylRecord.objects.count()} vinyl records (✨ {created_count} new)\n'
-                f'\n🔑 Login credentials:\n'
+                f'- {VinylRecord.objects.count()} vinyl records\n'
+                f'- {User.objects.count()} users\n'
+                f'- {UserProfile.objects.count()} user profiles\n'
+                f'\nLogin credentials:\n'
                 f'Admin: admin / admin123\n'
-                f'User: testuser / testpass123'
+                f'User: testuser / testpass123\n'
+                f'\nTo clear and recreate data, use: python manage.py import_vinyl_data --clear'
             )
         )
