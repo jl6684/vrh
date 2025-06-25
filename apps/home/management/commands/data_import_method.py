@@ -1,11 +1,16 @@
+"""
+Data import methods for sample data management command.
+Supports CSV, Google Sheets, and Excel file imports with error handling.
+"""
+import pandas as pd, csv, gspread
+from oauth2client.service_account import ServiceAccountCredentials
+
 # ============================================================================
 # METHOD 1: CSV FILE IMPORT FUNCTIONS
 # ============================================================================
 
 def read_csv_data(csv_path):
     """Read CSV using pandas with better error handling."""
-    import pandas as pd
-    import csv
     try:
         df = pd.read_csv(csv_path, encoding='utf-8')
         return df.to_dict(orient='records')
@@ -21,6 +26,10 @@ def read_csv_data(csv_path):
                 f"2. Each row has exactly 8 columns\n"
                 f"3. No extra commas in data fields\n"
                 f"Original error: {str(e)}")
+    except FileNotFoundError:
+        raise Exception(f"CSV file not found: {csv_path}")
+    except Exception as e:
+        raise Exception(f"Error reading CSV file: {str(e)}")
 
 # ============================================================================
 # METHOD 2: GOOGLE SHEETS IMPORT FUNCTIONS
@@ -31,8 +40,6 @@ VALID_WORKSHEETS = ["Sheet1", "Sheet2", "dupSheet2"]
 
 def read_gsheet_data(sheet_id, worksheet_name='Sheet1'):
     """Read Google Sheet data with error handling."""
-    import gspread
-    from oauth2client.service_account import ServiceAccountCredentials
     try:
         scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
         creds = ServiceAccountCredentials.from_json_keyfile_name('gscredentials.json', scope)
@@ -56,7 +63,6 @@ def read_gsheet_data(sheet_id, worksheet_name='Sheet1'):
 
 def read_excel_data(excel_path):
     """Read Excel file with error handling."""
-    import pandas as pd
     try:
         df = pd.read_excel(excel_path)
         return df.to_dict(orient='records')

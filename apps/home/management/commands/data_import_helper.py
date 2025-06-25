@@ -1,12 +1,16 @@
-import pandas as pd
-import re
+"""
+Helper functions for data import validation and normalization.
+Used by the sample data management command to ensure imported data
+(from CSV, Google Sheets, or Excel) is clean, normalized, and valid
+before being loaded into the database.
+"""
+import pandas as pd, re
 
+# Normalize delimiters in artist, genre, and label fields.
 def normalize_field_delimiters(csv_rows):
     """
-    Normalize delimiters in artist, genre, and label fields:
-    - Replace ",", "|", "and" with "&"
-    - Keep existing "&" unchanged
-    - Ensure single space before and after "&"
+    Replace ',', '|', and 'and' with ' & ' in specified fields.
+    Ensures single space before/after '&' and preserves literal '&'.
     """
     normalized_rows = []
     for i, row in enumerate(csv_rows):
@@ -25,9 +29,11 @@ def normalize_field_delimiters(csv_rows):
         normalized_rows.append(normalized_row)
     return normalized_rows
 
+# Validate that normalized data meets formatting requirements.
 def validate_normalized_data(csv_rows):
     """
-    Validate that normalized data meets the formatting requirements.
+    Ensure only '&' is used as a delimiter and spacing is correct.
+    Raises Exception if unnormalized delimiters or bad spacing found.
     """
     for i, row in enumerate(csv_rows, start=2):
         for field in ['artist', 'genre', 'label']:
@@ -45,12 +51,10 @@ def validate_normalized_data(csv_rows):
                         f"Expected only '&' as delimiter."
                     )
 
+# Validate structure, types, and normalize/validate delimiters.
 def validate_and_normalize_data(csv_rows):
     """
-    Comprehensive data validation and normalization:
-    1. Validate structure and data types
-    2. Normalize delimiters in artist, genre, and label fields
-    3. Validate normalized data
+    Run all validation and normalization steps on imported data.
     """
     validate_csv_structure(csv_rows)
     validate_data_types(csv_rows)
@@ -58,6 +62,7 @@ def validate_and_normalize_data(csv_rows):
     validate_normalized_data(normalized_rows)
     return normalized_rows
 
+# Ensure CSV has required columns and correct row length.
 def validate_csv_structure(csv_rows):
     """Validate that CSV has the expected structure and provide helpful error messages."""
     expected_columns = ['title', 'artist', 'genre', 'year', 'price', 'type', 'country', 'label']
@@ -73,8 +78,11 @@ def validate_csv_structure(csv_rows):
                 f"Check for unquoted commas in: {row}")
     return True
 
+# Ensure all required fields are strings, not NaN/float.
 def validate_data_types(csv_rows):
-    """Validate that all required fields contain string data, not NaN/float."""
+    """
+    Check that all required fields are strings and not NaN/float.
+    """
     for i, row in enumerate(csv_rows, start=2):
         for field in ['title', 'artist', 'genre', 'type', 'country', 'label']:
             if pd.isna(row.get(field)) or not isinstance(row.get(field), str):
@@ -82,16 +90,19 @@ def validate_data_types(csv_rows):
                     f"Expected string, got {type(row.get(field)).__name__}. "
                     f"This indicates commas appeared in data fields but unquoted. Please review the CSV file.")
 
+# Extract unique genres from rows.
 def extract_genres_data(csv_rows):
-    """Extract unique genres from CSV rows."""
-    return list({str(row['genre']).strip() for row in csv_rows if row.get('genre') and pd.notna(row.get('genre'))})
+    """Return a sorted list of unique genres."""
+    return sorted({str(row['genre']).strip() for row in csv_rows if row.get('genre') and pd.notna(row.get('genre'))})
 
+# Extract unique labels from rows.
 def extract_labels_data(csv_rows):
-    """Extract unique labels from CSV rows."""
-    return list({str(row['label']).strip() for row in csv_rows if row.get('label') and pd.notna(row.get('label'))})
+    """Return a sorted list of unique labels."""
+    return sorted({str(row['label']).strip() for row in csv_rows if row.get('label') and pd.notna(row.get('label'))})
 
+# Extract artist info as list of dicts.
 def extract_artists_data(csv_rows):
-    """Extract artist info as list of dicts from CSV rows."""
+    """Return a list of unique artist dicts (name, type, country)."""
     seen = set()
     artists = []
     for row in csv_rows:
@@ -109,8 +120,9 @@ def extract_artists_data(csv_rows):
                 seen.add(key)
     return artists
 
+# Extract vinyl record info as list of dicts.
 def extract_vinyl_records_data(csv_rows):
-    """Extract vinyl record info as list of dicts from CSV rows."""
+    """Return a list of vinyl record dicts (title, artist, genre, year, price)."""
     records = []
     for row in csv_rows:
         title = str(row['title']).strip() if pd.notna(row.get('title')) else ''

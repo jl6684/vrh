@@ -235,6 +235,6 @@ class Command(BaseCommand):
                 f'\nLogin credentials:\n'
                 f'Admin: admin / admin123\n'
                 f'User: testuser / testpass123\n'
-                f'\nTo clear and recreate data, use: python manage.py create_sample_data --clear'
+                f'\nTo clear and recreate data, use: python manage.py import_vinyl_data --clear'
             )
         )
