@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.contrib.auth.models import User
 from .models import UserProfile
+from apps.vinyl.models import Genre
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -24,6 +25,13 @@ class CustomUserCreationForm(UserCreationForm):
 
 
 class UserProfileForm(forms.ModelForm):
+    favorite_genres = forms.ModelMultipleChoiceField(
+        queryset=Genre.objects.all(),
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'}),
+        required=False,
+        help_text="Select your favorite music genres to get personalized recommendations"
+    )
+    
     class Meta:
         model = UserProfile
         fields = [
@@ -40,9 +48,15 @@ class UserProfileForm(forms.ModelForm):
             'state': forms.TextInput(attrs={'class': 'form-control'}),
             'postal_code': forms.TextInput(attrs={'class': 'form-control'}),
             'country': forms.TextInput(attrs={'class': 'form-control'}),
-            'favorite_genres': forms.CheckboxSelectMultiple(),
             'newsletter_subscription': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Add Bootstrap classes to favorite genres checkboxes
+        self.fields['favorite_genres'].widget.attrs.update({
+            'class': 'form-check-input'
+        })
 
 
 class UserUpdateForm(forms.ModelForm):

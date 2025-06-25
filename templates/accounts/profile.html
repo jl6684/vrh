@@ -82,6 +82,44 @@
             </div>
         </div>
         
+        <!-- Favorite Genres -->
+        <div class="card mt-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-heart text-danger"></i> Favorite Genres
+                </h5>
+                <a href="{% url 'accounts:edit_profile' %}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+            </div>
+            <div class="card-body">
+                {% if profile.favorite_genres.all %}
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for genre in profile.favorite_genres.all %}
+                            <span class="badge bg-primary fs-6 px-3 py-2">
+                                <i class="fas fa-music"></i> {{ genre.name }}
+                            </span>
+                        {% endfor %}
+                    </div>
+                    <small class="text-muted d-block mt-2">
+                        <i class="fas fa-info-circle"></i> 
+                        These genres are used to personalize your homepage recommendations.
+                    </small>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-heart-broken fa-3x text-muted mb-3"></i>
+                        <h6 class="text-muted">No favorite genres selected</h6>
+                        <p class="text-muted small mb-3">
+                            Select your favorite music genres to get personalized vinyl recommendations!
+                        </p>
+                        <a href="{% url 'accounts:edit_profile' %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-heart"></i> Choose Favorites
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
         <!-- Recent Orders -->
         {% if recent_orders %}
         <div class="card mt-3">

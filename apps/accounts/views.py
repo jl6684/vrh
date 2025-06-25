@@ -12,6 +12,7 @@ from .models import UserProfile
 from apps.orders.models import Order
 from apps.wishlist.models import Wishlist
 from apps.reviews.models import Review
+from apps.vinyl.models import Genre
 
 
 def register_view(request):
@@ -102,6 +103,7 @@ def edit_profile_view(request):
     """Edit user profile view"""
     # Get or create profile for the user
     profile, created = UserProfile.objects.get_or_create(user=request.user)
+    all_genres = Genre.objects.all().order_by('name')
     
     if request.method == 'POST':
         # Update User model fields
@@ -134,6 +136,16 @@ def edit_profile_view(request):
         profile.newsletter_subscription = request.POST.get('newsletter_subscription') == 'on'
         profile.email_notifications = request.POST.get('email_notifications') == 'on'
         
+        # Handle favorite genres
+        selected_genres = request.POST.getlist('favorite_genres')
+        profile.favorite_genres.clear()  # Clear existing selections
+        for genre_id in selected_genres:
+            try:
+                genre = Genre.objects.get(id=genre_id)
+                profile.favorite_genres.add(genre)
+            except Genre.DoesNotExist:
+                pass
+        
         # Handle avatar upload
         if 'avatar' in request.FILES:
             profile.avatar = request.FILES['avatar']
@@ -143,7 +155,10 @@ def edit_profile_view(request):
         messages.success(request, 'Profile updated successfully!')
         return redirect('accounts:profile')
     
-    return render(request, 'accounts/edit_profile.html', {'profile': profile})
+    return render(request, 'accounts/edit_profile.html', {
+        'profile': profile,
+        'all_genres': all_genres
+    })
 
 
 @login_required
