@@ -31,6 +31,10 @@ urlpatterns = [
     path('wishlist/', include('apps.wishlist.urls')),
     path('reviews/', include('apps.reviews.urls')),
     
+    # Django JET URLs (must be before admin)
+    path('jet/', include('jet.urls', 'jet')),
+    path('jet/dashboard/', include('jet.dashboard.urls', 'jet-dashboard')),
+    
     # Admin
     path('admin/', admin.site.urls),
     

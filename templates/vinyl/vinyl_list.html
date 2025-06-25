@@ -119,11 +119,17 @@
                         </div>
                         <div class="col-md-2 mb-2 mb-md-0">
                             <label for="artist-filter" class="form-label small text-muted mb-1">Artist</label>
-                            <select class="form-select" name="artist_id" id="artist-filter" onchange="this.form.submit()">
+                            <select class="form-select" name="artist_id" id="artist-filter" onchange="this.form.submit()" style="max-width: 150px;">
                                 <option value="">All Artists</option>
                                 {% for artist in artists %}
-                                    <option value="{{ artist.id }}" {% if current_artist == artist.id|stringformat:"s" %}selected{% endif %}>
-                                        {{ artist.name }}
+                                    <option value="{{ artist.id }}" 
+                                            title="{{ artist.name }}"
+                                            {% if current_artist == artist.id|stringformat:"s" %}selected{% endif %}>
+                                        {% if artist.name|length > 15 %}
+                                            {{ artist.name|slice:":12" }}...
+                                        {% else %}
+                                            {{ artist.name }}
+                                        {% endif %}
                                     </option>
                                 {% endfor %}
                             </select>
