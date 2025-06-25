@@ -5,221 +5,35 @@ from apps.accounts.models import UserProfile
 from decimal import Decimal
 import random, os, csv, pandas as pd, re, gspread
 from oauth2client.service_account import ServiceAccountCredentials
+from .data_import_helper import (
+    normalize_field_delimiters,
+    validate_normalized_data,
+    validate_and_normalize_data,
+    validate_csv_structure,
+    validate_data_types,
+    extract_genres_data,
+    extract_labels_data,
+    extract_artists_data,
+    extract_vinyl_records_data,
+)
+from .data_import_method import (
+    read_csv_data,
+    read_gsheet_data,
+    read_excel_data,
+    DEFAULT_SHEET_ID,
+    VALID_WORKSHEETS,
+)
 
 # ============================================================================
-# METHOD 1: CSV FILE IMPORT FUNCTIONS
-# ============================================================================
-
-def read_csv_data(csv_path):
-    """Read CSV using pandas with better error handling."""
-    try:
-        df = pd.read_csv(csv_path, encoding='utf-8')
-        return df.to_dict(orient='records')
-    except pd.errors.ParserError as e:
-        # Try with different parsing options
-        try:
-            df = pd.read_csv(csv_path, encoding='utf-8', quoting=csv.QUOTE_ALL)
-            return df.to_dict(orient='records')
-        except pd.errors.ParserError:
-            # If still failing, provide detailed error information
-            raise Exception(f"CSV parsing error in {csv_path}. Please check:\n"
-                f"1. All fields with commas are properly quoted\n"
-                f"2. Each row has exactly 8 columns\n"
-                f"3. No extra commas in data fields\n"
-                f"Original error: {str(e)}")
-
-# ============================================================================
-# METHOD 2: GOOGLE SHEETS IMPORT FUNCTIONS
-# ============================================================================
-
-DEFAULT_SHEET_ID = "1VmJAB5tM0mok7j5ma15qw8Ozshlp-kBnPKG5oa-D1rM"
-VALID_WORKSHEETS = ["Sheet1", "Sheet2", "dupSheet2"]
-
-def read_gsheet_data(sheet_id, worksheet_name='Sheet1'):
-    """Read Google Sheet data with error handling."""
-    try:
-        scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-        creds = ServiceAccountCredentials.from_json_keyfile_name('gscredentials.json', scope)
-        client = gspread.authorize(creds)
-        sheet = client.open_by_key(sheet_id)
-        worksheet = sheet.worksheet(worksheet_name)
-        rows = worksheet.get_all_records()
-        return rows
-    except FileNotFoundError:
-        raise Exception("gscredentials.json file not found. Please ensure Google Sheets credentials are properly configured.")
-    except gspread.SpreadsheetNotFound:
-        raise Exception(f"Google Sheet with ID '{sheet_id}' not found or not accessible.")
-    except gspread.WorksheetNotFound:
-        raise Exception(f"Worksheet '{worksheet_name}' not found in the Google Sheet.")
-    except Exception as e:
-        raise Exception(f"Error accessing Google Sheet: {str(e)}")
-
-# ============================================================================
-# METHOD 3: EXCEL FILE IMPORT FUNCTIONS
-# ============================================================================
-
-def read_excel_data(excel_path):
-    """Read Excel file with error handling."""
-    try:
-        df = pd.read_excel(excel_path)
-        return df.to_dict(orient='records')
-    except FileNotFoundError:
-        raise Exception(f"Excel file not found: {excel_path}")
-    except Exception as e:
-        raise Exception(f"Error reading Excel file: {str(e)}")
-
-# ============================================================================
-# SHARED FUNCTIONS WORKING ON DATA NORMALIZATION AND VALIDATION IN ALL METHODS
-# ============================================================================
-
-def normalize_field_delimiters(csv_rows):
-    """
-    Normalize delimiters in artist, genre, and label fields:
-    - Replace ",", "|", "and" with "&"
-    - Keep existing "&" unchanged
-    - Ensure single space before and after "&"
-    """
-    normalized_rows = []
-    for i, row in enumerate(csv_rows):
-        normalized_row = row.copy()
-        fields_to_normalize = ['artist', 'genre', 'label']
-        for field in fields_to_normalize:
-            if field in normalized_row and pd.notna(normalized_row[field]):
-                value = str(normalized_row[field]).strip()
-                if not value:
-                    continue
-                # Step 1: Replace all delimiters (comma, pipe, and "and") with " & "
-                # Use regex to replace all at once, including cases with/without spaces
-                value = re.sub(r'\s*(,|\||\\band\\b)\s*', ' & ', value, flags=re.IGNORECASE)
-                # Step 2: Normalize spacing around "&"
-                value = re.sub(r'\s*&\s*', ' & ', value)
-                # Step 3: Clean up any remaining multiple spaces
-                value = re.sub(r'\s+', ' ', value)
-                # Step 4: Strip leading/trailing spaces
-                value = value.strip()
-                normalized_row[field] = value
-        normalized_rows.append(normalized_row)
-    return normalized_rows
-
-def validate_normalized_data(csv_rows):
-    """
-    Validate that normalized data meets the formatting requirements.
-    """
-    for i, row in enumerate(csv_rows, start=2):
-        for field in ['artist', 'genre', 'label']:
-            if field in row and pd.notna(row[field]):
-                value = str(row[field]).strip()
-                # Check for proper "&" formatting
-                if '&' in value:
-                    # Should match: "A & B", "A & B & C", etc. (no leading/trailing &, single space around each &)
-                    if not re.match(r'^[^&]+( & [^&]+)+$', value):
-                        raise Exception(
-                            f"Row {i}: Field '{field}' has improper spacing around '&': '{value}'. "
-                            f"Expected format: 'Artist1 & Artist2 [ & Artist3 ...]'"
-                        )
-                # Check for remaining commas, pipes, or "and"
-                if ',' in value or '|' in value or re.search(r'\band\b', value, re.IGNORECASE):
-                    raise Exception(
-                        f"Row {i}: Field '{field}' still contains unnormalized delimiters: '{value}'. "
-                        f"Expected only '&' as delimiter."
-                    )
-
-def validate_and_normalize_data(csv_rows):
-    """
-    Comprehensive data validation and normalization:
-    1. Validate structure and data types
-    2. Normalize delimiters in artist, genre, and label fields
-    3. Validate normalized data
-    """
-    # First, validate the original structure
-    validate_csv_structure(csv_rows)
-    validate_data_types(csv_rows)
-    # Then normalize the delimiters
-    normalized_rows = normalize_field_delimiters(csv_rows)
-    # Validate the normalized data
-    validate_normalized_data(normalized_rows)
-    return normalized_rows
-
-def validate_csv_structure(csv_rows):
-    """Validate that CSV has the expected structure and provide helpful error messages."""
-    expected_columns = ['title', 'artist', 'genre', 'year', 'price', 'type', 'country', 'label']
-    if not csv_rows:
-        raise Exception("CSV file is empty or could not be parsed")
-    # Check if all expected columns are present
-    first_row = csv_rows[0]
-    missing_columns = [col for col in expected_columns if col not in first_row]
-    if missing_columns:
-        raise Exception(f"Missing required columns: {missing_columns}")
-    # Check for rows with wrong number of fields
-    for i, row in enumerate(csv_rows, start=2):  # start=2 because row 1 is header
-        if len(row) != len(expected_columns):
-            raise Exception(f"Row {i} has {len(row)} fields, expected {len(expected_columns)}. "
-                f"Check for unquoted commas in: {row}")
-    return True
-
-def validate_data_types(csv_rows):
-    """Validate that all required fields contain string data, not NaN/float."""
-    for i, row in enumerate(csv_rows, start=2):  # start=2 because row 1 is header
-        for field in ['title', 'artist', 'genre', 'type', 'country', 'label']:
-            if pd.isna(row.get(field)) or not isinstance(row.get(field), str):
-                raise Exception(f"Row {i}: Field '{field}' contains invalid data: {row.get(field)}. "
-                    f"Expected string, got {type(row.get(field)).__name__}. "
-                    f"This indicates commas appeared in data fields but unquoted. Please review the CSV file.")
-
-def extract_genres_data(csv_rows):
-    """Extract unique genres from CSV rows."""
-    return list({str(row['genre']).strip() for row in csv_rows if row.get('genre') and pd.notna(row.get('genre'))})
-
-def extract_labels_data(csv_rows):
-    """Extract unique labels from CSV rows."""
-    return list({str(row['label']).strip() for row in csv_rows if row.get('label') and pd.notna(row.get('label'))})
-
-def extract_artists_data(csv_rows):
-    """Extract artist info as list of dicts from CSV rows."""
-    seen = set()
-    artists = []
-    for row in csv_rows:
-        # Convert to string and handle NaN values
-        artist_name = str(row['artist']).strip() if pd.notna(row.get('artist')) else ''
-        artist_type = str(row['type']).strip() if pd.notna(row.get('type')) else ''
-        artist_country = str(row['country']).strip() if pd.notna(row.get('country')) else ''
-        if artist_name and artist_type and artist_country:
-            key = (artist_name, artist_type, artist_country)
-            if key not in seen:
-                artists.append({
-                    'name': artist_name,
-                    'type': artist_type,
-                    'country': artist_country,
-                })
-                seen.add(key)
-    return artists
-
-def extract_vinyl_records_data(csv_rows):
-    """Extract vinyl record info as list of dicts from CSV rows."""
-    records = []
-    for row in csv_rows:
-        # Convert to string and handle NaN values
-        title = str(row['title']).strip() if pd.notna(row.get('title')) else ''
-        artist = str(row['artist']).strip() if pd.notna(row.get('artist')) else ''
-        genre = str(row['genre']).strip() if pd.notna(row.get('genre')) else ''
-        # Handle numeric fields
-        try:
-            year = int(row['year']) if pd.notna(row.get('year')) else 0
-            price = int(row['price']) if pd.notna(row.get('price')) else 0
-        except (ValueError, TypeError):
-            continue  # Skip rows with invalid numeric data
-        if title and artist and genre and year > 0 and price > 0:
-            records.append({
-                'title': title,
-                'artist': artist,
-                'genre': genre,
-                'year': year,
-                'price': price,
-            })
-    return records
-
-# ============================================================================
-# SHARED FUNCTIONS WORKING ON DATA NORMALIZATION AND VALIDATION IN ALL METHODS
+# DJANGO MANAGEMENT COMMAND: DATA IMPORT ENTRY POINT
+# The Command(BaseCommand) class below defines the CLI interface for importing
+# sample data into the system. It uses add_arguments to define CLI options
+# and the handle() method to coordinate the import process using the shared
+# and method-specific helper functions.
+# Supported import methods:
+#   --csv-file: Import from CSV
+#   --gs-file:  Import from Google Sheets
+#   --ex-file:  Import from Excel
 # ============================================================================
 
 class Command(BaseCommand):
