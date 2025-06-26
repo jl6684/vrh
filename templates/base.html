@@ -105,6 +105,11 @@
                     <!-- Contact Us -->
                     <a class="nav-link text-light" href="{% url 'home:contact' %}">Contact Us</a>
 
+                    <!-- Dark Mode Toggle -->
+                    <button class="dark-mode-toggle nav-link" onclick="toggleDarkMode()" id="darkModeToggle">
+                        <i class="fas fa-moon" id="darkModeIcon"></i>
+                    </button>
+
                     <!-- Wishlist -->
                     {% if user.is_authenticated %}
                         <a class="nav-link text-light" href="{% url 'wishlist:view' %}">
@@ -244,6 +249,39 @@
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
     <!-- Original script file from codrkai.github.io template -->
     <script src="{% static 'js/script.js' %}"></script>
+    
+    <!-- Dark Mode Toggle Script -->
+    <script>
+        // Check for saved dark mode preference or default to light mode
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-bs-theme', currentTheme);
+        
+        // Update icon based on current theme
+        function updateDarkModeIcon() {
+            const icon = document.getElementById('darkModeIcon');
+            const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+            if (currentTheme === 'dark') {
+                icon.className = 'fas fa-sun';
+            } else {
+                icon.className = 'fas fa-moon';
+            }
+        }
+        
+        // Toggle dark mode
+        function toggleDarkMode() {
+            const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            document.documentElement.setAttribute('data-bs-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateDarkModeIcon();
+        }
+        
+        // Initialize icon on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDarkModeIcon();
+        });
+    </script>
     
     {% block extra_js %}{% endblock %}
 </body>
