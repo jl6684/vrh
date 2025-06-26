@@ -42,14 +42,14 @@ def read_gsheet_data(sheet_id, worksheet_name='Sheet1'):
     """Read Google Sheet data with error handling."""
     try:
         scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-        creds = ServiceAccountCredentials.from_json_keyfile_name(os.getenv('GOOGLE_CREDEN'), scope)
+        creds = ServiceAccountCredentials.from_json_keyfile_name('gscredentials.json', scope)
         client = gspread.authorize(creds)
         sheet = client.open_by_key(sheet_id)
         worksheet = sheet.worksheet(worksheet_name)
         rows = worksheet.get_all_records()
         return rows
     except FileNotFoundError:
-        raise Exception("Google Credentials information file not found. Please ensure Google Sheets credentials are properly configured.")
+        raise Exception("gscredentials.json file not found. Please ensure Google Sheets credentials are properly configured.")
     except gspread.SpreadsheetNotFound:
         raise Exception(f"Google Sheet with ID '{sheet_id}' not found or not accessible.")
     except gspread.WorksheetNotFound:
