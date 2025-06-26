@@ -2,7 +2,7 @@
 Data import methods for sample data management command.
 Supports CSV, Google Sheets, and Excel file imports with error handling.
 """
-import pandas as pd, csv, gspread
+import os, json, csv, pandas as pd, gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
 # ============================================================================
@@ -40,16 +40,24 @@ VALID_WORKSHEETS = ["Sheet1", "Sheet2", "dupSheet2"]
 
 def read_gsheet_data(sheet_id, worksheet_name='Sheet1'):
     """Read Google Sheet data with error handling."""
+    cred_json = os.getenv('GOOGLE_CREDEN')
+    if not cred_json:
+        raise Exception("Environment variable 'GOOGLE_CREDEN' is not set.")
     try:
-        scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-        creds = ServiceAccountCredentials.from_json_keyfile_name('gscredentials.json', scope)
+        cred_dict = json.loads(cred_json)
+    except json.JSONDecodeError:
+        raise Exception("GOOGLE_CREDEN does not contain valid JSON.")
+
+    scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+    creds = ServiceAccountCredentials.from_json_keyfile_dict(cred_dict, scope)
+    try:
         client = gspread.authorize(creds)
         sheet = client.open_by_key(sheet_id)
         worksheet = sheet.worksheet(worksheet_name)
         rows = worksheet.get_all_records()
         return rows
     except FileNotFoundError:
-        raise Exception("gscredentials.json file not found. Please ensure Google Sheets credentials are properly configured.")
+        raise Exception("Google Credentials information file not found. Please ensure Google Sheets credentials are properly configured.")
     except gspread.SpreadsheetNotFound:
         raise Exception(f"Google Sheet with ID '{sheet_id}' not found or not accessible.")
     except gspread.WorksheetNotFound:
