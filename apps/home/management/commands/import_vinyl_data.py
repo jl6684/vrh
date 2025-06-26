@@ -106,7 +106,7 @@ class Command(BaseCommand):
             gs_file = options.get('gs_file')
             if gs_file:
                 if gs_file not in VALID_WORKSHEETS:
-                    self.stdout.write(self.style.ERROR(f"Please input worksheet name of '{gs_file}' you want to import."))
+                    self.stdout.write(self.style.ERROR(f"Please input correct worksheet name to import.(Case sensitive!!!)"))
                     return
                 sheet_id = DEFAULT_SHEET_ID
                 worksheet_name = gs_file
