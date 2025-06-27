@@ -7,10 +7,126 @@ import random
 
 
 class Command(BaseCommand):
-    help = 'Create sample data for testing the vinyl shop'
+    help = '''
+    🎵 VINYL HOUSE - SAMPLE DATA CREATOR 🎵
+    
+    Create sample data for testing your vinyl shop.
+    Creates genres, artists, labels, and vinyl records.
+    
+    USAGE:
+        python manage.py create_sample_data              # Interactive mode (recommended)
+        python manage.py create_sample_data --quick      # Create 25 records quickly
+        python manage.py create_sample_data --minimal    # Create 10 records only
+        python manage.py create_sample_data --records 5  # Create exactly 5 records
+    '''
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--quick',
+            action='store_true',
+            help='Quick setup - creates 25 vinyl records with related data'
+        )
+        parser.add_argument(
+            '--minimal',
+            action='store_true',
+            help='Create minimal sample data - only 10 vinyl records'
+        )
+        parser.add_argument(
+            '--records',
+            type=int,
+            default=25,
+            help='Number of vinyl records to create (1-25, default: 25)'
+        )
 
     def handle(self, *args, **options):
-        self.stdout.write('Creating sample data...')
+        # Show welcome message
+        self.show_welcome()
+        
+        if options['quick']:
+            self.create_sample_data(records_count=options['records'])
+        elif options['minimal']:
+            self.create_sample_data(records_count=10)
+        else:
+            # Interactive mode
+            self.interactive_setup()
+
+    def show_welcome(self):
+        """Show welcome message"""
+        self.stdout.write('\n' + '='*50)
+        self.stdout.write(self.style.SUCCESS('🎵 VINYL HOUSE - SAMPLE DATA CREATOR 🎵'))
+        self.stdout.write('='*50)
+        self.stdout.write('This will create sample data for your vinyl shop.')
+        self.stdout.write('Perfect for development and testing!\n')
+
+    def interactive_setup(self):
+        """Interactive setup mode"""
+        self.stdout.write('🚀 Let\'s set up your vinyl shop with sample data!')
+        self.stdout.write('Choose how much sample data you\'d like to create:\n')
+        
+        # Show current database status first
+        current_vinyl_count = VinylRecord.objects.count()
+        if current_vinyl_count > 0:
+            self.stdout.write(f'� You currently have {current_vinyl_count} vinyl records in your database.')
+            self.stdout.write('Note: This will only create records that don\'t already exist.\n')
+        
+        menu_options = [
+            (5, '📦 Quick Start (5 records)', 'Perfect for quick testing - creates essential albums'),
+            (10, '🎵 Small Collection (10 records)', 'Good for development - includes variety of genres'),
+            (15, '🎪 Medium Collection (15 records)', 'Nice for demos - covers most popular albums'),
+            (25, '🏪 Full Collection (25 records)', 'Complete sample store - all available albums'),
+            (0, '🛠️ Custom Amount', 'Choose exactly how many records you want')
+        ]
+        
+        for i, (count, name, description) in enumerate(menu_options, 1):
+            self.stdout.write(f'{i}. {name}')
+            self.stdout.write(f'   {description}')
+        
+        while True:
+            try:
+                choice = input(f'\nEnter your choice (1-{len(menu_options)}): ').strip()
+                
+                if choice.isdigit():
+                    choice_num = int(choice)
+                    if 1 <= choice_num <= len(menu_options):
+                        selected_count, selected_name, _ = menu_options[choice_num - 1]
+                        
+                        if selected_count == 0:  # Custom amount
+                            while True:
+                                try:
+                                    records_count = int(input('How many vinyl records would you like? (1-25): '))
+                                    if 1 <= records_count <= 25:
+                                        break
+                                    else:
+                                        self.stdout.write('Please enter a number between 1 and 25.')
+                                except ValueError:
+                                    self.stdout.write('Please enter a valid number.')
+                        else:
+                            records_count = selected_count
+                        
+                        break
+                
+                self.stdout.write(f'Please enter a number between 1-{len(menu_options)}.')
+            except KeyboardInterrupt:
+                self.stdout.write('\n\n❌ Operation cancelled.')
+                return
+        
+        # Show what will be created
+        self.stdout.write(f'\n📋 Ready to create sample data:')
+        self.stdout.write(f'   • Target: {records_count} vinyl records')
+        self.stdout.write(f'   • Plus: Genres, Artists, Labels (as needed)')
+        self.stdout.write(f'   • Note: Won\'t create duplicates of existing records')
+        
+        # Simple confirmation
+        confirm = input(f'\n✅ Start creating sample data? (y/n): ').strip().lower()
+        
+        if confirm in ['y', 'yes']:
+            self.create_sample_data(records_count)
+        else:
+            self.stdout.write('❌ Operation cancelled.')
+
+    def create_sample_data(self, records_count=25):
+        """Create the sample data"""
+        self.stdout.write(f'\n🚀 Creating sample data ({records_count} records)...\n')
         
         # Create admin user if it doesn't exist
         if not User.objects.filter(username='admin').exists():
@@ -168,7 +284,12 @@ class Command(BaseCommand):
             {'title': 'Lemonade', 'artist': 'Beyoncé', 'genre': 'R&B', 'year': 2016, 'price': 35},
         ]
         
-        for record_data in vinyl_records_data:
+        # Limit records based on requested count
+        selected_records = vinyl_records_data[:records_count]
+        self.stdout.write(f'Creating {len(selected_records)} vinyl records...')
+        
+        created_count = 0
+        for record_data in selected_records:
             # Find the artist and genre objects
             try:
                 artist = Artist.objects.get(name=record_data['artist'])
@@ -193,19 +314,23 @@ class Command(BaseCommand):
                 )
                 
                 if created:
-                    self.stdout.write(f'Created vinyl: {record_data["title"]} by {record_data["artist"]}')
+                    created_count += 1
+                    self.stdout.write(f'✅ Created: {record_data["title"]} by {record_data["artist"]}')
+                else:
+                    self.stdout.write(f'📀 Already exists: {record_data["title"]} by {record_data["artist"]}')
             
             except (Artist.DoesNotExist, Genre.DoesNotExist) as e:
-                self.stdout.write(f'Error creating {record_data["title"]}: {e}')
+                self.stdout.write(f'❌ Error creating {record_data["title"]}: {e}')
         
         self.stdout.write(
             self.style.SUCCESS(
-                f'\nSample data created successfully!\n'
+                f'\n🎉 Sample data creation completed!\n'
+                f'📊 Summary:\n'
                 f'- {Genre.objects.count()} genres\n'
                 f'- {Label.objects.count()} labels\n'
                 f'- {Artist.objects.count()} artists\n'
-                f'- {VinylRecord.objects.count()} vinyl records\n'
-                f'\nLogin credentials:\n'
+                f'- {VinylRecord.objects.count()} vinyl records (✨ {created_count} new)\n'
+                f'\n🔑 Login credentials:\n'
                 f'Admin: admin / admin123\n'
                 f'User: testuser / testpass123'
             )
