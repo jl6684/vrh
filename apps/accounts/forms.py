@@ -21,7 +21,7 @@ class CustomUserCreationForm(UserCreationForm):
             if field_name == 'username':
                 field.help_text = 'Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.'
             elif field_name == 'password1':
-                field.help_text = 'Your password must contain at least 8 characters.'
+                field.help_text = 'Your password must contain at least 4 characters.'
 
 
 class UserProfileForm(forms.ModelForm):

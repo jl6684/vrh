@@ -51,9 +51,18 @@ INSTALLED_APPS = [
     'django.contrib.sessions',      # Middleware
     'django.contrib.messages',      # Communication
     'django.contrib.staticfiles',
+    'django.contrib.sites',         # Required for allauth
     #'django.contrib.humanize',      # Add django extra library for datetime, currency calculations
 
     #"debug_toolbar",                # Register downloaded APPS ~>python -m pip install django-debug-toolbar
+    
+    # Django Allauth
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.github',
+    'allauth.socialaccount.providers.microsoft',
     
     # Custom Apps
     'apps.home',
@@ -66,8 +75,12 @@ INSTALLED_APPS = [
     'main',  # Keep for migration purposes, will remove later
 ]
 
+# Required for django-allauth
+SITE_ID = 1
+
 # These middleware calls Django login library
 MIDDLEWARE = [
+    'allauth.account.middleware.AccountMiddleware',  # Required for allauth
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -127,18 +140,70 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 4,  # Reduced from default 8 to 4
+        }
     },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    # Commented out strict validators for easier registration
+    # {
+    #     'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    # },
+    # {
+    #     'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    # },
+    # {
+    #     'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    # },
 ]
+
+# Authentication backends
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',  # Default Django backend
+    'allauth.account.auth_backends.AuthenticationBackend',  # Allauth backend
+]
+
+# Django Allauth Configuration
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+ACCOUNT_LOGOUT_REDIRECT_URL = '/'
+
+# Social login settings
+SOCIALACCOUNT_LOGIN_ON_GET = True
+ACCOUNT_EMAIL_VERIFICATION = 'none'  # Disable email verification for easier setup
+
+# Allauth configuration (newer format)
+# ACCOUNT_LOGIN_METHODS = {'email'}  # Use email instead of username for login
+# ACCOUNT_SIGNUP_FIELDS = []  # No additional fields required for social signup
+# ACCOUNT_UNIQUE_EMAIL = True
+# ACCOUNT_SIGNUP_FORM_CLASS = None
+
+# Social account settings - Auto signup without intermediate page
+# SOCIALACCOUNT_QUERY_EMAIL = True
+# SOCIALACCOUNT_STORE_TOKENS = False
+# SOCIALACCOUNT_AUTO_SIGNUP = True  # Automatically create accounts for social users
+
+# Provider specific settings
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        },
+        'OAUTH_PKCE_ENABLED': True,
+    },
+    'github': {
+        'SCOPE': [
+            'user:email',
+        ],
+    },
+    'microsoft': {
+        'tenant': 'common',  # Use 'common' for personal and work accounts
+    }
+}
 
 
 # Internationalization

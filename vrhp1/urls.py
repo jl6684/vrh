@@ -26,6 +26,7 @@ urlpatterns = [
     path('', include('apps.home.urls')),
     path('vinyl/', include('apps.vinyl.urls')),
     path('accounts/', include('apps.accounts.urls')),
+    path('accounts/', include('allauth.urls')),  # Django allauth URLs (merged with accounts)
     path('cart/', include('apps.cart.urls')),
     path('orders/', include('apps.orders.urls')),
     path('wishlist/', include('apps.wishlist.urls')),

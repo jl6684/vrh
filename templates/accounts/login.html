@@ -1,7 +1,67 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load socialaccount %}
 
 {% block title %}Login - Vinyl Record House{% endblock %}
+
+{% block extra_css %}
+<style>
+.social-login-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    color: white;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    margin-bottom: 10px;
+}
+
+.social-login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-google {
+    background-color: #4285f4;
+}
+
+.btn-github {
+    background-color: #333;
+}
+
+.btn-microsoft {
+    background-color: #0078d4;
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #ccc;
+}
+
+.divider span {
+    padding: 0 15px;
+    color: #666;
+    font-size: 14px;
+}
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
@@ -11,6 +71,30 @@
                 <h4 class="mb-0"><i class="fas fa-sign-in-alt"></i> Login</h4>
             </div>
             <div class="card-body">
+                <!-- Social Login Buttons -->
+                <div class="mb-4">
+                    <h6 class="text-center mb-3">Login with Social Account</h6>
+                    
+                    <a href="{% provider_login_url 'google' %}" class="social-login-btn btn-google">
+                        <i class="fab fa-google"></i>
+                        Continue with Google
+                    </a>
+                    
+                    <a href="{% provider_login_url 'github' %}" class="social-login-btn btn-github">
+                        <i class="fab fa-github"></i>
+                        Continue with GitHub
+                    </a>
+                    
+                    <a href="{% provider_login_url 'microsoft' %}" class="social-login-btn btn-microsoft">
+                        <i class="fab fa-microsoft"></i>
+                        Continue with Microsoft
+                    </a>
+                </div>
+                
+                <div class="divider">
+                    <span>or login with email</span>
+                </div>
+                
                 <form method="post">
                     {% csrf_token %}
                     
