@@ -68,7 +68,19 @@ You can now control how missing data is handled using the `-md` or `--missing-da
 
 - `-md error` or `--missing-data error` (default): Abort import and show an error if any required field is missing in a row.
 - `-md skip` or `--missing-data skip`: Skip rows with missing required fields and continue importing the rest. Skipped rows will be reported in the output.
-- `-md fill` or `--missing-data fill`: Fill missing required fields with sensible defaults (e.g., 'Unknown Title', 0, etc.) and import all rows. Filled fields will be reported in the output.
+- `-md fill` or `--missing-data fill`: Fill missing required fields with sensible defaults and import all rows. Filled fields will be reported in the output.
+
+**Default fill values for missing data:**
+- `title`: 'Unknown Title'
+- `artist`: 'Unknown Artist'
+- `genre`: 'Unknown Genre'
+- `year`: current year (e.g., 2024)
+- `price`: 0
+- `type`: 'Unknown'
+- `country`: 'Unknown'
+- `label`: 'Unknown'
+
+If the `year` field is missing, the current year will be used (since the database requires an integer). If the `label` field is missing, the value 'Unknown' will be used and a label with that name will be created if it does not exist.
 
 #### Examples:
 Import and skip rows with missing data:
@@ -454,3 +466,88 @@ The import command includes:
 - Use `python manage.py delete_vinyl_data --help` for delete command options
 - Check the console output for specific error messages
 - Verify file format matches the required structure 
+
+## Data Validation and Error Handling
+
+### Data Validation Rules
+
+The import command now includes comprehensive data validation to ensure data quality:
+
+#### 1. Year Validation
+- Years must be between 1900 and the current year
+- Invalid years will cause validation errors
+
+#### 2. Text Field Validation
+- Fields `type`, `country`, and `label` must contain text values only
+- Numeric values in these fields will cause validation errors
+
+#### 3. Column Structure Validation
+- Detects column shifts caused by unquoted commas
+- Validates that each row has exactly 8 columns
+- Checks for proper CSV formatting
+
+#### 4. Missing Data Handling
+- Required fields: `title`, `artist`, `genre`, `year`, `price`, `type`, `country`, `label`
+- Missing data is handled according to the `-md` strategy
+- **Default fill values:**
+    - `year`: current year (e.g., 2024)
+    - `label`: 'Unknown'
+    - All other fields: see above
+
+### Common CSV Formatting Issues
+
+#### 1. Unquoted Commas in Data Fields
+**Problem**: Fields containing commas without quotes cause column shifts
+```
+❌ Incorrect: Herbert von Karajan,Berlin Philharmonic,Classical
+✅ Correct: "Herbert von Karajan,Berlin Philharmonic",Classical
+```
+
+**Solution**: Quote fields that contain commas
+```csv
+title,artist,genre,year,price,type,country,label
+"Album Title","Artist Name, Band Name",Pop,1980,25,band,USA,Label Name
+```
+
+#### 2. Column Shift Detection
+The system detects when data appears in wrong columns due to unquoted commas:
+- Years appearing in genre fields
+- Text values appearing in numeric fields
+- Missing required fields
+
+#### 3. Validation Error Handling
+- **Default behavior** (`-md error`): Abort import and show all validation errors
+- **Skip strategy** (`-md skip`): Skip problematic rows and continue
+- **Fill strategy** (`-md fill`): Fill missing fields with defaults and continue
+
+### Example: Fixing a Problematic CSV File
+
+**Original problematic file** (`data-error.csv`):
+```csv
+title,artist,genre,year,price,type,country,label
+Beethoven-Violin Concerto,Salvatore Accardo,Gewandhausorchester Leipzig, Kurt Masur,Classical,1981,117,Classical,Italy,Philips
+```
+
+**Issues detected**:
+- Unquoted commas in artist field cause column shift
+- Year 1981 appears in genre column
+- Price 117 appears in year column
+- Validation errors: year range, text field validation
+
+**Corrected file** (`data-error-fixed.csv`):
+```csv
+title,artist,genre,year,price,type,country,label
+"Beethoven-Violin Concerto","Salvatore Accardo,Gewandhausorchester Leipzig, Kurt Masur",Classical,1981,117,Classical,Italy,Philips
+```
+
+### Validation Error Messages
+
+When validation fails, you'll see messages like:
+```
+Data validation failed. Please fix the following issues:
+  - Row 3: Year '390' is outside valid range (1900-2025)
+  - Row 3: Genre field contains year-like value '1976', possible column shift detected
+  - Row 4: Price field contains non-numeric value 'United Kingdom', possible column shift detected
+
+To bypass validation errors, use: -md skip or -md fill
+``` 

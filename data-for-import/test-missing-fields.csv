@@ -1,0 +1,7 @@
+title,artist,genre,year,price,type,country,label
+Missing Genre,Test Artist,,1980,20,band,USA,TestLabel
+Missing Year,Test Artist 2,Pop,,25,male,UK,TestLabel2
+Missing Price,Test Artist 3,Jazz,1990,,female,Canada,TestLabel3
+Missing Type,Test Artist 4,Rock,2000,30,,Australia,TestLabel4
+Missing Country,Test Artist 5,Classical,2010,40,band,,TestLabel5
+Missing Label,Test Artist 6,Folk,2020,50,male,France, 

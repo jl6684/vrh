@@ -4,7 +4,98 @@ Used by the sample data management command to ensure imported data
 (from CSV, Google Sheets, or Excel) is clean, normalized, and valid
 before being loaded into the database.
 """
-import pandas as pd, re
+import pandas as pd, re, csv
+from datetime import datetime
+
+# Validate year is within reasonable range
+def validate_year(year_value, row_num):
+    """
+    Validate that year is a reasonable value between 1900 and current year.
+    Returns (is_valid, error_message)
+    """
+    try:
+        if pd.isna(year_value) or year_value == '' or year_value is None:
+            return True, None  # Allow empty years (will be handled by missing data logic)
+        
+        year = int(year_value)
+        current_year = datetime.now().year
+        
+        if year < 1900 or year > current_year:
+            return False, f"Row {row_num}: Year '{year}' is outside valid range (1900-{current_year})"
+        
+        return True, None
+    except (ValueError, TypeError):
+        return False, f"Row {row_num}: Year '{year_value}' is not a valid integer"
+
+# Validate text fields contain only text values
+def validate_text_field(value, field_name, row_num):
+    """
+    Validate that a field contains only text values.
+    Returns (is_valid, error_message)
+    """
+    if pd.isna(value) or value == '' or value is None:
+        return True, None  # Allow empty values (will be handled by missing data logic)
+    
+    # Check if value is numeric when it shouldn't be
+    try:
+        float_val = float(value)
+        # If it's a number, it's invalid for text fields
+        return False, f"Row {row_num}: Field '{field_name}' contains numeric value '{value}', expected text only"
+    except (ValueError, TypeError):
+        # Not a number, so it's valid text
+        return True, None
+
+# Comprehensive data validation function
+def validate_data_integrity(csv_rows, missing_data_strategy='error'):
+    """
+    Comprehensive validation of data integrity including:
+    - Year range validation (1900 to current year)
+    - Text field validation (type, country, label should be text only)
+    - Column structure validation
+    
+    Returns (is_valid, error_messages)
+    """
+    errors = []
+    current_year = datetime.now().year
+    
+    for i, row in enumerate(csv_rows, start=2):
+        # Validate year
+        year_valid, year_error = validate_year(row.get('year'), i)
+        if not year_valid:
+            errors.append(year_error)
+        
+        # Validate text fields
+        text_fields = ['type', 'country', 'label']
+        for field in text_fields:
+            field_valid, field_error = validate_text_field(row.get(field), field, i)
+            if not field_valid:
+                errors.append(field_error)
+        
+        # Additional validation: check for obvious column shift indicators
+        # If genre contains a year-like number, it might indicate column shift
+        genre_value = row.get('genre', '')
+        if pd.notna(genre_value) and str(genre_value).isdigit():
+            year_val = int(genre_value)
+            if 1900 <= year_val <= current_year:
+                errors.append(f"Row {i}: Genre field contains year-like value '{genre_value}', possible column shift detected")
+        
+        # If price contains non-numeric value, it might indicate column shift
+        price_value = row.get('price', '')
+        if pd.notna(price_value):
+            try:
+                int(price_value)
+            except (ValueError, TypeError):
+                errors.append(f"Row {i}: Price field contains non-numeric value '{price_value}', possible column shift detected")
+    
+    # If there are validation errors and strategy is 'error', abort
+    if errors and missing_data_strategy == 'error':
+        return False, errors
+    
+    # If strategy is 'skip' or 'fill', log errors but continue
+    if errors:
+        return True, errors
+    
+    return True, []
 
 # Handle missing data according to the specified strategy.
 def handle_missing_data(csv_rows, strategy='error', stdout=None):
@@ -19,7 +110,7 @@ def handle_missing_data(csv_rows, strategy='error', stdout=None):
         'title': 'Unknown Title',
         'artist': 'Unknown Artist',
         'genre': 'Unknown Genre',
-        'year': 0,
+        'year': datetime.now().year,
         'price': 0,
         'type': 'Unknown',
         'country': 'Unknown',
@@ -27,7 +118,11 @@ def handle_missing_data(csv_rows, strategy='error', stdout=None):
     }
     filtered = []
     for i, row in enumerate(csv_rows, start=2):
-        missing = [field for field in required_fields if not row.get(field)]
+        missing = []
+        for field in required_fields:
+            value = row.get(field)
+            if value is None or pd.isna(value) or str(value).strip() == '':
+                missing.append(field)
         if not missing:
             filtered.append(row)
         else:
@@ -86,14 +181,13 @@ def check_existing_vinyl_records(vinyl_records_data, stdout=None):
     
     return existing_records, new_records
 
-# Normalize delimiters in artist, genre, and label fields.
-def normalize_field_delimiters(csv_rows):
+def data_normalization(csv_rows):
     """
-    Replace ',', '|', and 'and' with ' & ' in specified fields.
-    Ensures single space before/after '&' and preserves literal '&'.
+    Normalize delimiters and strip whitespace in artist, genre, and label fields for all rows.
+    Returns a new list of normalized rows.
     """
     normalized_rows = []
-    for i, row in enumerate(csv_rows):
+    for row in csv_rows:
         normalized_row = row.copy()
         fields_to_normalize = ['artist', 'genre', 'label']
         for field in fields_to_normalize:
@@ -101,11 +195,15 @@ def normalize_field_delimiters(csv_rows):
                 value = str(normalized_row[field]).strip()
                 if not value:
                     continue
-                value = re.sub(r'\s*(,|\||\\band\\b)\s*', ' & ', value, flags=re.IGNORECASE)
+                value = re.sub(r'\s*(,|\||\band\b)\s*', ' & ', value, flags=re.IGNORECASE)
                 value = re.sub(r'\s*&\s*', ' & ', value)
                 value = re.sub(r'\s+', ' ', value)
                 value = value.strip()
                 normalized_row[field] = value
+        # Also strip whitespace from all string fields
+        for key in normalized_row:
+            if isinstance(normalized_row[key], str):
+                normalized_row[key] = normalized_row[key].strip()
         normalized_rows.append(normalized_row)
     return normalized_rows
 
@@ -131,14 +229,18 @@ def validate_normalized_data(csv_rows):
                         f"Expected only '&' as delimiter."
                     )
 
-# Validate structure, types, and normalize/validate delimiters.
-def validate_and_normalize_data(csv_rows):
+def validate_full_data(csv_rows):
     """
-    Run all validation and normalization steps on imported data.
+    Run all validation and normalization steps on imported data:
+    - Structure validation
+    - Data type validation
+    - Data normalization
+    - Delimiter validation
+    Returns normalized rows if all checks pass.
     """
     validate_csv_structure(csv_rows)
     validate_data_types(csv_rows)
-    normalized_rows = normalize_field_delimiters(csv_rows)
+    normalized_rows = data_normalization(csv_rows)
     validate_normalized_data(normalized_rows)
     return normalized_rows
 
@@ -204,16 +306,33 @@ def extract_artists_data(csv_rows):
 def extract_vinyl_records_data(csv_rows):
     """Return a list of vinyl record dicts (title, artist, genre, year, price)."""
     records = []
-    for row in csv_rows:
+    for i, row in enumerate(csv_rows, start=1):
         title = str(row['title']).strip() if pd.notna(row.get('title')) else ''
         artist = str(row['artist']).strip() if pd.notna(row.get('artist')) else ''
         genre = str(row['genre']).strip() if pd.notna(row.get('genre')) else ''
+        
+        # Handle year and price with better validation
         try:
-            year = int(row['year']) if pd.notna(row.get('year')) else 0
-            price = int(row['price']) if pd.notna(row.get('price')) else 0
+            year_value = row.get('year')
+            if pd.isna(year_value) or year_value == '' or year_value is None:
+                year = 0
+            else:
+                year = int(year_value)
         except (ValueError, TypeError):
-            continue
-        if title and artist and genre and year > 0 and price > 0:
+            year = 0
+            
+        try:
+            price_value = row.get('price')
+            if pd.isna(price_value) or price_value == '' or price_value is None:
+                price = 0
+            else:
+                price = int(price_value)
+        except (ValueError, TypeError):
+            price = 0
+        
+        # Check if we have the minimum required data
+        if title and artist and genre:
+            # Allow year and price to be 0 (filled defaults)
             records.append({
                 'title': title,
                 'artist': artist,
@@ -221,4 +340,23 @@ def extract_vinyl_records_data(csv_rows):
                 'year': year,
                 'price': price,
             })
-    return records 
+    
+    return records
+
+def precheck_csv_column_count(csv_path, expected_columns=8):
+    """
+    Read the CSV as raw rows and abort if any row does not have the expected number of columns.
+    """
+    with open(csv_path, newline='', encoding='utf-8') as csvfile:
+        reader = csv.reader(csvfile)
+        header = next(reader, None)
+        if header is None:
+            raise Exception("CSV file is empty or missing header row.")
+        for i, row in enumerate(reader, start=2):
+            if len(row) != expected_columns:
+                raise Exception(
+                    f"Row {i} has {len(row)} fields, expected {expected_columns}. "
+                    f"Check for unquoted commas or formatting errors in: {row}\n"
+                    f"Import aborted due to column count mismatch."
+                )
+    return True 

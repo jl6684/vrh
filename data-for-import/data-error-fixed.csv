@@ -1,0 +1,7 @@
+title,artist,genre,year,price,type,country,label
+"Beethoven-Violin Concerto","Salvatore Accardo,Gewandhausorchester Leipzig, Kurt Masur",Classical,1981,117,Classical,Italy,Philips
+"Bruckner-The Symphonies","Herbert von Karajan,Berlin Philharmonic",Classical,1976,390,Classical,Austria,Deutsche Grammophon
+Rumours,Fleetwood Mac,Pop,1977,320,band,United Kingdom,Warner Bros.
+"Off the Wall",Michael Jackson,Pop,1979,350,male,United States,Epic
+"ABBA Gold: Greatest Hits",ABBA,Pop,1976,300,band,Sweden,Polar
+Missing Country2,Test Artist 6,Classical,2010,40,band,,TestLabel6
