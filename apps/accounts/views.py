@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
@@ -9,6 +9,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.core.paginator import Paginator
 from .models import UserProfile
+from .forms import CustomUserCreationForm
 from apps.orders.models import Order
 from apps.wishlist.models import Wishlist
 from apps.reviews.models import Review
@@ -21,7 +22,7 @@ def register_view(request):
         return redirect('home:index')
     
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
             username = form.cleaned_data.get('username')
@@ -29,7 +30,7 @@ def register_view(request):
             login(request, user)
             return redirect('home:index')
     else:
-        form = UserCreationForm()
+        form = CustomUserCreationForm()
     
     return render(request, 'accounts/register.html', {'form': form})
 
