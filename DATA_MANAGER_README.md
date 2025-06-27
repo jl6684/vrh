@@ -51,6 +51,13 @@ python manage.py quickstart
 - Remove extra spaces, generate missing slugs
 - Standardize data formats
 - Non-destructive formatting
+- 🧹 Artist Formatting: Name capitalization, biography cleaning, country formatting
+🏠 Profile Formatting: Address capitalization, phone cleaning
+🎵 Vinyl Formatting: Title capitalization, price validation, description cleaning
+👤 User Formatting: Name capitalization, email lowercase
+⭐ Review Formatting: Rating validation (1-5), comment cleaning
+🛒 Order Formatting: Name/address capitalization, email lowercase
+🎵 Genre/Label Formatting: Name and description cleaning
 
 ### 📊 Statistics
 - Detailed database overview
