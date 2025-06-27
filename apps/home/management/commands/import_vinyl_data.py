@@ -5,9 +5,10 @@ from django.contrib.auth.models import User
 from apps.vinyl.models import VinylRecord, Artist, Genre, Label
 from apps.accounts.models import UserProfile
 from .data_import_helper import (
-    normalize_field_delimiters,
+    precheck_csv_column_count,
+    data_normalization,
     validate_normalized_data,
-    validate_and_normalize_data,
+    validate_full_data,
     validate_csv_structure,
     validate_data_types,
     extract_genres_data,
@@ -16,9 +17,11 @@ from .data_import_helper import (
     extract_vinyl_records_data,
     handle_missing_data,
     check_existing_vinyl_records,
+    validate_data_integrity,
 )
 from .data_import_method import (
     read_csv_data,
+    read_csv_data_with_skip,
     read_gsheet_data,
     read_excel_data,
     DEFAULT_SHEET_ID,
@@ -62,12 +65,14 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument(
             '-cs', '--csv-file',
+            dest='csv_file',
             type=str,
             default='vinyldata.csv',
             help='Name of the CSV file in data-for-import folder (default: vinyldata.csv)'
         )
         parser.add_argument(
             '-gs', '--gs-file',
+            dest='gs_file',
             type=str,
             nargs='?',
             const='vinyldata-gs.xlsx',
@@ -76,6 +81,7 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             '-ex', '--ex-file',
+            dest='ex_file',
             type=str,
             nargs='?',
             const='vinyldata-ex.xlsx',
@@ -84,6 +90,7 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             '-md', '--missing-data',
+            dest='missing_data',
             choices=['error', 'skip', 'fill'],
             default='error',
             help='How to handle rows with missing data: error (default), skip, or fill with defaults.'
@@ -105,7 +112,7 @@ class Command(BaseCommand):
             try:
                 excel_rows = read_excel_data(excel_path)
                 excel_rows = handle_missing_data(excel_rows, strategy=missing_data_strategy, stdout=self.stdout)
-                excel_rows = validate_and_normalize_data(excel_rows)
+                excel_rows = validate_full_data(excel_rows)
             except Exception as e:
                 self.stdout.write(self.style.ERROR(f'Excel validation error: {e}'))
                 return
@@ -121,7 +128,7 @@ class Command(BaseCommand):
                 try:
                     csv_rows = read_gsheet_data(sheet_id, worksheet_name)
                     csv_rows = handle_missing_data(csv_rows, strategy=missing_data_strategy, stdout=self.stdout)
-                    csv_rows = validate_and_normalize_data(csv_rows)
+                    csv_rows = validate_full_data(csv_rows)
                 except Exception as e:
                     self.stdout.write(self.style.ERROR(f'Google Sheet error: {e}'))
                     return
@@ -136,19 +143,53 @@ class Command(BaseCommand):
                     self.print_available_files(DATA_IMPORT_DIR, '.csv')
                     return
                 try:
-                    csv_rows = read_csv_data(csv_path)
+                    if missing_data_strategy == 'skip':
+                        csv_rows = read_csv_data_with_skip(csv_path, missing_data_strategy=missing_data_strategy, expected_columns=8, stdout=self.stdout)
+                    else:
+                        precheck_csv_column_count(csv_path, expected_columns=8)
+                        csv_rows = read_csv_data(csv_path)
+                        validate_csv_structure(csv_rows)
+                except Exception as e:
+                    self.stdout.write(self.style.ERROR(f'CSV structure validation error: {e}'))
+                    return
+                try:
                     csv_rows = handle_missing_data(csv_rows, strategy=missing_data_strategy, stdout=self.stdout)
-                    csv_rows = validate_and_normalize_data(csv_rows)
+                    csv_rows = validate_full_data(csv_rows)
                 except Exception as e:
                     self.stdout.write(self.style.ERROR(f'CSV validation error: {e}'))
                     return
                 self.stdout.write(f'Successfully loaded {len(csv_rows)} records from {csv_filename}')
+
+        # NEW: Comprehensive data integrity validation
+        self.stdout.write('Validating data integrity...')
+        is_valid, validation_errors = validate_data_integrity(csv_rows, missing_data_strategy)
+        
+        if validation_errors:
+            if missing_data_strategy == 'error':
+                self.stdout.write(self.style.ERROR('Data validation failed. Please fix the following issues:'))
+                for error in validation_errors:
+                    self.stdout.write(self.style.ERROR(f'  - {error}'))
+                self.stdout.write(self.style.ERROR('\nTo bypass validation errors, use: -md skip or -md fill'))
+                return
+            else:
+                # For skip/fill strategies, log errors but continue
+                self.stdout.write(self.style.WARNING('Data validation warnings (continuing due to -md strategy):'))
+                for error in validation_errors:
+                    self.stdout.write(self.style.WARNING(f'  - {error}'))
+                self.stdout.write('')
 
         # Extract data from the CSV rows
         genres_data = extract_genres_data(csv_rows)
         labels_data = extract_labels_data(csv_rows)
         artists_data = extract_artists_data(csv_rows)
         vinyl_records_data = extract_vinyl_records_data(csv_rows)
+        
+        # Add debugging information
+        self.stdout.write(f'Data extraction summary:')
+        self.stdout.write(f'  - {len(genres_data)} unique genres found')
+        self.stdout.write(f'  - {len(labels_data)} unique labels found')
+        self.stdout.write(f'  - {len(artists_data)} unique artists found')
+        self.stdout.write(f'  - {len(vinyl_records_data)} vinyl records extracted from {len(csv_rows)} total rows')
         
         # Check for existing vinyl records and provide feedback
         existing_records, new_records = check_existing_vinyl_records(vinyl_records_data, self.stdout)
@@ -207,16 +248,20 @@ class Command(BaseCommand):
         # Create vinyl records
         created_vinyl_count = 0
         for record_data in vinyl_records_data:
-            # Find the artist and genre objects
             try:
                 artist = Artist.objects.get(name=record_data['artist'])
                 genre = Genre.objects.get(name=record_data['genre'])
-                label = random.choice(labels)
-                
-                # Add some variety to conditions and physical properties
-                conditions = ['new', 'mint', 'very_good', 'good']
-                sizes = ['12', '12', '12', '7']  # Mostly 12" with some 7"
-                speeds = ['33', '33', '45'] if random.choice(sizes) == '7' else ['33']
+                # Use label from data row, default to 'Unknown' if missing or blank
+                label_name = record_data.get('label', '').strip() or 'Unknown'
+                if not label_name or label_name.lower() == 'unknown':
+                    label_name = 'Unknown'
+                label, _ = Label.objects.get_or_create(
+                    name=label_name,
+                    defaults={
+                        'country': 'United States',
+                        'website': f'https://www.{label_name.lower().replace(" ", "").replace(".", "")}.com'
+                    }
+                )
                 vinyl, created = VinylRecord.objects.get_or_create(
                     title=record_data['title'],
                     artist=artist,
@@ -227,9 +272,9 @@ class Command(BaseCommand):
                         'release_year': record_data['year'],
                         'stock_quantity': random.randint(5, 50),
                         'is_available': True,
-                        'condition': random.choice(conditions),
-                        'speed': random.choice(speeds),
-                        'size': random.choice(sizes),
+                        'condition': random.choice(['new', 'mint', 'very_good', 'good']),
+                        'speed': random.choice(['33', '45']) if random.random() < 0.5 else '33',
+                        'size': random.choice(['12', '7']) if random.random() < 0.5 else '12',
                         'description': f"Classic album {record_data['title']} by {record_data['artist']} from {record_data['year']}. A must-have for any vinyl collection.",
                         'featured': random.choice([True, False]) if random.random() < 0.3 else False,
                         'weight': round(random.uniform(120, 180), 2),  # Typical vinyl weight in grams
