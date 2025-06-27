@@ -6,6 +6,86 @@ before being loaded into the database.
 """
 import pandas as pd, re
 
+# Handle missing data according to the specified strategy.
+def handle_missing_data(csv_rows, strategy='error', stdout=None):
+    """
+    Handle rows with missing data according to the specified strategy.
+    - 'error': Raise an exception on the first missing required field.
+    - 'skip': Skip rows with missing required fields, optionally logging them.
+    - 'fill': Fill missing fields with sensible defaults.
+    """
+    required_fields = ['title', 'artist', 'genre', 'year', 'price', 'type', 'country', 'label']
+    defaults = {
+        'title': 'Unknown Title',
+        'artist': 'Unknown Artist',
+        'genre': 'Unknown Genre',
+        'year': 0,
+        'price': 0,
+        'type': 'Unknown',
+        'country': 'Unknown',
+        'label': 'Unknown'
+    }
+    filtered = []
+    for i, row in enumerate(csv_rows, start=2):
+        missing = [field for field in required_fields if not row.get(field)]
+        if not missing:
+            filtered.append(row)
+        else:
+            if strategy == 'error':
+                raise Exception(f"Row {i}: Missing required field(s) {missing}. Row: {row}")
+            elif strategy == 'skip':
+                if stdout:
+                    stdout.write(f"Skipping row {i} due to missing fields {missing}: {row}")
+                continue
+            elif strategy == 'fill':
+                for field in missing:
+                    row[field] = defaults[field]
+                if stdout:
+                    stdout.write(f"Filling missing fields {missing} in row {i} with defaults.")
+                filtered.append(row)
+    return filtered
+
+# Check for existing vinyl records in database
+def check_existing_vinyl_records(vinyl_records_data, stdout=None):
+    """
+    Check which vinyl records already exist in the database.
+    Returns information about existing records for user feedback.
+    """
+    from apps.vinyl.models import VinylRecord, Artist
+    
+    existing_records = []
+    new_records = []
+    
+    for record_data in vinyl_records_data:
+        try:
+            # Check if artist exists
+            artist = Artist.objects.get(name=record_data['artist'])
+            # Check if vinyl record with same title and artist exists
+            existing_vinyl = VinylRecord.objects.filter(
+                title=record_data['title'],
+                artist=artist
+            ).first()
+            
+            if existing_vinyl:
+                existing_records.append({
+                    'title': record_data['title'],
+                    'artist': record_data['artist'],
+                    'existing_id': existing_vinyl.id
+                })
+            else:
+                new_records.append({
+                    'title': record_data['title'],
+                    'artist': record_data['artist']
+                })
+        except Artist.DoesNotExist:
+            # Artist doesn't exist, so record is new
+            new_records.append({
+                'title': record_data['title'],
+                'artist': record_data['artist']
+            })
+    
+    return existing_records, new_records
+
 # Normalize delimiters in artist, genre, and label fields.
 def normalize_field_delimiters(csv_rows):
     """

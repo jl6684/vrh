@@ -61,7 +61,8 @@ def read_gsheet_data(sheet_id, worksheet_name='Sheet1'):
     except gspread.SpreadsheetNotFound:
         raise Exception(f"Google Sheet with ID '{sheet_id}' not found or not accessible.")
     except gspread.WorksheetNotFound:
-        raise Exception(f"Worksheet '{worksheet_name}' not found in the Google Sheet.")
+        available = [ws.title for ws in sheet.worksheets()]
+        raise Exception(f"Worksheet '{worksheet_name}' not found in the Google Sheet. Available worksheets: {available}")
     except Exception as e:
         raise Exception(f"Error accessing Google Sheet: {str(e)}")
 

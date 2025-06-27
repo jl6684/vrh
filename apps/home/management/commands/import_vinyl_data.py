@@ -14,6 +14,8 @@ from .data_import_helper import (
     extract_labels_data,
     extract_artists_data,
     extract_vinyl_records_data,
+    handle_missing_data,
+    check_existing_vinyl_records,
 )
 from .data_import_method import (
     read_csv_data,
@@ -59,13 +61,13 @@ class Command(BaseCommand):
     # Added a method to add arguments to the command, used in the handle() method.
     def add_arguments(self, parser):
         parser.add_argument(
-            '--csv-file',
+            '-cs', '--csv-file',
             type=str,
             default='vinyldata.csv',
             help='Name of the CSV file in data-for-import folder (default: vinyldata.csv)'
         )
         parser.add_argument(
-            '--gs-file',
+            '-gs', '--gs-file',
             type=str,
             nargs='?',
             const='vinyldata-gs.xlsx',
@@ -73,16 +75,23 @@ class Command(BaseCommand):
             help='Google Sheet ID to import data from. If not provided, defaults to vinyldata-gs.xlsx.'
         )
         parser.add_argument(
-            '--ex-file',
+            '-ex', '--ex-file',
             type=str,
             nargs='?',
             const='vinyldata-ex.xlsx',
             default=None,
             help='Name of the Excel file in data-for-import folder (default: vinyldata-ex.xlsx)'
         )
+        parser.add_argument(
+            '-md', '--missing-data',
+            choices=['error', 'skip', 'fill'],
+            default='error',
+            help='How to handle rows with missing data: error (default), skip, or fill with defaults.'
+        )
 
     # Added a method to handle the command, used in the handle() method.
     def handle(self, *args, **options):
+        missing_data_strategy = options.get('missing_data', 'error')
         ex_file = options.get('ex_file')
         if ex_file is not None:
             # METHOD 3: Excel File Import
@@ -95,6 +104,7 @@ class Command(BaseCommand):
                 return
             try:
                 excel_rows = read_excel_data(excel_path)
+                excel_rows = handle_missing_data(excel_rows, strategy=missing_data_strategy, stdout=self.stdout)
                 excel_rows = validate_and_normalize_data(excel_rows)
             except Exception as e:
                 self.stdout.write(self.style.ERROR(f'Excel validation error: {e}'))
@@ -103,21 +113,19 @@ class Command(BaseCommand):
             csv_rows = excel_rows  # For downstream processing
         else:
             # METHOD 2: Google Sheet Import
-            gs_file = options.get('gs_file')
-            if gs_file:
-                if gs_file not in VALID_WORKSHEETS:
-                    self.stdout.write(self.style.ERROR(f"Please input correct worksheet name to import.(Case sensitive!!!)"))
-                    return
+            gs_worksheet = options.get('gs_file')
+            if gs_worksheet:
                 sheet_id = DEFAULT_SHEET_ID
-                worksheet_name = gs_file
+                worksheet_name = gs_worksheet
                 self.stdout.write(f'Creating sample data from Google Sheet: {sheet_id} (worksheet: {worksheet_name})...')
                 try:
                     csv_rows = read_gsheet_data(sheet_id, worksheet_name)
+                    csv_rows = handle_missing_data(csv_rows, strategy=missing_data_strategy, stdout=self.stdout)
                     csv_rows = validate_and_normalize_data(csv_rows)
                 except Exception as e:
                     self.stdout.write(self.style.ERROR(f'Google Sheet error: {e}'))
                     return
-                self.stdout.write(f'Successfully loaded {len(csv_rows)} records from Google Sheet {sheet_id}')
+                self.stdout.write(f'Successfully loaded {len(csv_rows)} records from Google Sheet {worksheet_name}')
             else:
                 # METHOD 1: CSV File Import
                 csv_filename = options['csv_file']
@@ -129,6 +137,7 @@ class Command(BaseCommand):
                     return
                 try:
                     csv_rows = read_csv_data(csv_path)
+                    csv_rows = handle_missing_data(csv_rows, strategy=missing_data_strategy, stdout=self.stdout)
                     csv_rows = validate_and_normalize_data(csv_rows)
                 except Exception as e:
                     self.stdout.write(self.style.ERROR(f'CSV validation error: {e}'))
@@ -140,6 +149,15 @@ class Command(BaseCommand):
         labels_data = extract_labels_data(csv_rows)
         artists_data = extract_artists_data(csv_rows)
         vinyl_records_data = extract_vinyl_records_data(csv_rows)
+        
+        # Check for existing vinyl records and provide feedback
+        existing_records, new_records = check_existing_vinyl_records(vinyl_records_data, self.stdout)
+        
+        if existing_records:
+            self.stdout.write(f'Duplicate detection: {len(existing_records)} records already exist in database:')
+            for record in existing_records:
+                self.stdout.write(f'  - "{record["title"]}" by {record["artist"]}')
+            self.stdout.write(f'  {len(new_records)} new records will be created.')
         
         # Create genres
         genres = []
@@ -187,6 +205,7 @@ class Command(BaseCommand):
                 self.stdout.write(f'Created artist: {artist_data["name"]} ({artist_data["type"]})')
         
         # Create vinyl records
+        created_vinyl_count = 0
         for record_data in vinyl_records_data:
             # Find the artist and genre objects
             try:
@@ -219,6 +238,7 @@ class Command(BaseCommand):
                                 
                 if created:
                     self.stdout.write(f'Created vinyl: {record_data["title"]} by {record_data["artist"]}')
+                    created_vinyl_count += 1
             except (Artist.DoesNotExist, Genre.DoesNotExist) as e:
                 self.stdout.write(f'Error creating {record_data["title"]}: {e}')
         
@@ -229,12 +249,13 @@ class Command(BaseCommand):
                 f'- {Genre.objects.count()} genres\n'
                 f'- {Label.objects.count()} labels\n'
                 f'- {Artist.objects.count()} artists\n'
-                f'- {VinylRecord.objects.count()} vinyl records\n'
+                f'- {VinylRecord.objects.count()} vinyl records (total in database)\n'
                 f'- {User.objects.count()} users\n'
                 f'- {UserProfile.objects.count()} user profiles\n'
                 f'\nLogin credentials:\n'
                 f'Admin: admin / admin123\n'
                 f'User: testuser / testpass123\n'
-                f'\nTo clear and recreate data, use: python manage.py import_vinyl_data --clear'
+                f'\nTo delete vinyl data, please use: python manage.py delete_vinyl_data\n'
+                f'Details information please refer to DataMenu.md'
             )
         )
