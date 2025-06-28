@@ -15,8 +15,6 @@ from apps.reviews.models import Review
 from apps.orders.models import Order
 
 
-
-
 class Command(BaseCommand):
     help = '''
     🎵 VINYL HOUSE - DATA MANAGER 🎵
@@ -626,10 +624,6 @@ class Command(BaseCommand):
 
     def import_data(self, file_path):
         """Import data from file"""
-        self.stdout.write(f'📥 Importing data from {file_path.name}...')
-        # This would implement file import logic
-    def import_data(self, file_path):
-        """Import data from file"""
         self.stdout.write(f'📥 Importing from: {file_path.name}')
         
         if file_path.suffix.lower() == '.json':
@@ -655,6 +649,7 @@ class Command(BaseCommand):
                 created = 0
                 updated = 0
                 skipped = 0
+                error_samples = []  # Collect first few errors for reporting
                 
                 for obj in objects:
                     try:
@@ -678,8 +673,9 @@ class Command(BaseCommand):
                             
                     except Exception as e:
                         skipped += 1
-                        if self.verbosity >= 2:
-                            self.stdout.write(f'⚠️ Skipped: {str(e)}')
+                        # Collect first 3 errors for debugging
+                        if len(error_samples) < 3:
+                            error_samples.append(str(e))
                         continue
                 
                 self.stdout.write(self.style.SUCCESS(f'✅ Import complete!'))
@@ -689,6 +685,13 @@ class Command(BaseCommand):
                     self.stdout.write(f'   🔄 Updated: {updated} existing records')
                 if skipped > 0:
                     self.stdout.write(f'   ⚠️ Skipped: {skipped} records (errors)')
+                    # Show sample errors for debugging
+                    if error_samples:
+                        self.stdout.write('   🔍 Sample errors:')
+                        for i, error in enumerate(error_samples, 1):
+                            self.stdout.write(f'      {i}. {error}')
+                        if skipped > len(error_samples):
+                            self.stdout.write(f'      ... and {skipped - len(error_samples)} more errors')
                     
                 total_processed = created + updated
                 if total_processed == 0:
@@ -952,18 +955,369 @@ class Command(BaseCommand):
         vinyls = list(VinylRecord.objects.all())
         users = list(User.objects.all())
         
+        # Sample address data
+        addresses = [
+            {'line_1': '123 Music Street', 'city': 'Rock City', 'postal_code': '12345'},
+            {'line_1': '456 Vinyl Avenue', 'city': 'Jazz Town', 'postal_code': '23456'},
+            {'line_1': '789 Record Road', 'city': 'Blues Borough', 'postal_code': '34567'},
+            {'line_1': '101 Album Lane', 'city': 'Pop Plaza', 'postal_code': '45678'},
+            {'line_1': '202 Track Terrace', 'city': 'Classic Corner', 'postal_code': '56789'},
+        ]
+        
         created = 0
         for _ in range(count):
             user = random.choice(users)
             vinyl = random.choice(vinyls)
             quantity = random.randint(1, 3)
+            address = random.choice(addresses)
             
             order = Order.objects.create(
                 user=user,
+                email=user.email,
+                first_name=user.first_name or 'Test',
+                last_name=user.last_name or 'User',
+                phone=f'+852-{random.randint(1000, 9999)}-{random.randint(1000, 9999)}',
+                address_line_1=address['line_1'],
+                city=address['city'],
+                postal_code=address['postal_code'],
                 total_amount=vinyl.price * quantity,
+                shipping_cost=random.choice([0, 50, 100]),
                 status=random.choice(['pending', 'processing', 'shipped', 'delivered']),
-                shipping_address=f"{random.randint(100, 999)} Music St, Vinyl City, VC {random.randint(10000, 99999)}"
+                notes=random.choice(['', 'Handle with care', 'Gift wrapping requested', 'Express delivery'])
             )
             created += 1
         
         return created
+
+    def export_model_data(self, model_name, format_choice, export_folder):
+        """Export data for a specific model"""
+        if model_name not in self.MODELS:
+            self.stdout.write(f'⚠️ Unknown model: {model_name}')
+            return None
+            
+        model = self.MODELS[model_name]
+        queryset = model.objects.all()
+        
+        if not queryset.exists():
+            self.stdout.write(f'⚠️ No {model_name} data to export')
+            return None
+        
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        
+        if format_choice == 'json':
+            return self._export_json(model_name, queryset, export_folder, timestamp)
+        elif format_choice == 'csv':
+            return self._export_csv(model_name, queryset, export_folder, timestamp)
+        else:
+            self.stdout.write(f'⚠️ Unsupported format: {format_choice}')
+            return None
+    
+    def _export_json(self, model_name, queryset, export_folder, timestamp):
+        """Export data as JSON"""
+        from django.core import serializers
+        
+        file_path = export_folder / f'{model_name}_{timestamp}.json'
+        
+        try:
+            with open(file_path, 'w', encoding='utf-8') as jsonfile:
+                serialized_data = serializers.serialize('json', queryset, indent=2)
+                jsonfile.write(serialized_data)
+            
+            self.stdout.write(f'   ✅ Exported {queryset.count()} {model_name} records to JSON')
+            return file_path
+            
+        except Exception as e:
+            self.stdout.write(f'   ❌ Failed to export {model_name}: {str(e)}')
+            return None
+    
+    def _export_csv(self, model_name, queryset, export_folder, timestamp):
+        """Export data as CSV"""
+        import csv
+        
+        file_path = export_folder / f'{model_name}_{timestamp}.csv'
+        
+        try:
+            with open(file_path, 'w', newline='', encoding='utf-8') as csvfile:
+                if not queryset.exists():
+                    return None
+                
+                # Get field names from the first object
+                first_obj = queryset.first()
+                field_names = [field.name for field in first_obj._meta.fields]
+                
+                writer = csv.DictWriter(csvfile, fieldnames=field_names)
+                writer.writeheader()
+                
+                for obj in queryset:
+                    row = {}
+                    for field_name in field_names:
+                        value = getattr(obj, field_name)
+                        # Handle special types
+                        if isinstance(value, (date, datetime)):
+                            value = value.isoformat()
+                        elif value is None:
+                            value = ''
+                        row[field_name] = str(value)
+                    writer.writerow(row)
+            
+            self.stdout.write(f'   ✅ Exported {queryset.count()} {model_name} records to CSV')
+            return file_path
+            
+        except Exception as e:
+            self.stdout.write(f'   ❌ Failed to export {model_name}: {str(e)}')
+            return None
+
+    def format_model_data(self, model_name):
+        """Format and clean data for a specific model"""
+        if model_name not in self.MODELS:
+            return 0
+            
+        model = self.MODELS[model_name]
+        changes = 0
+        
+        # Get all objects for this model
+        queryset = model.objects.all()
+        
+        if not queryset.exists():
+            return 0
+        
+        # Model-specific formatting rules
+        if model_name == 'artist':
+            changes += self._format_artist_data(queryset)
+        elif model_name == 'vinyl':
+            changes += self._format_vinyl_data(queryset)
+        elif model_name == 'genre':
+            changes += self._format_genre_data(queryset)
+        elif model_name == 'label':
+            changes += self._format_label_data(queryset)
+        elif model_name == 'user':
+            changes += self._format_user_data(queryset)
+        elif model_name == 'profile':
+            changes += self._format_profile_data(queryset)
+        elif model_name == 'review':
+            changes += self._format_review_data(queryset)
+        elif model_name == 'order':
+            changes += self._format_order_data(queryset)
+        
+        return changes
+    
+    def _format_artist_data(self, queryset):
+        """Format artist data"""
+        changes = 0
+        for artist in queryset:
+            updated = False
+            
+            # Fix name capitalization
+            if artist.name and artist.name != artist.name.title():
+                artist.name = artist.name.title()
+                updated = True
+            
+            # Clean biography
+            if artist.biography and (artist.biography.startswith(' ') or artist.biography.endswith(' ')):
+                artist.biography = artist.biography.strip()
+                updated = True
+            
+            # Clean country capitalization
+            if artist.country and artist.country != artist.country.title():
+                artist.country = artist.country.title()
+                updated = True
+            
+            if updated:
+                artist.save()
+                changes += 1
+        
+        return changes
+    
+    def _format_vinyl_data(self, queryset):
+        """Format vinyl data"""
+        changes = 0
+        for vinyl in queryset:
+            updated = False
+            
+            # Fix title capitalization
+            if vinyl.title and vinyl.title != vinyl.title.title():
+                vinyl.title = vinyl.title.title()
+                updated = True
+            
+            # Ensure price is positive
+            if vinyl.price <= 0:
+                vinyl.price = 1  # Set minimum price
+                updated = True
+            
+            # Clean description
+            if vinyl.description and (vinyl.description.startswith(' ') or vinyl.description.endswith(' ')):
+                vinyl.description = vinyl.description.strip()
+                updated = True
+            
+            if updated:
+                vinyl.save()
+                changes += 1
+        
+        return changes
+    
+    def _format_genre_data(self, queryset):
+        """Format genre data"""
+        changes = 0
+        for genre in queryset:
+            updated = False
+            
+            # Fix name capitalization
+            if genre.name and genre.name != genre.name.title():
+                genre.name = genre.name.title()
+                updated = True
+            
+            # Clean description
+            if genre.description and (genre.description.startswith(' ') or genre.description.endswith(' ')):
+                genre.description = genre.description.strip()
+                updated = True
+            
+            if updated:
+                genre.save()
+                changes += 1
+        
+        return changes
+    
+    def _format_label_data(self, queryset):
+        """Format label data"""
+        changes = 0
+        for label in queryset:
+            updated = False
+            
+            # Fix name capitalization
+            if label.name and label.name != label.name.title():
+                label.name = label.name.title()
+                updated = True
+            
+            # Clean description
+            if hasattr(label, 'description') and label.description:
+                if label.description.startswith(' ') or label.description.endswith(' '):
+                    label.description = label.description.strip()
+                    updated = True
+            
+            if updated:
+                label.save()
+                changes += 1
+        
+        return changes
+    
+    def _format_user_data(self, queryset):
+        """Format user data"""
+        changes = 0
+        for user in queryset:
+            updated = False
+            
+            # Fix name capitalization
+            if user.first_name and user.first_name != user.first_name.title():
+                user.first_name = user.first_name.title()
+                updated = True
+                
+            if user.last_name and user.last_name != user.last_name.title():
+                user.last_name = user.last_name.title()
+                updated = True
+            
+            # Ensure email is lowercase
+            if user.email and user.email != user.email.lower():
+                user.email = user.email.lower()
+                updated = True
+            
+            if updated:
+                user.save()
+                changes += 1
+        
+        return changes
+    
+    def _format_profile_data(self, queryset):
+        """Format profile data"""
+        changes = 0
+        for profile in queryset:
+            updated = False
+            
+            # Clean address fields
+            if profile.address_line_1 and profile.address_line_1 != profile.address_line_1.strip().title():
+                profile.address_line_1 = profile.address_line_1.strip().title()
+                updated = True
+            
+            if profile.city and profile.city != profile.city.strip().title():
+                profile.city = profile.city.strip().title()
+                updated = True
+            
+            if profile.state and profile.state != profile.state.strip().title():
+                profile.state = profile.state.strip().title()
+                updated = True
+            
+            if profile.country and profile.country != profile.country.strip().title():
+                profile.country = profile.country.strip().title()
+                updated = True
+            
+            # Clean phone number (remove extra spaces)
+            if profile.phone and profile.phone != profile.phone.strip():
+                profile.phone = profile.phone.strip()
+                updated = True
+            
+            if updated:
+                profile.save()
+                changes += 1
+        
+        return changes
+    
+    def _format_review_data(self, queryset):
+        """Format review data"""
+        changes = 0
+        for review in queryset:
+            updated = False
+            
+            # Ensure rating is within valid range
+            if review.rating < 1:
+                review.rating = 1
+                updated = True
+            elif review.rating > 5:
+                review.rating = 5
+                updated = True
+            
+            # Clean comment
+            if review.comment and (review.comment.startswith(' ') or review.comment.endswith(' ')):
+                review.comment = review.comment.strip()
+                updated = True
+            
+            if updated:
+                review.save()
+                changes += 1
+        
+        return changes
+    
+    def _format_order_data(self, queryset):
+        """Format order data"""
+        changes = 0
+        for order in queryset:
+            updated = False
+            
+            # Fix name capitalization
+            if order.first_name and order.first_name != order.first_name.title():
+                order.first_name = order.first_name.title()
+                updated = True
+                
+            if order.last_name and order.last_name != order.last_name.title():
+                order.last_name = order.last_name.title()
+                updated = True
+            
+            # Ensure email is lowercase
+            if order.email and order.email != order.email.lower():
+                order.email = order.email.lower()
+                updated = True
+            
+            # Clean address
+            if order.address_line_1:
+                cleaned_address = order.address_line_1.strip().title()
+                if order.address_line_1 != cleaned_address:
+                    order.address_line_1 = cleaned_address
+                    updated = True
+            
+            if order.city and order.city != order.city.title():
+                order.city = order.city.title()
+                updated = True
+            
+            if updated:
+                order.save()
+                changes += 1
+        
+        return changes

@@ -13,4 +13,12 @@ urlpatterns = [
     
     # Checkout
     path('checkout/', views.checkout_view, name='checkout'),
+
+    # Stripe Payment URLs
+    path('create-checkout-session/', views.create_checkout_session, name='create_checkout_session'),
+    path('payment-success/', views.payment_success, name='payment_success'),
+    path('payment-cancel/', views.payment_cancel, name='payment_cancel'),
+
+    # Order without payment
+    path('place-order-no-payment/', views.place_order_no_payment, name='place_order_no_payment'),
 ]

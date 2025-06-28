@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Payment Cancelled{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Cancel Card -->
+            <div class="card border-warning">
+                <div class="card-header bg-warning text-dark text-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-times-circle fa-2x mb-2"></i>
+                        <br>Payment Cancelled
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <h5 class="text-warning">No worries, your cart is still here!</h5>
+                        <p class="text-muted">You can continue shopping or try paying again when you're ready.</p>
+                    </div>
+                    
+                    <!-- Reassurance Message -->
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle"></i> Your Items Are Safe</h6>
+                        <ul class="mb-0">
+                            <li>Your cart items are still saved</li>
+                            <li>No charges were made to your card</li>
+                            <li>You can checkout again anytime</li>
+                            <li>Need help? Contact our customer service</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="text-center mt-4">
+                        <a href="{% url 'cart:view' %}" class="btn btn-primary me-3">
+                            <i class="fas fa-shopping-cart"></i> Back to Cart
+                        </a>
+                        <a href="{% url 'vinyl:list' %}" class="btn btn-outline-secondary me-3">
+                            <i class="fas fa-compact-disc"></i> Continue Shopping
+                        </a>
+                        <a href="{% url 'home:contact' %}" class="btn btn-outline-info">
+                            <i class="fas fa-question-circle"></i> Need Help?
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Popular Items Suggestion -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-star"></i> Maybe You'll Like These Popular Items
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">While you're here, check out what other vinyl lovers are buying!</p>
+                    <a href="{% url 'vinyl:list' %}" class="btn btn-sm btn-outline-primary">
+                        View Popular Vinyl Records
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

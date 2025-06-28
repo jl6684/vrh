@@ -261,3 +261,12 @@ MESSAGE_TAGS = {
     messages.ERROR  : 'danger',
     messages.SUCCESS: 'success'
 }
+
+# Stripe Configuration
+# Get your keys from: https://dashboard.stripe.com/test/apikeys
+STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY', 'pk_test_...')  # Add your test publishable key here
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', 'sk_test_...')  # Add your test secret key here
+STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET', '')  # Optional for now
+
+# Currency for your vinyl shop (Hong Kong Dollars)
+STRIPE_CURRENCY = 'hkd'

@@ -207,20 +207,37 @@
                             {{ form.order_notes }}
                         </div>
                         
-                        <!-- Payment Note -->
-                        <div class="alert alert-info">
-                            <h6><i class="fas fa-info-circle"></i> Payment Information</h6>
-                            <p class="mb-0">Payment processing is not implemented in this demo. 
-                            Your order will be created and you'll receive a confirmation email.</p>
+                        <!-- Payment Section -->
+                        <div class="alert alert-success">
+                            <h6><i class="fas fa-shield-alt"></i> Secure Payment with Stripe</h6>
+                            <p class="mb-0">Your payment information is processed securely by Stripe. 
+                            We accept all major credit cards and your data is protected.</p>
                         </div>
                         
                         <div class="d-flex justify-content-between">
                             <a href="{% url 'cart:view' %}" class="btn btn-outline-secondary">
                                 <i class="fas fa-arrow-left"></i> Back to Cart
                             </a>
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-credit-card"></i> Place Order
-                            </button>
+                            
+                            <div class="btn-group">
+                                {% if user.is_authenticated %}
+                                    <!-- Place Order Without Payment -->
+                                    <a href="{% url 'cart:place_order_no_payment' %}" class="btn btn-success btn-lg me-2">
+                                        <i class="fas fa-shopping-bag"></i> Place Order (${{ total }})
+                                        <br><small>Pay Later</small>
+                                    </a>
+                                    
+                                    <!-- Pay with Stripe -->
+                                    <a href="{% url 'cart:create_checkout_session' %}" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-credit-card"></i> Pay with Stripe (${{ total }})
+                                        <br><small>Pay Now</small>
+                                    </a>
+                                {% else %}
+                                    <a href="{% url 'accounts:login' %}?next={% url 'cart:checkout' %}" class="btn btn-warning btn-lg">
+                                        <i class="fas fa-sign-in-alt"></i> Login to Continue
+                                    </a>
+                                {% endif %}
+                            </div>
                         </div>
                     </form>
                 </div>
