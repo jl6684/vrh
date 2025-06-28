@@ -9,6 +9,13 @@ from django.db.models import Sum, F
 from .models import Cart, CartItem
 from apps.vinyl.models import VinylRecord
 import json
+import stripe
+from django.conf import settings
+from django.urls import reverse
+from apps.orders.models import Order
+
+# Configure Stripe
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 def get_or_create_cart(request):
@@ -284,3 +291,160 @@ def checkout_view(request):
     }
     
     return render(request, 'cart/checkout.html', context)
+
+
+@login_required
+def create_checkout_session(request):
+    """Create Stripe checkout session"""
+    # Debug: Check if API key is set
+    print(f"DEBUG: Stripe API key set: {stripe.api_key[:20] if stripe.api_key else 'NOT SET'}")
+    print(f"DEBUG: Settings STRIPE_SECRET_KEY: {settings.STRIPE_SECRET_KEY[:20] if settings.STRIPE_SECRET_KEY else 'NOT SET'}")
+    
+    cart = get_or_create_cart(request)
+    cart_items = CartItem.objects.filter(cart=cart).select_related('vinyl_record')
+    
+    if not cart_items.exists():
+        messages.error(request, 'Your cart is empty!')
+        return redirect('cart:view')
+    
+    try:
+        # Build line items for Stripe
+        line_items = []
+        total_amount = 0
+        
+        for item in cart_items:
+            line_item = {
+                'price_data': {
+                    'currency': settings.STRIPE_CURRENCY,
+                    'product_data': {
+                        'name': item.vinyl_record.title,
+                        'description': f'by {item.vinyl_record.artist.name}',
+                    },
+                    'unit_amount': int(item.vinyl_record.price * 100),  # Convert to cents
+                },
+                'quantity': item.quantity,
+            }
+            line_items.append(line_item)
+            total_amount += item.get_total_price()
+        
+        # Create Stripe checkout session
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=line_items,
+            mode='payment',
+            customer_email=request.user.email,
+            success_url=request.build_absolute_uri(reverse('cart:payment_success')) + '?session_id={CHECKOUT_SESSION_ID}',
+            cancel_url=request.build_absolute_uri(reverse('cart:payment_cancel')),
+            metadata={
+                'user_id': request.user.id,
+                'total_amount': str(total_amount),
+            }
+        )
+        
+        # Store session ID in session for later use
+        request.session['stripe_session_id'] = checkout_session.id
+        
+        return redirect(checkout_session.url, code=303)
+        
+    except stripe.error.StripeError as e:
+        messages.error(request, f'Payment error: {str(e)}')
+        return redirect('cart:view')
+    except Exception as e:
+        messages.error(request, f'An error occurred: {str(e)}')
+        return redirect('cart:view')
+
+
+def payment_success(request):
+    """Handle successful payment"""
+    session_id = request.GET.get('session_id')
+    
+    if not session_id:
+        messages.error(request, 'Payment session not found!')
+        return redirect('cart:view')
+    
+    try:
+        # Retrieve the session from Stripe
+        session = stripe.checkout.Session.retrieve(session_id)
+        
+        if session.payment_status == 'paid':
+            # Get cart and create order
+            cart = get_or_create_cart(request)
+            cart_items = CartItem.objects.filter(cart=cart).select_related('vinyl_record')
+            
+            # Create order
+            order = Order.objects.create(
+                user=request.user,
+                email=request.user.email,
+                first_name=request.user.first_name or 'Customer',
+                last_name=request.user.last_name or '',
+                address_line_1='To be updated',  # User can update this later
+                city='Hong Kong',
+                postal_code='000000',
+                total_amount=int(float(session.metadata.get('total_amount', 0))),
+                status='confirmed',
+                notes=f'Stripe Payment ID: {session.payment_intent}'
+            )
+            
+            # Clear the cart
+            cart_items.delete()
+            
+            messages.success(request, f'Payment successful! Order #{order.order_id} has been created.')
+            return render(request, 'cart/payment_success.html', {
+                'order': order,
+                'session': session
+            })
+        else:
+            messages.error(request, 'Payment was not completed successfully.')
+            return redirect('cart:view')
+            
+    except stripe.error.StripeError as e:
+        messages.error(request, f'Payment verification failed: {str(e)}')
+        return redirect('cart:view')
+
+
+def payment_cancel(request):
+    """Handle cancelled payment"""
+    messages.info(request, 'Payment was cancelled. Your cart is still available.')
+    return render(request, 'cart/payment_cancel.html')
+
+
+@login_required
+def place_order_no_payment(request):
+    """Create order without payment (pay later option)"""
+    cart = get_or_create_cart(request)
+    cart_items = CartItem.objects.filter(cart=cart).select_related('vinyl_record')
+    
+    if not cart_items.exists():
+        messages.error(request, 'Your cart is empty!')
+        return redirect('cart:view')
+    
+    try:
+        # Calculate total
+        total_amount = sum(item.get_total_price() for item in cart_items)
+        
+        # Create order
+        order = Order.objects.create(
+            user=request.user,
+            email=request.user.email,
+            first_name=request.user.first_name or 'Customer',
+            last_name=request.user.last_name or '',
+            address_line_1='To be updated',  # User can update this later
+            city='Hong Kong',
+            postal_code='000000',
+            total_amount=int(total_amount),
+            status='pending',  # Status: pending (no payment yet)
+            notes='Order placed without payment - Payment pending'
+        )
+        
+        # Clear the cart
+        cart_items.delete()
+        
+        messages.success(request, f'Order #{order.order_id} has been created! You can pay later.')
+        return render(request, 'cart/order_success.html', {
+            'order': order,
+            'payment_required': True
+        })
+        
+    except Exception as e:
+        messages.error(request, f'An error occurred: {str(e)}')
+        return redirect('cart:view')
