@@ -16,15 +16,52 @@ This document provides instructions for importing and deleting vinyl record data
   - `country` - Artist's country of origin
   - `label` - Record label (can be left blank)
 
+## Python Package Prerequisites
+
+The following Python packages must be installed in your virtual environment to support the three data import methods:
+
+### Required Packages
+
+1. **gspread** - Google Sheets API wrapper
+   - **Purpose**: Enables reading data from Google Sheets
+   - **Install**: `pip install gspread`
+   - **Usage**: Used for METHOD 2 (Google Sheets import)
+
+2. **oauth2client** - Google OAuth 2.0 authentication
+   - **Purpose**: Handles authentication for Google Sheets API
+   - **Install**: `pip install oauth2client`
+   - **Usage**: Required for Google Sheets authentication
+
+3. **openpyxl** - Excel file processing
+   - **Purpose**: Reads and processes Excel (.xlsx) files
+   - **Install**: `pip install openpyxl`
+   - **Usage**: Used for METHOD 3 (Excel file import)
+
+### Installation Command
+```bash
+pip install gspread oauth2client openpyxl
+```
+
+**Note**: These packages are automatically imported by the data import system. If any package is missing, the import will fail with a clear error message indicating which package needs to be installed.
+
 ## Available Data Files
 The following files are available in the `data-for-import` folder:
-- `vinyldata.csv` (default)
-- `vinyldata1.csv`
-- `data-error.csv`
-- `vinyldata-ex.xlsx`
-- `vinyldata-ex1.xlsx`
-- `vinyldata-dup.xlsx`
-- `pop-test-data.csv` (new test data)
+
+### Main Data Files
+- `vinyldata.csv` (default) - 21 records
+- `vinyldata1.csv` - 26 records  
+- `vinyldata-ex.xlsx` - 21 records
+- `vinyldata-ex1.xlsx` - 24 records
+- `vinyldata-dup.xlsx` - 14 records (duplicate data for testing)
+
+### Test/Error Files
+- `vinyldata1-dup.csv` - 8 records (duplicate data for testing)
+- `vinyldata1-error.csv` - 6 records (contains formatting errors for testing)
+
+### Trial Data Subfolder
+- `trial-fake-data/test-missing-fields.csv` - 7 records (test data with missing fields)
+
+**Note**: Files with "error" or "dup" in their names are intended for testing error handling and duplicate detection features. Files in the `trial-fake-data` subfolder are for testing specific scenarios like missing data handling.
 
 ## Data Import Commands
 
@@ -52,7 +89,9 @@ python manage.py import_vinyl_data -gs Sheet1
 # Long form
 python manage.py import_vinyl_data --gs-file Sheet1
 ```
-- You can now use any worksheet name from your Google Sheet. If the worksheet does not exist, the error message will list all available worksheet names in the sheet for your reference.
+- You can now use any worksheet name from your Google Sheet. If the worksheet does not exist, the error message will list all available worksheet names in the sheet for your reference. 
+**Note**: The Google Sheets feature requires proper Google API credentials set in the `GOOGLE_CREDEN` environment variable. If credentials are missing or invalid, the import will fail with a clear error message.
+
 
 #### 4. Import Data from Excel File
 ```sh
@@ -82,6 +121,14 @@ You can now control how missing data is handled using the `-md` or `--missing-da
 
 If the `year` field is missing, the current year will be used (since the database requires an integer). If the `label` field is missing, the value 'Unknown' will be used and a label with that name will be created if it does not exist.
 
+**Data Normalization Features:**
+The import process automatically normalizes delimiters in artist, genre, and label fields:
+- **Commas** (`,`), **pipes** (`|`), and **"and"** are converted to **"&"** with proper spacing
+- **Example**: `"Artist1, Artist2"` → `"Artist1 & Artist2"`
+- **Example**: `"Artist1 | Artist2"` → `"Artist1 & Artist2"`
+- **Example**: `"Artist1 and Artist2"` → `"Artist1 & Artist2"`
+- All fields are automatically stripped of leading/trailing whitespace
+
 #### Examples:
 Import and skip rows with missing data:
 ```sh
@@ -99,6 +146,12 @@ python manage.py import_vinyl_data -cs vinyldata1.csv -md fill
 
 # Long form
 python manage.py import_vinyl_data --csv-file vinyldata1.csv --missing-data fill
+```
+
+Import from subfolder:
+```sh
+# Import from trial-fake-data subfolder
+python manage.py import_vinyl_data -cs trial-fake-data/test-missing-fields.csv -md fill
 ```
 
 Get help:
@@ -234,6 +287,9 @@ python manage.py import_vinyl_data -gs Sheet2 -md skip
 
 # Excel with short form
 python manage.py import_vinyl_data -ex vinyldata-ex1.xlsx -md fill
+
+# Import from subfolder
+python manage.py import_vinyl_data -cs trial-fake-data/test-missing-fields.csv -md fill
 ```
 
 ### Delete Examples
@@ -254,12 +310,6 @@ python manage.py delete_vinyl_data -artist --force-delete
 python manage.py delete_vinyl_data -genre -label --test-only
 ```
 
-## User Management
-
-1. **Create Admin Users** (if they don't exist):
-   - Admin user: `admin` / `admin123`
-   - Test user: `testuser` / `testpass123`
-
 ## Data Processing Workflow
 
 ### Import Process
@@ -270,18 +320,24 @@ When you run the `import_vinyl_data` command, it will:
    - Extract unique genres, labels, artists, and vinyl records
    - Display the number of records loaded
 
-2. **Detect Duplicates**:
+2. **Validate and Normalize Data**:
+   - Perform comprehensive data integrity validation
+   - Normalize delimiters (commas, pipes, "and" → "&")
+   - Handle missing data according to the specified strategy
+   - Validate year ranges and text field types
+
+3. **Detect Duplicates**:
    - Check which vinyl records already exist in the database
    - Display list of existing records that won't be recreated
    - Show count of new records that will be created
 
-3. **Create Database Records**:
+4. **Create Database Records**:
    - Create Genre objects from unique genres
    - Create Label objects from unique labels
    - Create Artist objects with type and country information
    - Create VinylRecord objects with all details (only new records)
 
-4. **Provide Feedback**:
+5. **Provide Feedback**:
    - Show which records were created
    - Display summary statistics
    - List any errors encountered
@@ -329,8 +385,12 @@ If missing data is encountered:
 ```
 Creating sample data from vinyldata1.csv...
 Successfully loaded 25 records from vinyldata1.csv
-Created admin user: admin/admin123
-Created test user: testuser/testpass123
+Validating data integrity...
+Data extraction summary:
+  - 8 unique genres found
+  - 17 unique labels found
+  - 18 unique artists found
+  - 25 vinyl records extracted from 25 total rows
 Created genre: Rock
 Created genre: Pop
 Created genre: Jazz
@@ -341,8 +401,8 @@ Created vinyl: Highway 61 Revisited by Bob Dylan
 
 Sample data created successfully!
 - 8 genres
-- 5 labels
-- 15 artists
+- 17 labels
+- 18 artists
 - 25 vinyl records
 
 Login credentials:
@@ -356,12 +416,12 @@ Details information please refer to DataMenu.md
 ### Import Output with Duplicate Detection
 ```
 Creating sample data from Excel file: vinyldata-dup.xlsx...
-Successfully loaded 3 records from vinyldata-dup.xlsx
+Successfully loaded 14 records from vinyldata-dup.xlsx
 Duplicate detection: 3 records already exist in database:
   - "天才與白痴" by 許冠傑
   - "賣身契" by 許冠傑
   - "財神到" by 許冠傑
-  0 new records will be created.
+  11 new records will be created.
 
 Sample data created successfully!
 - 11 genres
@@ -447,12 +507,16 @@ The import command includes:
 - **Multiple parsing attempts** for CSVs
 - **Column count verification** for each row
 - **Configurable missing data handling** via `-md` or `--missing-data` argument
-- **Dynamic worksheet validation** for Google Sheets: if a worksheet is not found, the error will list all available worksheet names.
+- **Dynamic worksheet validation** for Google Sheets: if a worksheet is not found, the error will list all available worksheet names
+- **Comprehensive data integrity validation** including year range and text field validation
+- **Automatic delimiter normalization** (commas, pipes, "and" → "&")
+- **Column shift detection** to identify unquoted commas in data fields
+- **Pre-import CSV structure checking** to validate column counts before processing
 
 ## Troubleshooting
 
 ### Common Issues:
-1. **File Not Found**: Check that the file exists in the `data-for-import` folder
+1. **File Not Found**: Check that the file exists in the `data-for-import` folder or its subfolders
 2. **Permission Errors**: Ensure the Django application has read access to the file
 3. **Data Format Errors**: Verify that `year` and `price` columns contain valid integers
 4. **Encoding Issues**: Make sure the file is saved with UTF-8 encoding
@@ -460,12 +524,13 @@ The import command includes:
 6. **Worksheet Not Found**: If you get an error about a missing worksheet, check the list of available worksheet names in the error message and use one of those.
 7. **Deletion Confirmation**: Use `--test-only` to preview what will be deleted before actually deleting
 8. **Force Deletion**: Use `--force-delete` to skip confirmation prompts (use with caution)
+9. **Subfolder Files**: Files in subfolders (like `trial-fake-data/`) can be imported by specifying the full path relative to the `data-for-import` folder
 
 ### Getting Help:
 - Use `python manage.py import_vinyl_data --help` for import command options
 - Use `python manage.py delete_vinyl_data --help` for delete command options
 - Check the console output for specific error messages
-- Verify file format matches the required structure 
+- Verify file format matches the required structure
 
 ## Data Validation and Error Handling
 
@@ -522,7 +587,7 @@ The system detects when data appears in wrong columns due to unquoted commas:
 
 ### Example: Fixing a Problematic CSV File
 
-**Original problematic file** (`data-error.csv`):
+**Original problematic file** (`vinyldata1-error.csv`):
 ```csv
 title,artist,genre,year,price,type,country,label
 Beethoven-Violin Concerto,Salvatore Accardo,Gewandhausorchester Leipzig, Kurt Masur,Classical,1981,117,Classical,Italy,Philips
@@ -534,11 +599,34 @@ Beethoven-Violin Concerto,Salvatore Accardo,Gewandhausorchester Leipzig, Kurt Ma
 - Price 117 appears in year column
 - Validation errors: year range, text field validation
 
-**Corrected file** (`data-error-fixed.csv`):
+**Corrected file** (properly formatted):
 ```csv
 title,artist,genre,year,price,type,country,label
 "Beethoven-Violin Concerto","Salvatore Accardo,Gewandhausorchester Leipzig, Kurt Masur",Classical,1981,117,Classical,Italy,Philips
 ```
+
+### Advanced Validation Functions
+
+The import system includes several specialized validation functions:
+
+#### 1. `validate_data_integrity()`
+- Comprehensive validation of all data fields
+- Checks year ranges (1900 to current year)
+- Validates text fields contain only text values
+- Detects column shifts from unquoted commas
+- Returns detailed error messages for each issue
+
+#### 2. `precheck_csv_column_count()`
+- Validates CSV structure before processing
+- Checks that each row has exactly 8 columns
+- Provides specific error messages for column count mismatches
+- Helps identify unquoted commas in data fields
+
+#### 3. `read_csv_data_with_skip()`
+- Alternative CSV reading function for skip strategy
+- Skips rows with column count mismatches
+- Reports skipped rows in output
+- Used when `-md skip` is specified
 
 ### Validation Error Messages
 
@@ -550,4 +638,4 @@ Data validation failed. Please fix the following issues:
   - Row 4: Price field contains non-numeric value 'United Kingdom', possible column shift detected
 
 To bypass validation errors, use: -md skip or -md fill
-``` 
+```
