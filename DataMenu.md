@@ -1,7 +1,7 @@
 # Data Handling Menu
 
 ## Overview
-This document provides instructions for importing and deleting vinyl record data in the Django application using management commands. Data can be imported from CSV, Google Sheets, or Excel files stored in the `data-for-import` folder, and deleted using the `delete_vinyl_data` command.
+This document provides instructions for importing, deleting, and exporting vinyl record data in the Django application using management commands. Data can be imported from CSV, Google Sheets, or Excel files stored in the `data-for-import` folder, deleted using the `delete_vinyl_data` command, and exported to Excel format using the `export_vrh_data` command.
 
 ## Prerequisites
 - Django project is set up and running
@@ -37,12 +37,17 @@ The following Python packages must be installed in your virtual environment to s
    - **Install**: `pip install openpyxl`
    - **Usage**: Used for METHOD 3 (Excel file import)
 
+4. **pandas** - Data manipulation and analysis
+   - **Purpose**: Handles data processing and Excel export operations
+   - **Install**: `pip install pandas`
+   - **Usage**: Used for data export functionality
+
 ### Installation Command
 ```bash
-pip install gspread oauth2client openpyxl
+pip install gspread oauth2client openpyxl pandas
 ```
 
-**Note**: These packages are automatically imported by the data import system. If any package is missing, the import will fail with a clear error message indicating which package needs to be installed.
+**Note**: These packages are automatically imported by the data import and export systems. If any package is missing, the operation will fail with a clear error message indicating which package needs to be installed.
 
 ## Available Data Files
 The following files are available in the `data-for-import` folder:
@@ -269,7 +274,129 @@ python manage.py delete_vinyl_data --help
 - `--test-only` allows safe testing without any data loss
 - Foreign key constraints are respected (vinyl records deleted first)
 
-## Example Usage with Mixed Arguments
+## Data Export Commands
+
+### Export Data Using `export_vrh_data`
+
+#### Overview
+The `export_vrh_data` command exports all VRH database data to an Excel file with multiple worksheets, combining related data from different tables into comprehensive datasets.
+
+#### Features
+- **5 Worksheets**: vinyl, orders, cart, reviews, wishlist
+- **Combined Data**: Each worksheet contains related data from multiple tables
+- **Timezone Handling**: Automatically converts timezone-aware datetimes to naive format for Excel compatibility
+- **Custom Filenames**: Specify custom output filenames
+- **Automatic Directory Creation**: Creates `data-export` directory if it doesn't exist
+- **Overwrite Protection**: Warns when overwriting existing files
+
+#### 1. Export Data Using Default Filename
+```sh
+python manage.py export_vrh_data
+```
+This exports data to `data-export/vrh_export.xlsx`
+
+#### 2. Export Data Using Custom Filename
+```sh
+python manage.py export_vrh_data custom_name.xlsx
+```
+This exports data to `data-export/custom_name.xlsx`
+
+#### 3. Get Help
+```sh
+python manage.py export_vrh_data --help
+```
+
+#### Export Arguments Summary
+
+| Argument | Description | Default |
+|----------|-------------|---------|
+| `filename` | Output Excel filename | `vrh_export.xlsx` |
+
+#### Export Worksheet Structure
+
+**1. vinyl Worksheet**
+- Combines data from: `vinyl_vinylrecord`, `vinyl_artist`, `vinyl_genre`, `vinyl_label`
+- One row per vinyl record with all related artist, genre, and label information
+- Fields include: vinyl details, artist information, genre details, label information
+
+**2. orders Worksheet**
+- Combines data from: `auth_user`, `orders_order`, `orders_orderitem`
+- One row per order item with repeated order and user data
+- Fields include: user details, order information, order item details
+
+**3. cart Worksheet**
+- Combines data from: `auth_user`, `cart_cart`, `cart_cartitem`
+- One row per cart item with repeated cart and user data
+- Handles anonymous carts (user data may be None)
+- Fields include: user details, cart information, cart item details
+
+**4. reviews Worksheet**
+- Combines data from: `auth_user`, `reviews_review`
+- One row per review with user data
+- Fields include: user details, review information
+
+**5. wishlist Worksheet**
+- Combines data from: `auth_user`, `wishlist_wishlist`, `wishlist_wishlistitem`
+- One row per wishlist item with repeated wishlist and user data
+- Fields include: user details, wishlist information, wishlist item details
+
+#### Export Process
+When you run the `export_vrh_data` command, it will:
+
+1. **Setup**:
+   - Create `data-export` directory if it doesn't exist
+   - Check for existing files and warn about overwriting
+   - Initialize Excel writer with openpyxl engine
+
+2. **Data Processing**:
+   - Query each data type with optimized database queries
+   - Combine related data from multiple tables
+   - Convert timezone-aware datetimes to naive format
+   - Handle null values and missing relationships
+
+3. **Export**:
+   - Create pandas DataFrames for each data type
+   - Export to separate worksheets in the Excel file
+   - Display progress messages for each worksheet
+
+4. **Completion**:
+   - Show success message with file path
+   - Display record counts for each worksheet
+
+#### Example Export Output
+```
+Creating new file: /path/to/data-export/vrh_export.xlsx
+Starting VRH data export to /path/to/data-export/vrh_export.xlsx...
+Exporting vinyl records data...
+  - Exported 68 vinyl records
+Exporting orders data...
+  - Exported 45 order records
+Exporting cart data...
+  - Exported 23 cart records
+Exporting reviews data...
+  - Exported 12 review records
+Exporting wishlist data...
+  - Exported 8 wishlist records
+Successfully exported VRH data to /path/to/data-export/vrh_export.xlsx
+```
+
+#### Export Command Behavior
+
+**Default Behavior:**
+1. Creates `data-export` directory if it doesn't exist
+2. Warns if output file already exists
+3. Exports all data types to separate worksheets
+4. Shows progress for each worksheet
+5. Displays final success message
+
+**Features:**
+- **Efficient Queries**: Uses `select_related` and `prefetch_related` for optimal database performance
+- **Data Integrity**: Maintains relationships between tables in combined datasets
+- **Excel Compatibility**: Handles timezone conversion and data formatting
+- **Error Handling**: Graceful handling of missing relationships and null values
+- **Progress Feedback**: Real-time updates during export process
+
+## Example Usage with All Commands
 
 ### Import Examples
 ```bash
@@ -310,214 +437,44 @@ python manage.py delete_vinyl_data -artist --force-delete
 python manage.py delete_vinyl_data -genre -label --test-only
 ```
 
-## Data Processing Workflow
+### Export Examples
+```bash
+# Export with default filename
+python manage.py export_vrh_data
 
-### Import Process
-When you run the `import_vinyl_data` command, it will:
+# Export with custom filename
+python manage.py export_vrh_data my_export.xlsx
 
-1. **Read Data**:
-   - Load the specified file (CSV, Google Sheet, or Excel)
-   - Extract unique genres, labels, artists, and vinyl records
-   - Display the number of records loaded
-
-2. **Validate and Normalize Data**:
-   - Perform comprehensive data integrity validation
-   - Normalize delimiters (commas, pipes, "and" → "&")
-   - Handle missing data according to the specified strategy
-   - Validate year ranges and text field types
-
-3. **Detect Duplicates**:
-   - Check which vinyl records already exist in the database
-   - Display list of existing records that won't be recreated
-   - Show count of new records that will be created
-
-4. **Create Database Records**:
-   - Create Genre objects from unique genres
-   - Create Label objects from unique labels
-   - Create Artist objects with type and country information
-   - Create VinylRecord objects with all details (only new records)
-
-5. **Provide Feedback**:
-   - Show which records were created
-   - Display summary statistics
-   - List any errors encountered
-   - Report skipped or filled rows if using `-md skip` or `-md fill`
-
-### Delete Process
-When you run the `delete_vinyl_data` command, it will:
-
-1. **Analyze Data**:
-   - Count records in tables to be deleted
-   - Show summary of what will be deleted
-
-2. **Confirm Action** (unless `--force-delete` or `--test-only`):
-   - Display warning message with record counts
-   - Prompt for user confirmation
-
-3. **Execute Deletion**:
-   - Delete vinyl records first (to respect foreign keys)
-   - Delete other specified tables
-   - Show deletion results
-
-## Error Handling
-
-### Import Errors
-If the specified file doesn't exist, the command will:
-- Display an error message
-- Show the full path where it looked for the file
-- List all available files in the `data-for-import` folder
-
-If you specify a worksheet name for Google Sheets that does not exist, the error message will show all available worksheet names in the sheet so you can correct your input.
-
-If missing data is encountered:
-- With `-md error` or `--missing-data error` (default), the import will stop and show a detailed error message for the first problematic row.
-- With `-md skip` or `--missing-data skip`, the import will continue, and each skipped row will be reported in the output.
-- With `-md fill` or `--missing-data fill`, the import will continue, and each row with filled fields will be reported in the output.
-
-### Delete Errors
-- **No records found**: Command will warn if no records are found to delete
-- **Database errors**: Any database errors will be displayed with details
-- **Cancellation**: User can cancel deletion at confirmation prompt
-
-## Example Output
-
-### Import Output
-```
-Creating sample data from vinyldata1.csv...
-Successfully loaded 25 records from vinyldata1.csv
-Validating data integrity...
-Data extraction summary:
-  - 8 unique genres found
-  - 17 unique labels found
-  - 18 unique artists found
-  - 25 vinyl records extracted from 25 total rows
-Created genre: Rock
-Created genre: Pop
-Created genre: Jazz
-Created artist: The Beatles (band)
-Created artist: Bob Dylan (male)
-Created vinyl: Abbey Road by The Beatles
-Created vinyl: Highway 61 Revisited by Bob Dylan
-
-Sample data created successfully!
-- 8 genres
-- 17 labels
-- 18 artists
-- 25 vinyl records
-
-Login credentials:
-Admin: admin / admin123
-User: testuser / testpass123
-
-To delete vinyl data, please use: python manage.py delete_vinyl_data
-Details information please refer to DataMenu.md
+# Export with descriptive filename
+python manage.py export_vrh_data vrh_data_$(date +%Y%m%d).xlsx
 ```
 
-### Import Output with Duplicate Detection
+## Complete Data Workflow
+
+### Typical Data Management Workflow
+1. **Import Data**: Use `import_vinyl_data` to populate the database
+2. **Verify Data**: Check the application to ensure data is correctly imported
+3. **Export Data**: Use `export_vrh_data` to create backup or analysis files
+4. **Clean Data**: Use `delete_vinyl_data` when needed to clear data
+5. **Re-import**: Import fresh data as needed
+
+### Data Backup Strategy
+```bash
+# Create daily backup
+python manage.py export_vrh_data vrh_backup_$(date +%Y%m%d).xlsx
+
+# Create weekly backup
+python manage.py export_vrh_data vrh_weekly_$(date +%Y%m%d).xlsx
+
+# Create before major changes
+python manage.py export_vrh_data vrh_before_changes.xlsx
 ```
-Creating sample data from Excel file: vinyldata-dup.xlsx...
-Successfully loaded 14 records from vinyldata-dup.xlsx
-Duplicate detection: 3 records already exist in database:
-  - "天才與白痴" by 許冠傑
-  - "賣身契" by 許冠傑
-  - "財神到" by 許冠傑
-  11 new records will be created.
-
-Sample data created successfully!
-- 11 genres
-- 35 labels
-- 43 artists
-- 61 vinyl records (total in database)
-- 5 users
-- 5 user profiles
-
-Login credentials:
-Admin: admin / admin123
-User: testuser / testpass123
-
-To delete vinyl data, please use: python manage.py delete_vinyl_data
-Details information please refer to DataMenu.md
-```
-
-### Delete Output
-```
-About to delete:
-- 68 vinyl records
-- 49 artists
-- 11 genres
-- 40 labels
-
-This action cannot be undone!
-Are you sure you want to continue? (yes/no): yes
-Deleted 68 vinyl records
-Deleted 49 artists
-Deleted 11 genres
-Deleted 40 labels
-
-Successfully deleted vinyl data!
-Total records deleted: 168
-```
-
-### Test-Only Output
-```
-TEST ONLY - Would delete:
-- 68 vinyl records
-- 49 artists
-- 11 genres
-- 40 labels
-Total: 168 records
-```
-
-## Tips for Data File Preparation
-
-1. **Column Headers**: Ensure your file has the exact column names shown above
-2. **Data Format**: 
-   - `year` and `price` should be integers
-   - `title`, `artist`, `genre`, `type`, `country` should be text
-   - `label` can be left blank (empty string)
-3. **Encoding**: Use UTF-8 encoding for proper handling of special characters
-4. **Quotes**: Use double quotes around text values if they contain commas
-5. **Field Separation**: Each row must have exactly 8 fields separated by commas
-6. **Missing Data Handling**: Use the `-md` or `--missing-data` option to control how missing or incomplete rows are processed during import.
-
-## Common Data Input Errors and Solutions
-
-### Error: "Expected 8 fields in line X, saw Y"
-**Cause**: A field contains unquoted commas, causing the parser to split it into multiple fields.
-
-**Solution**: Quote fields that contain commas:
-```
-"Beethoven-Violin Concerto","Salvatore Accardo, Gewandhausorchester Leipzig, Kurt Masur",Classical,1981,117,Classical,Italy,Philips
-```
-
-### How to Handle Fields with Commas
-
-1. **Wrap the entire field in double quotes**
-2. **Use consistent quoting style**
-   - You can quote all text fields for consistency
-   - Example: `"Album Title","Artist Name","Rock",1970,25,"band","Country","Label"`
-
-3. **Check for trailing commas**
-
-### Validation Features
-
-The import command includes:
-- **Automatic structure validation**
-- **Detailed error messages** for problematic rows
-- **Multiple parsing attempts** for CSVs
-- **Column count verification** for each row
-- **Configurable missing data handling** via `-md` or `--missing-data` argument
-- **Dynamic worksheet validation** for Google Sheets: if a worksheet is not found, the error will list all available worksheet names
-- **Comprehensive data integrity validation** including year range and text field validation
-- **Automatic delimiter normalization** (commas, pipes, "and" → "&")
-- **Column shift detection** to identify unquoted commas in data fields
-- **Pre-import CSV structure checking** to validate column counts before processing
 
 ## Troubleshooting
 
 ### Common Issues:
 1. **File Not Found**: Check that the file exists in the `data-for-import` folder or its subfolders
-2. **Permission Errors**: Ensure the Django application has read access to the file
+2. **Permission Errors**: Ensure the Django application has read/write access to the directories
 3. **Data Format Errors**: Verify that `year` and `price` columns contain valid integers
 4. **Encoding Issues**: Make sure the file is saved with UTF-8 encoding
 5. **Missing Data**: Use `-md skip` or `-md fill` to avoid import failures due to incomplete rows
@@ -525,10 +482,13 @@ The import command includes:
 7. **Deletion Confirmation**: Use `--test-only` to preview what will be deleted before actually deleting
 8. **Force Deletion**: Use `--force-delete` to skip confirmation prompts (use with caution)
 9. **Subfolder Files**: Files in subfolders (like `trial-fake-data/`) can be imported by specifying the full path relative to the `data-for-import` folder
+10. **Export Directory**: The export command automatically creates the `data-export` directory if it doesn't exist
+11. **Excel Compatibility**: Export automatically handles timezone conversion for Excel compatibility
 
 ### Getting Help:
 - Use `python manage.py import_vinyl_data --help` for import command options
 - Use `python manage.py delete_vinyl_data --help` for delete command options
+- Use `python manage.py export_vrh_data --help` for export command options
 - Check the console output for specific error messages
 - Verify file format matches the required structure
 
