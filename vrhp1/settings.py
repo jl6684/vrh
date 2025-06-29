@@ -72,7 +72,6 @@ INSTALLED_APPS = [
     'apps.orders',
     'apps.wishlist',
     'apps.reviews',
-    'main',  # Keep for migration purposes, will remove later
 ]
 
 # Required for django-allauth

@@ -38,7 +38,4 @@ urlpatterns = [
     
     # Admin
     path('admin/', admin.site.urls),
-    
-    # Legacy support (will migrate existing data)
-    path('main/', include('main.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
