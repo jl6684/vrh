@@ -27,7 +27,7 @@ def register_view(request):
             user = form.save()
             username = form.cleaned_data.get('username')
             messages.success(request, f'Account created for {username}!')
-            login(request, user)
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             return redirect('home:index')
     else:
         form = CustomUserCreationForm()
@@ -47,7 +47,7 @@ def login_view(request):
             password = form.cleaned_data.get('password')
             user = authenticate(username=username, password=password)
             if user is not None:
-                login(request, user)
+                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
                 messages.success(request, f'Welcome back, {username}!')
                 # Redirect to next page if provided
                 next_page = request.GET.get('next', 'home:index')
