@@ -1,0 +1,5 @@
+user_id,user_username,user_email,user_first_name,user_last_name,user_is_active,user_date_joined,user_last_login,cart_id,cart_session_key,cart_created_at,cart_updated_at,item_id,item_vinyl_record_id,item_quantity,item_price,item_created_at,item_updated_at
+5.0,Henry,,,,True,2025-06-25 08:41:50.869842,2025-06-29 14:40:54.966185,8,dk5uysvnbdfepalsgl1z8ai2240o9716,2025-06-29 14:41:39.690687,2025-06-29 14:41:39.690720,,,,,,
+,,,,,,,,7,yrucmimebwj8ldzhqmjf8r6atvf53u6l,2025-06-28 17:50:07.119553,2025-06-28 17:50:07.119583,,,,,,
+1.0,admin,peteryungcp@gmail.com,Peter,Yung,True,2025-06-22 01:53:40.000000,2025-06-29 14:43:34.157498,6,jmqgaugwgqkn1s8kz911r3f4khhf0crx,2025-06-28 04:05:36.726440,2025-06-28 04:05:36.726458,10.0,1056.0,1.0,400.0,2025-06-29 14:46:21.244150,2025-06-29 14:46:21.244206
+,,,,,,,,5,55yen1z87703vezmin8ucxom9df393ap,2025-06-27 00:31:40.458643,2025-06-27 00:31:40.458669,,,,,,

@@ -1,10 +1,13 @@
 """
-Django management command to export VRH data to Excel format.
-Exports data from multiple tables grouped by relationships into separate worksheets.
+Django management command to export VRH data to Excel or CSV format.
+Exports data from multiple tables grouped by relationships into separate worksheets/files.
 
 Usage:
-    python manage.py export_vrh_data                    # Exports to data-export/vrh_export.xlsx
-    python manage.py export_vrh_data custom_name.xlsx   # Exports to data-export/custom_name.xlsx
+    python manage.py export_vrh_data                    # Exports to data-export/vrh_export.xlsx (Excel)
+    python manage.py export_vrh_data custom_name.xlsx   # Exports to data-export/custom_name.xlsx (Excel)
+    python manage.py export_vrh_data --ex-csv           # Exports to data-export/vrh_export.csv (CSV)
+    python manage.py export_vrh_data custom_name.csv --ex-csv  # Exports to data-export/custom_name.csv (CSV)
+    python manage.py export_vrh_data -ex-xlsx           # Explicitly export to Excel format
 """
 import os, pandas as pd
 from django.core.management.base import BaseCommand
@@ -22,16 +25,16 @@ from .export_methods import ExportMethodsMixin
 
 class Command(BaseCommand, ExportMethodsMixin):
     """
-    Django management command to export VRH database data to Excel format.
+    Django management command to export VRH database data to Excel or CSV format.
     
-    Creates an Excel file with 5 worksheets:
+    Creates an Excel file with 5 worksheets OR separate CSV files:
     1. vinyl - Vinyl records with related artist, genre, and label data
     2. orders - Orders with user and order items data
     3. cart - Cart with user and cart items data
     4. reviews - Reviews with user data
     5. wishlist - Wishlist with user and wishlist items data
     """
-    help = 'Export VRH data to Excel format with multiple worksheets'
+    help = 'Export VRH data to Excel format with multiple worksheets or CSV format with separate files'
 
     def add_arguments(self, parser):
         """Define command-line arguments for the export command."""
@@ -40,13 +43,45 @@ class Command(BaseCommand, ExportMethodsMixin):
             nargs='?',  # Make filename optional
             type=str,
             default='vrh_export.xlsx',
-            help='Output Excel filename (default: vrh_export.xlsx)'
+            help='Output filename (default: vrh_export.xlsx for Excel, vrh_export.csv for CSV)'
+        )
+        parser.add_argument(
+            '--ex-csv',
+            action='store_true',
+            help='Export to CSV format instead of Excel'
+        )
+        parser.add_argument(
+            '-ex-xlsx',
+            action='store_true',
+            help='Explicitly export to Excel format (default behavior)'
         )
 
     def handle(self, *args, **options):
         """Main execution method for the export command."""
-        # Get filename from command line arguments or use default
+        # Get filename and format from command line arguments
         output_filename = options['filename']
+        export_csv = options['ex_csv']
+        export_xlsx = options['ex_xlsx']
+        
+        # Determine export format and adjust filename if needed
+        if export_csv:
+            # CSV export mode
+            if not output_filename.endswith('.csv'):
+                # If filename doesn't end with .csv, add it
+                if output_filename.endswith('.xlsx'):
+                    output_filename = output_filename.replace('.xlsx', '.csv')
+                else:
+                    output_filename = output_filename + '.csv'
+            export_format = 'csv'
+        else:
+            # Excel export mode (default)
+            if not output_filename.endswith('.xlsx'):
+                # If filename doesn't end with .xlsx, add it
+                if output_filename.endswith('.csv'):
+                    output_filename = output_filename.replace('.csv', '.xlsx')
+                else:
+                    output_filename = output_filename + '.xlsx'
+            export_format = 'excel'
         
         # Create data-export directory path (5 levels up from this file)
         export_dir = os.path.join(
@@ -66,7 +101,7 @@ class Command(BaseCommand, ExportMethodsMixin):
         else:
             self.stdout.write(f'Creating new file: {output_path}')
         
-        self.stdout.write(f'Starting VRH data export to {output_path}...')
+        self.stdout.write(f'Starting VRH data export to {output_path} ({export_format.upper()} format)...')
         
         # Set up model references for the mixin methods
         self.VinylRecord = VinylRecord
@@ -75,17 +110,32 @@ class Command(BaseCommand, ExportMethodsMixin):
         self.Review = Review
         self.Wishlist = Wishlist
         
-        # Create Excel writer with openpyxl engine
-        with pd.ExcelWriter(output_path, engine='openpyxl') as writer:
+        if export_format == 'excel':
+            # Excel export - create single file with multiple worksheets
+            with pd.ExcelWriter(output_path, engine='openpyxl') as writer:
+                # Export data to separate worksheets
+                self.export_vinyl_data(writer)      # Worksheet 1: Vinyl Records
+                self.export_orders_data(writer)     # Worksheet 2: Orders
+                self.export_cart_data(writer)       # Worksheet 3: Cart
+                self.export_reviews_data(writer)    # Worksheet 4: Reviews
+                self.export_wishlist_data(writer)   # Worksheet 5: Wishlist
+        else:
+            # CSV export - create separate files for each data type
+            base_name = output_filename.replace('.csv', '')
             
-            # Export data to separate worksheets
-            self.export_vinyl_data(writer)      # Worksheet 1: Vinyl Records
-            self.export_orders_data(writer)     # Worksheet 2: Orders
-            self.export_cart_data(writer)       # Worksheet 3: Cart
-            self.export_reviews_data(writer)    # Worksheet 4: Reviews
-            self.export_wishlist_data(writer)   # Worksheet 5: Wishlist
+            # Export each data type to separate CSV files
+            self.export_vinyl_data_csv(base_name, export_dir)      # vinyl_data.csv
+            self.export_orders_data_csv(base_name, export_dir)     # orders_data.csv
+            self.export_cart_data_csv(base_name, export_dir)       # cart_data.csv
+            self.export_reviews_data_csv(base_name, export_dir)    # reviews_data.csv
+            self.export_wishlist_data_csv(base_name, export_dir)   # wishlist_data.csv
         
         # Success message
-        self.stdout.write(
-            self.style.SUCCESS(f'Successfully exported VRH data to {output_path}')
-        ) 
+        if export_format == 'excel':
+            self.stdout.write(
+                self.style.SUCCESS(f'Successfully exported VRH data to {output_path}')
+            )
+        else:
+            self.stdout.write(
+                self.style.SUCCESS(f'Successfully exported VRH data to {export_dir} (5 CSV files)')
+            ) 
