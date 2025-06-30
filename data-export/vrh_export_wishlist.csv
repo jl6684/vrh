@@ -1,0 +1,3 @@
+user_id,user_username,user_email,user_first_name,user_last_name,user_is_active,user_date_joined,user_last_login,wishlist_id,wishlist_created_at,wishlist_updated_at,item_id,item_vinyl_record_id,item_created_at
+1,admin,peteryungcp@gmail.com,Peter,Yung,True,2025-06-22 01:53:40.000000,2025-06-29 14:43:34.157498,2,2025-06-28 04:05:34.607989,2025-06-28 04:05:34.608024,3,1058,2025-06-29 14:36:55.652695
+5,Henry,,,,True,2025-06-25 08:41:50.869842,2025-06-29 14:40:54.966185,3,2025-06-29 14:41:07.491176,2025-06-29 14:41:07.491206,4,1058,2025-06-29 14:41:07.494075

@@ -279,29 +279,44 @@ python manage.py delete_vinyl_data --help
 ### Export Data Using `export_vrh_data`
 
 #### Overview
-The `export_vrh_data` command exports all VRH database data to an Excel file with multiple worksheets, combining related data from different tables into comprehensive datasets.
+The `export_vrh_data` command exports all VRH database data to an Excel file with multiple worksheets OR to separate CSV files, combining related data from different tables into comprehensive datasets.
 
 #### Features
-- **5 Worksheets**: vinyl, orders, cart, reviews, wishlist
-- **Combined Data**: Each worksheet contains related data from multiple tables
-- **Timezone Handling**: Automatically converts timezone-aware datetimes to naive format for Excel compatibility
+- **5 Worksheets/Files**: vinyl, orders, cart, reviews, wishlist
+- **Two Export Formats**: Excel (single file with worksheets) or CSV (separate files)
+- **Combined Data**: Each worksheet/file contains related data from multiple tables
+- **Timezone Handling**: Automatically converts timezone-aware datetimes to naive format for Excel/CSV compatibility
 - **Custom Filenames**: Specify custom output filenames
 - **Automatic Directory Creation**: Creates `data-export` directory if it doesn't exist
 - **Overwrite Protection**: Warns when overwriting existing files
 
-#### 1. Export Data Using Default Filename
+#### 1. Export Data Using Default Filename (Excel Format)
 ```sh
 python manage.py export_vrh_data
 ```
 This exports data to `data-export/vrh_export.xlsx`
 
-#### 2. Export Data Using Custom Filename
+#### 2. Export Data Using Custom Filename (Excel Format)
 ```sh
 python manage.py export_vrh_data custom_name.xlsx
 ```
 This exports data to `data-export/custom_name.xlsx`
 
-#### 3. Get Help
+#### 3. Export Data to CSV Format
+```sh
+# Using default filename
+python manage.py export_vrh_data --ex-csv
+
+# Using custom filename
+python manage.py export_vrh_data custom_name.csv --ex-csv
+```
+
+#### 4. Explicitly Export to Excel Format
+```sh
+python manage.py export_vrh_data -ex-xlsx
+```
+
+#### 5. Get Help
 ```sh
 python manage.py export_vrh_data --help
 ```
@@ -310,32 +325,46 @@ python manage.py export_vrh_data --help
 
 | Argument | Description | Default |
 |----------|-------------|---------|
-| `filename` | Output Excel filename | `vrh_export.xlsx` |
+| `filename` | Output filename | `vrh_export.xlsx` for Excel, `vrh_export.csv` for CSV |
+| `--ex-csv` | Export to CSV format instead of Excel | `False` |
+| `-ex-xlsx` | Explicitly export to Excel format | `False` |
 
-#### Export Worksheet Structure
+#### Export Format Behavior
 
-**1. vinyl Worksheet**
+**Excel Format (Default):**
+- Creates a single Excel file with 5 worksheets
+- Each worksheet contains one data type (vinyl, orders, cart, reviews, wishlist)
+- File extension: `.xlsx`
+
+**CSV Format:**
+- Creates 5 separate CSV files in the `data-export` directory
+- File naming pattern: `{base_name}_{data_type}.csv`
+- Example: `vrh_export_vinyl.csv`, `vrh_export_orders.csv`, etc.
+
+#### Export Worksheet/File Structure
+
+**1. vinyl Worksheet/File**
 - Combines data from: `vinyl_vinylrecord`, `vinyl_artist`, `vinyl_genre`, `vinyl_label`
 - One row per vinyl record with all related artist, genre, and label information
 - Fields include: vinyl details, artist information, genre details, label information
 
-**2. orders Worksheet**
+**2. orders Worksheet/File**
 - Combines data from: `auth_user`, `orders_order`, `orders_orderitem`
 - One row per order item with repeated order and user data
 - Fields include: user details, order information, order item details
 
-**3. cart Worksheet**
+**3. cart Worksheet/File**
 - Combines data from: `auth_user`, `cart_cart`, `cart_cartitem`
 - One row per cart item with repeated cart and user data
 - Handles anonymous carts (user data may be None)
 - Fields include: user details, cart information, cart item details
 
-**4. reviews Worksheet**
+**4. reviews Worksheet/File**
 - Combines data from: `auth_user`, `reviews_review`
 - One row per review with user data
 - Fields include: user details, review information
 
-**5. wishlist Worksheet**
+**5. wishlist Worksheet/File**
 - Combines data from: `auth_user`, `wishlist_wishlist`, `wishlist_wishlistitem`
 - One row per wishlist item with repeated wishlist and user data
 - Fields include: user details, wishlist information, wishlist item details
@@ -346,7 +375,7 @@ When you run the `export_vrh_data` command, it will:
 1. **Setup**:
    - Create `data-export` directory if it doesn't exist
    - Check for existing files and warn about overwriting
-   - Initialize Excel writer with openpyxl engine
+   - Determine export format based on arguments
 
 2. **Data Processing**:
    - Query each data type with optimized database queries
@@ -355,46 +384,73 @@ When you run the `export_vrh_data` command, it will:
    - Handle null values and missing relationships
 
 3. **Export**:
-   - Create pandas DataFrames for each data type
-   - Export to separate worksheets in the Excel file
-   - Display progress messages for each worksheet
+   - **Excel**: Create pandas DataFrames and export to separate worksheets
+   - **CSV**: Create pandas DataFrames and export to separate CSV files
+   - Display progress messages for each data type
 
 4. **Completion**:
-   - Show success message with file path
-   - Display record counts for each worksheet
+   - Show success message with file path(s)
+   - Display record counts for each data type
 
 #### Example Export Output
+
+**Excel Export:**
 ```
 Creating new file: /path/to/data-export/vrh_export.xlsx
-Starting VRH data export to /path/to/data-export/vrh_export.xlsx...
+Starting VRH data export to /path/to/data-export/vrh_export.xlsx (EXCEL format)...
 Exporting vinyl records data...
-  - Exported 68 vinyl records
+  - Exported 55 vinyl records
 Exporting orders data...
-  - Exported 45 order records
+  - Exported 2 order records
 Exporting cart data...
-  - Exported 23 cart records
+  - Exported 4 cart records
 Exporting reviews data...
-  - Exported 12 review records
+  - Exported 2 review records
 Exporting wishlist data...
-  - Exported 8 wishlist records
+  - Exported 2 wishlist records
 Successfully exported VRH data to /path/to/data-export/vrh_export.xlsx
+```
+
+**CSV Export:**
+```
+Creating new file: /path/to/data-export/vrh_export.csv
+Starting VRH data export to /path/to/data-export/vrh_export.csv (CSV format)...
+Exporting vinyl records data to CSV...
+  - Exported 55 vinyl records to /path/to/data-export/vrh_export_vinyl.csv
+Exporting orders data to CSV...
+  - Exported 2 order records to /path/to/data-export/vrh_export_orders.csv
+Exporting cart data to CSV...
+  - Exported 4 cart records to /path/to/data-export/vrh_export_cart.csv
+Exporting reviews data to CSV...
+  - Exported 2 review records to /path/to/data-export/vrh_export_reviews.csv
+Exporting wishlist data to CSV...
+  - Exported 2 wishlist records to /path/to/data-export/vrh_export_wishlist.csv
+Successfully exported VRH data to /path/to/data-export (5 CSV files)
 ```
 
 #### Export Command Behavior
 
-**Default Behavior:**
+**Default Behavior (Excel):**
 1. Creates `data-export` directory if it doesn't exist
 2. Warns if output file already exists
-3. Exports all data types to separate worksheets
+3. Exports all data types to separate worksheets in single Excel file
 4. Shows progress for each worksheet
 5. Displays final success message
+
+**CSV Behavior:**
+1. Creates `data-export` directory if it doesn't exist
+2. Warns if output files already exist
+3. Exports each data type to separate CSV files
+4. Shows progress for each file
+5. Displays final success message with directory path
 
 **Features:**
 - **Efficient Queries**: Uses `select_related` and `prefetch_related` for optimal database performance
 - **Data Integrity**: Maintains relationships between tables in combined datasets
-- **Excel Compatibility**: Handles timezone conversion and data formatting
+- **Format Compatibility**: Handles timezone conversion and data formatting for both Excel and CSV
 - **Error Handling**: Graceful handling of missing relationships and null values
 - **Progress Feedback**: Real-time updates during export process
+- **Flexible Output**: Choose between single Excel file or multiple CSV files
 
 ## Example Usage with All Commands
 
@@ -439,14 +495,29 @@ python manage.py delete_vinyl_data -genre -label --test-only
 
 ### Export Examples
 ```bash
-# Export with default filename
+# Export with default filename (Excel)
 python manage.py export_vrh_data
 
-# Export with custom filename
+# Export with custom filename (Excel)
 python manage.py export_vrh_data my_export.xlsx
 
-# Export with descriptive filename
+# Export with descriptive filename (Excel)
 python manage.py export_vrh_data vrh_data_$(date +%Y%m%d).xlsx
+
+# Export to CSV format with default filename
+python manage.py export_vrh_data --ex-csv
+
+# Export to CSV format with custom filename
+python manage.py export_vrh_data my_export.csv --ex-csv
+
+# Export to CSV format with descriptive filename
+python manage.py export_vrh_data vrh_data_$(date +%Y%m%d).csv --ex-csv
+
+# Explicitly export to Excel format
+python manage.py export_vrh_data -ex-xlsx
+
+# Export to Excel with custom filename
+python manage.py export_vrh_data custom_name.xlsx -ex-xlsx
 ```
 
 ## Complete Data Workflow
@@ -523,8 +594,7 @@ The import command now includes comprehensive data validation to ensure data qua
 
 #### 1. Unquoted Commas in Data Fields
 **Problem**: Fields containing commas without quotes cause column shifts
-```
-❌ Incorrect: Herbert von Karajan,Berlin Philharmonic,Classical
+```❌ Incorrect: Herbert von Karajan,Berlin Philharmonic,Classical
 ✅ Correct: "Herbert von Karajan,Berlin Philharmonic",Classical
 ```
 
