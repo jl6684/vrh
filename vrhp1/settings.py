@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # SECRET_KEY = 'django-insecure-i7_%&n!j8_-0kn#nife)e%jvma-om6qka45dlt@&p(jboi7(u2'
-SECRET_KEY = os.getenv('SITE_SECRET_KEY')   # New added
+SECRET_KEY = os.getenv('SITE_SECRET_KEY')   # Read from environment variable with fallback
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -38,6 +38,12 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    # Django JET Dashboard (must be before jet)
+    'jet.dashboard',
+    
+    # Django JET (must be before django.contrib.admin)
+    'jet',
+    
     # Base Packages
     'django.contrib.admin',
     'django.contrib.auth',          # Login/logout
@@ -45,16 +51,36 @@ INSTALLED_APPS = [
     'django.contrib.sessions',      # Middleware
     'django.contrib.messages',      # Communication
     'django.contrib.staticfiles',
-    #'django.contrib.humanize',      # Add djanog extra library for datetime, currency calcuations
+    'django.contrib.sites',         # Required for allauth
+    #'django.contrib.humanize',      # Add django extra library for datetime, currency calculations
 
     #"debug_toolbar",                # Register downloaded APPS ~>python -m pip install django-debug-toolbar
     
+    # Django Allauth
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.github',
+    'allauth.socialaccount.providers.microsoft',
+    
     # Custom Apps
-    'main',
+    'apps.home',
+    'apps.vinyl',
+    'apps.accounts',
+    'apps.cart',
+    'apps.orders',
+    'apps.wishlist',
+    'apps.reviews',
+    'main',  # Keep for migration purposes, will remove later
 ]
+
+# Required for django-allauth
+SITE_ID = 1
 
 # These middleware calls Django login library
 MIDDLEWARE = [
+    'allauth.account.middleware.AccountMiddleware',  # Required for allauth
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -77,6 +103,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'apps.cart.context_processors.cart_context',
             ],
         },
     },
@@ -113,18 +140,70 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 4,  # Reduced from default 8 to 4
+        }
     },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    # Commented out strict validators for easier registration
+    # {
+    #     'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    # },
+    # {
+    #     'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    # },
+    # {
+    #     'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    # },
 ]
+
+# Authentication backends
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',  # Default Django backend
+    'allauth.account.auth_backends.AuthenticationBackend',  # Allauth backend
+]
+
+# Django Allauth Configuration
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+ACCOUNT_LOGOUT_REDIRECT_URL = '/'
+
+# Social login settings
+SOCIALACCOUNT_LOGIN_ON_GET = True
+ACCOUNT_EMAIL_VERIFICATION = 'none'  # Disable email verification for easier setup
+
+# Allauth configuration (newer format)
+# ACCOUNT_LOGIN_METHODS = {'email'}  # Use email instead of username for login
+# ACCOUNT_SIGNUP_FIELDS = []  # No additional fields required for social signup
+# ACCOUNT_UNIQUE_EMAIL = True
+# ACCOUNT_SIGNUP_FORM_CLASS = None
+
+# Social account settings - Auto signup without intermediate page
+# SOCIALACCOUNT_QUERY_EMAIL = True
+# SOCIALACCOUNT_STORE_TOKENS = False
+# SOCIALACCOUNT_AUTO_SIGNUP = True  # Automatically create accounts for social users
+
+# Provider specific settings
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        },
+        'OAUTH_PKCE_ENABLED': True,
+    },
+    'github': {
+        'SCOPE': [
+            'user:email',
+        ],
+    },
+    'microsoft': {
+        'tenant': 'common',  # Use 'common' for personal and work accounts
+    }
+}
 
 
 # Internationalization
@@ -163,9 +242,31 @@ INTERNAL_IPS = [
 MEDIA_ROOT = os.path.join(BASE_DIR,'media')
 MEDIA_URL = '/media/'
 
+# Create media subdirectories for organized file storage
+import os
+media_dirs = [
+    'vinyl_covers',
+    'audio_samples',
+    'profile_pics',
+    'user_uploads'
+]
+
+for media_dir in media_dirs:
+    full_path = os.path.join(BASE_DIR, 'media', media_dir)
+    os.makedirs(full_path, exist_ok=True)
+
 # Declare message
 # Pass variables to Bootstrap message box
 MESSAGE_TAGS = {
     messages.ERROR  : 'danger',
     messages.SUCCESS: 'success'
 }
+
+# Stripe Configuration
+# Get your keys from: https://dashboard.stripe.com/test/apikeys
+STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY', 'pk_test_...')  # Add your test publishable key here
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', 'sk_test_...')  # Add your test secret key here
+STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET', '')  # Optional for now
+
+# Currency for your vinyl shop (Hong Kong Dollars)
+STRIPE_CURRENCY = 'hkd'

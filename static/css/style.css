@@ -1,3 +1,21 @@
+/* Fix for fixed-top navbar covering content */
+body {
+    padding-top: 80px;
+}
+
+/* Method 2: Dark top section of page */
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 120px; /* Slightly taller than navbar for visual padding */
+    background: linear-gradient(45deg, #1a1a1a, #2d2d2d);
+    z-index: -1; /* Behind everything */
+    box-shadow: 0 2px 15px rgba(0,0,0,0.2);
+}
+
 .navbar {
     background-color: transparent;
     box-shadow: 0px 1px 20px #eaeaea;
@@ -5,7 +23,7 @@
 }
 
 .navbar.solid {
-    transition: background-color 1s ease 0s;
+    transition: background-color 2s ease 0s;
 }
 
 .card-text {
@@ -34,7 +52,7 @@ footer p, footer a {
 
 /* Enhanced vinyl shop theme styles */
 .hero-section {
-    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('./assets/img/pexels-bg.jpg');
+    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('../img/pexels-bg.jpg');
     background-size: cover;
     background-position: center;
     height: 60vh;
@@ -287,4 +305,31 @@ footer p, footer a {
     outline-offset: 2px;
     background: linear-gradient(135deg, #d4af37, #b8941f) !important;
     color: white !important;
+}
+
+/* VRH Logo Spin Animation - Available for all pages */
+@keyframes logoSpin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.logo-spin {
+    animation: logoSpin 10s linear infinite;
+}
+
+/* Additional logo animation variations */
+.logo-spin-fast {
+    animation: logoSpin 5s linear infinite;
+}
+
+.logo-spin-slow {
+    animation: logoSpin 15s linear infinite;
+}
+
+.logo-spin-hover:hover {
+    animation: logoSpin 2s linear infinite;
 }

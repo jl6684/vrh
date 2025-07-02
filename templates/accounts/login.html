@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load socialaccount %}
+
+{% block title %}Login - Vinyl Record House{% endblock %}
+
+{% block extra_css %}
+<style>
+.social-login-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    color: white;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    margin-bottom: 10px;
+}
+
+.social-login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-google {
+    background-color: #4285f4;
+}
+
+.btn-github {
+    background-color: #333;
+}
+
+.btn-microsoft {
+    background-color: #0078d4;
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #ccc;
+}
+
+.divider span {
+    padding: 0 15px;
+    color: #666;
+    font-size: 14px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0"><i class="fas fa-sign-in-alt"></i> Login</h4>
+            </div>
+            <div class="card-body">
+                <!-- Social Login Buttons -->
+                <div class="mb-4">
+                    <h6 class="text-center mb-3">Login with Social Account</h6>
+                    
+                    <a href="{% provider_login_url 'google' %}" class="social-login-btn btn-google">
+                        <i class="fab fa-google"></i>
+                        Continue with Google
+                    </a>
+                    
+                    <a href="{% provider_login_url 'github' %}" class="social-login-btn btn-github">
+                        <i class="fab fa-github"></i>
+                        Continue with GitHub
+                    </a>
+                    
+                    <a href="{% provider_login_url 'microsoft' %}" class="social-login-btn btn-microsoft">
+                        <i class="fab fa-microsoft"></i>
+                        Continue with Microsoft
+                    </a>
+                </div>
+                
+                <div class="divider">
+                    <span>or login with email</span>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.username.id_for_label }}" class="form-label">Username</label>
+                        {{ form.username }}
+                        {% if form.username.errors %}
+                            <div class="text-danger">{{ form.username.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.password.id_for_label }}" class="form-label">Password</label>
+                        {{ form.password }}
+                        {% if form.password.errors %}
+                            <div class="text-danger">{{ form.password.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </button>
+                    </div>
+                </form>
+                
+                <hr>
+                <div class="text-center">
+                    <p>Don't have an account? <a href="{% url 'accounts:register' %}" class='h5' style='color:red;'>Sign Up</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Add Bootstrap classes to form fields
+    $('#id_username').addClass('form-control');
+    $('#id_password').addClass('form-control');
+});
+</script>
+{% endblock %}

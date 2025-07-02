@@ -1,0 +1,489 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Vinyl Record House - Premium Vinyl Collection{% endblock %}
+
+{% block extra_css %}
+<style>
+.hero-section {
+    min-height: 50vh;
+    display: flex;
+    align-items: center;
+    color: white;
+    background: linear-gradient(45deg, #1a1a2e, #16213e,rgb(49, 132, 233), #e94560);
+    background-size: 300% 300%;
+    animation: vinylSpin 12s ease infinite;
+}
+
+@keyframes vinylSpin {
+    0% { background-position: 0% 0%; }
+    25% { background-position: 100% 0%; }
+    50% { background-position: 100% 100%; }
+    75% { background-position: 0% 100%; }
+    100% { background-position: 0% 0%; }
+}
+
+.vinyl-card {
+    transition: transform 0.3s ease;
+    height: 100%;
+}
+
+.vinyl-card:hover {
+    transform: scale(1.05);
+}
+
+.recommended-card {
+    border: 2px solid transparent;
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(45deg, #dc3545, #007bff) border-box;
+    border-radius: 0.5rem;
+}
+
+.recommended-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
+}
+
+.add-to-cart-btn {
+    transition: all 0.3s ease;
+}
+
+.add-to-cart-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
+}
+
+.stats-section {
+    background: linear-gradient(135deg,rgb(5, 7, 15) 0%,rgb(21, 18, 24) 100%);
+    color: white;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 2rem 1rem;
+}
+
+.stat-number {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.testimonial-card {
+    background: #f8f9fa;
+    border-left: 4px solid #007bff;
+    padding: 2rem;
+    margin: 1rem 0;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container text-center pt-5 mt-5">
+        <img src="{% static 'img/VRHlogo.png' %}" width="100" alt="" class="logo-spin">
+        <h1 class="display-4 mb-3">Vinyl Record Home</h1>
+        <p class="lead">Where Every Groove Feels Like Home</p>
+    </div>
+</section>
+
+<!-- Greeting Section -->
+<section class="py-5 bg-dark text-white">
+    <div class="container text-center">
+        <h2 class="mb-4">Ready to Start Your Vinyl Journey in Hong Kong?</h2>
+        <p class="lead mb-4">Join thousands of Hong Kong music lovers who have discovered their perfect sound with us</p>
+        <a href="#projectAnchor" class="btn btn-outline-light btn-lg mr-3">Browse Collection</a>
+        <a href="{% url 'home:contact' %}" class="btn btn-light btn-lg">Visit Our Store</a>
+    </div>
+</section>
+
+<!-- Slider Background -->
+<div class="carousel" id="mainSlide">
+    <div class="carousel-inner">
+        <img class="w-100 d-block" src="{% static 'img/pexels-bg2.jpg' %}" alt="">
+    </div>
+</div>
+
+<!-- Content -->
+<div class="container-fluid mt-5 pt-5">
+    <h1 class="display-4 bg-light ml-5 pl-5" id="projectAnchor">
+        New Arrivals
+    </h1>
+    
+    <!-- Latest Vinyl Records -->
+    {% if latest_vinyl %}
+        <div class="row p-5">
+            {% for vinyl in latest_vinyl %}
+            <div class="col-md-3 mb-4 d-flex align-items-stretch">
+                <div class="card w-100 vinyl-card">
+                    <a href="{% url 'vinyl:detail' vinyl.slug %}" class="text-decoration-none">
+                        {% if vinyl.cover_image %}
+                            <img class="card-img-top" src="{{ vinyl.cover_image.url }}" alt="{{ vinyl.title }}" style="cursor: pointer;">
+                        {% else %}
+                            <img class="card-img-top" src="{% static 'img/projects/projects-macbook-stats.jpg' %}" alt="{{ vinyl.title }}" style="cursor: pointer;">
+                        {% endif %}
+                    </a>
+                    <div class="card-body">
+                        <h3 class="card-title">{{ vinyl.title }}</h3>
+                            <h5>{{ vinyl.artist.name }}</h5>
+                            
+                            <!-- Rating -->
+                            {% if vinyl.average_rating %}
+                                <div class="mb-2">
+                                    <span class="text-warning">
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= vinyl.average_rating %}
+                                                <i class="fas fa-star"></i>
+                                            {% else %}
+                                                <i class="far fa-star"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </span>
+                                    <small class="text-muted">({{ vinyl.review_count }})</small>
+                                </div>
+                            {% else %}
+                                <div class="mb-2">
+                                    <span class="text-muted small">No reviews yet</span>
+                                </div>
+                            {% endif %}
+                            
+                            <p class="text-muted">${{ vinyl.price }}</p>
+                        </p>
+                    </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- Default Records Layout -->
+        <div class="card-deck p-5">
+            <div class="card">
+                <img class="card-img-top" src="{% static 'img/projects/projects-macbook-stats.jpg' %}" alt="">
+                <div class="card-body">
+                    <h3 class="card-title">
+                        Record 1
+                    </h3>
+                    <p class="card-text">
+                        <h5>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eos, eveniet.</h5>
+                    </p>
+                    <a class="btn btn-sm btn-dark h4" href="#">
+                        <h6>View Product</h6>
+                    </a>
+                </div>
+            </div>
+
+            <div class="card">
+                <img class="card-img-top" src="{% static 'img/projects/projects-coding-sunset.jpg' %}" alt="">
+                <div class="card-body">
+                    <h3 class="card-title">
+                        Record 2
+                    </h3>
+                    <p class="card-text">
+                        <h5>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eos, eveniet.</h5>
+                    </p>
+                    <a class="btn btn-sm btn-dark h4" href="#">
+                        <h6>View Product</h6>
+                    </a>
+                </div>
+            </div>
+
+            <div class="card">
+                <img class="card-img-top" src="{% static 'img/projects/projects-hello-world.jpg' %}" alt="">
+                <div class="card-body">
+                    <h3 class="card-title">
+                        Record 3
+                    </h3>
+                    <p class="card-text">
+                        <h5>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eos, eveniet.</h5>
+                    </p>
+                    <a class="btn btn-sm btn-dark h4" href="#">
+                        <h6>View Product</h6>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-deck p-5">
+            <div class="card">
+                <img class="card-img-top" src="{% static 'img/projects/projects-retro-computer.jpg' %}" alt="">
+                <div class="card-body">
+                    <h3 class="card-title">
+                        Record 4
+                    </h3>
+                    <p class="card-text">
+                        <h5>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eos, eveniet.</h5>
+                    </p>
+                    <a class="btn btn-sm btn-dark h4" href="#">
+                        <h6>View Product</h6>
+                    </a>
+                </div>
+            </div>
+
+            <div class="card">
+                <img class="card-img-top" src="{% static 'img/projects/projects-robodog.jpg' %}" alt="">
+                <div class="card-body">
+                    <h3 class="card-title">
+                        Record 5
+                    </h3>
+                    <p class="card-text">
+                        <h5>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eos, eveniet.</h5>
+                    </p>
+                    <a class="btn btn-sm btn-dark h4" href="#">
+                        <h6>View Product</h6>
+                    </a>
+                </div>
+            </div>
+
+            <div class="card">
+                <img class="card-img-top" src="{% static 'img/projects/projects-robot.jpg' %}" alt="">
+                <div class="card-body">
+                    <h3 class="card-title">
+                        Record 6
+                    </h3>
+                    <p class="card-text">
+                        <h5>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eos, eveniet.</h5>
+                    </p>
+                    <a class="btn btn-sm btn-dark h4" href="#">
+                        <h6>View Product</h6>
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    
+    <!-- Recommended for You Section -->
+    {% if user_has_preferences and recommended_vinyl %}
+        <div class="container-fluid mt-5">
+            <div class="row">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center mb-4 px-5">
+                        <div>
+                            <h2 class="display-5 text-primary">
+                                <i class="fas fa-heart text-danger"></i> Recommended for You
+                            </h2>
+                            <p class="text-muted">Based on your favorite genres</p>
+                        </div>
+                        <a href="{% url 'vinyl:list' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-right"></i> View All Vinyl
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row p-5">
+                {% for vinyl in recommended_vinyl %}
+                <div class="col-md-3 mb-4 d-flex align-items-stretch">
+                    <div class="card w-100 vinyl-card recommended-card">
+                        <div class="position-relative">
+                            <a href="{% url 'vinyl:detail' vinyl.slug %}" class="text-decoration-none">
+                                {% if vinyl.cover_image %}
+                                    <img class="card-img-top" src="{{ vinyl.cover_image.url }}" alt="{{ vinyl.title }}" style="cursor: pointer;">
+                                {% else %}
+                                    <img class="card-img-top" src="{% static 'img/projects/projects-macbook-stats.jpg' %}" alt="{{ vinyl.title }}" style="cursor: pointer;">
+                                {% endif %}
+                            </a>
+                            <div class="position-absolute top-0 start-0 p-2">
+                                <span class="badge bg-danger">
+                                    <i class="fas fa-heart"></i> For You
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <h3 class="card-title">
+                                {{ vinyl.title }}
+                            </h3>
+                            <p class="card-text">
+                                <h5>{{ vinyl.artist.name }}</h5>
+                                <span class="badge bg-primary mb-2">{{ vinyl.genre.name }}</span>
+                                
+                                <!-- Rating -->
+                                {% if vinyl.average_rating %}
+                                    <div class="mb-2">
+                                        <span class="text-warning">
+                                            {% for i in "12345" %}
+                                                {% if forloop.counter <= vinyl.average_rating %}
+                                                    <i class="fas fa-star"></i>
+                                                {% else %}
+                                                    <i class="far fa-star"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </span>
+                                        <small class="text-muted">({{ vinyl.review_count }})</small>
+                                    </div>
+                                {% else %}
+                                    <div class="mb-2">
+                                        <span class="text-muted small">No reviews yet</span>
+                                    </div>
+                                {% endif %}
+                                
+                                <p class="text-muted">${{ vinyl.price }}</p>
+                            </p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <button class="btn btn-primary btn-sm add-to-cart-btn w-100" data-vinyl-id="{{ vinyl.id }}">
+                                <i class="fas fa-cart-plus"></i> Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Call to Action for Users Without Preferences -->
+        </div>
+    {% elif user.is_authenticated and not user_has_preferences %}
+        <div class="container-fluid mt-5">
+            <div class="row">
+                <div class="col-12">
+                    <div class="alert alert-info mx-5" role="alert">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h4 class="alert-heading">
+                                    <i class="fas fa-magic"></i> Get Personalized Recommendations!
+                                </h4>
+                                <p class="mb-0">
+                                    Tell us your favorite music genres and we'll recommend vinyl records you'll love.
+                                </p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <a href="{% url 'accounts:profile' %}" class="btn btn-primary">
+                                    <i class="fas fa-cog"></i> Set Preferences
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Statistics Section -->
+<section class="stats-section py-5">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-item">
+                    <div class="stat-number">{{ total_vinyl_count|default:"500+" }}</div>
+                    <div class="stat-label">Vinyl Records</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-item">
+                    <div class="stat-number">{{ total_artists_count|default:"200+" }}</div>
+                    <div class="stat-label">Artists</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-item">
+                    <div class="stat-number">{{ total_genres_count|default:"25+" }}</div>
+                    <div class="stat-label">Genres</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-item">
+                    <div class="stat-number">{{ total_customers_count|default:"1000+" }}</div>
+                    <div class="stat-label">Happy Customers</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Why Choose Us -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold">Why Choose Vinyl Record House?</h2>
+            <p class="text-muted">We're passionate about bringing you the best vinyl experience</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="text-center">
+                    <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
+                    <h5>Authentic Records</h5>
+                    <p class="text-muted">Every record in our collection is guaranteed authentic. We source directly from record labels and trusted distributors.</p>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="text-center">
+                    <i class="fas fa-shipping-fast fa-3x text-success mb-3"></i>
+                    <h5>Fast Shipping</h5>
+                    <p class="text-muted">Get your vinyl delivered safely and quickly. We use specialized packaging to ensure your records arrive in perfect condition.</p>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="text-center">
+                    <i class="fas fa-headphones fa-3x text-warning mb-3"></i>
+                    <h5>Expert Curation</h5>
+                    <p class="text-muted">Our team of music experts carefully curates our collection to bring you both timeless classics and exciting new discoveries.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter Signup -->
+<section class="py-5 bg-dark text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h3>Stay in the Loop</h3>
+                <p class="mb-0">Get notified about new arrivals, exclusive releases, and special offers.</p>
+            </div>
+            <div class="col-lg-6">
+                <div class="d-flex gap-2">
+                    <input type="email" class="form-control" placeholder="Enter your email">
+                    <button class="btn btn-primary">Subscribe</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+// Add to cart functionality
+document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+    button.addEventListener('click', function() {
+        const vinylId = this.dataset.vinylId;
+        
+        fetch(`/cart/add/${vinylId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            body: JSON.stringify({
+                'vinyl_id': vinylId,
+                'quantity': 1
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update cart count in navbar
+                const cartCount = document.querySelector('#cart-count');
+                if (cartCount) {
+                    cartCount.textContent = data.cart_count;
+                }
+                
+                // Show success feedback
+                this.innerHTML = '<i class="fas fa-check"></i>';
+                this.classList.remove('btn-outline-primary');
+                this.classList.add('btn-success');
+                
+                setTimeout(() => {
+                    this.innerHTML = '<i class="fas fa-cart-plus"></i>';
+                    this.classList.remove('btn-success');
+                    this.classList.add('btn-outline-primary');
+                }, 2000);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,247 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load vinyl_tags %}
+
+{% block title %}My Wishlist - Vinyl Record House{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h4 class="mb-0"><i class="fas fa-heart"></i> My Wishlist</h4>
+                        <small class="text-muted">{{ total_items }} item{{ total_items|pluralize }}</small>
+                    </div>
+                    <div class="col-md-6">
+                        <!-- Search and Filter -->
+                        <form method="get" class="d-flex">
+                            <div class="input-group me-2">
+                                <input type="text" class="form-control form-control-sm" name="search" 
+                                       value="{{ search_query }}" placeholder="Search wishlist...">
+                                <button class="btn btn-outline-secondary btn-sm" type="submit">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                            <select name="availability" class="form-select form-select-sm" onchange="this.form.submit()">
+                                <option value="">All Items</option>
+                                <option value="in_stock" {% if availability_filter == 'in_stock' %}selected{% endif %}>In Stock</option>
+                                <option value="out_of_stock" {% if availability_filter == 'out_of_stock' %}selected{% endif %}>Out of Stock</option>
+                            </select>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if page_obj %}
+                    <div class="row">
+                        {% for item in page_obj %}
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100">
+                                <div class="position-relative">
+                                    {% if item.vinyl_record.cover_image %}
+                                        <img src="{{ item.vinyl_record.cover_image.url }}" class="card-img-top" alt="{{ item.vinyl_record.title }}" style="height: 200px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                            <i class="fas fa-compact-disc fa-3x text-muted"></i>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <!-- Stock Status Badge -->
+                                    {% if item.vinyl_record.stock_quantity <= 0 %}
+                                        <span class="position-absolute top-0 end-0 badge bg-danger m-2">Out of Stock</span>
+                                    {% elif item.vinyl_record.stock_quantity <= 5 %}
+                                        <span class="position-absolute top-0 end-0 badge bg-warning m-2">Low Stock</span>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="card-body d-flex flex-column">
+                                    <h6 class="card-title">{{ item.vinyl_record.title }}</h6>
+                                    <p class="card-text text-muted mb-2">{{ item.vinyl_record.artist.name }}</p>
+                                    <p class="card-text">
+                                        <small class="text-muted">
+                                            {{ item.vinyl_record.label.name }} • {{ item.vinyl_record.release_year }}
+                                        </small>
+                                    </p>
+                                    
+                                    <div class="mt-auto">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <strong class="text-primary">${{ item.vinyl_record.price }}</strong>
+                                            <small class="text-muted">Added {{ item.created_at|date:"M d" }}</small>
+                                        </div>
+                                        
+                                        <div class="btn-group w-100" role="group">
+                                            {% if item.vinyl_record.stock_quantity > 0 %}
+                                                <button class="btn btn-primary btn-sm btn-move-to-cart" 
+                                                        data-vinyl-id="{{ item.vinyl_record.id }}">
+                                                    <i class="fas fa-shopping-cart"></i> Add to Cart
+                                                </button>
+                                            {% else %}
+                                                <button class="btn btn-secondary btn-sm" disabled>
+                                                    <i class="fas fa-ban"></i> Out of Stock
+                                                </button>
+                                            {% endif %}
+                                            
+                                            <a href="{% url 'vinyl:detail' item.vinyl_record.slug %}" class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                            
+                                            <button class="btn btn-outline-danger btn-sm btn-remove-wishlist" 
+                                                    data-vinyl-id="{{ item.vinyl_record.id }}">
+                                                <i class="fas fa-heart-broken"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% render_pagination page_obj request %}
+                    
+                    <!-- Bulk Actions -->
+                    {% if total_items > 0 %}
+                    <div class="text-center mt-4">
+                        <button class="btn btn-outline-danger" id="clear-wishlist">
+                            <i class="fas fa-trash"></i> Clear Wishlist
+                        </button>
+                    </div>
+                    {% endif %}
+                    
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-heart fa-4x text-muted mb-3"></i>
+                        <h5>Your wishlist is empty</h5>
+                        <p class="text-muted">Start browsing and add some vinyl records to your wishlist!</p>
+                        <a href="{% url 'vinyl:list' %}" class="btn btn-primary">
+                            <i class="fas fa-compact-disc"></i> Browse Vinyl Records
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% csrf_token %}
+<script>
+$(document).ready(function() {
+    // Move to cart
+    $('.btn-move-to-cart').on('click', function() {
+        var vinylId = $(this).data('vinyl-id');
+        moveToCart(vinylId, $(this));
+    });
+    
+    // Remove from wishlist
+    $('.btn-remove-wishlist').on('click', function() {
+        var vinylId = $(this).data('vinyl-id');
+        removeFromWishlist(vinylId, $(this));
+    });
+    
+    // Clear wishlist
+    $('#clear-wishlist').on('click', function() {
+        if (confirm('Are you sure you want to clear your entire wishlist?')) {
+            clearWishlist();
+        }
+    });
+    
+    function moveToCart(vinylId, button) {
+        $.ajax({
+            url: `/wishlist/move-to-cart/${vinylId}/`,
+            method: 'POST',
+            data: {
+                'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+            },
+            beforeSend: function() {
+                button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Adding...');
+            },
+            success: function(response) {
+                button.closest('.col-md-6').fadeOut(300, function() {
+                    $(this).remove();
+                });
+                showMessage('Item moved to cart successfully!', 'success');
+                // Update cart count if exists
+                updateCartCount();
+            },
+            error: function() {
+                button.prop('disabled', false).html('<i class="fas fa-shopping-cart"></i> Add to Cart');
+                showMessage('Error moving item to cart', 'danger');
+            }
+        });
+    }
+    
+    function removeFromWishlist(vinylId, button) {
+        $.ajax({
+            url: `/wishlist/remove/${vinylId}/`,
+            method: 'POST',
+            data: {
+                'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+            },
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function(response) {
+                if (response.success) {
+                    button.closest('.col-md-6').fadeOut(300, function() {
+                        $(this).remove();
+                        if ($('.col-md-6').length === 0) {
+                            location.reload();
+                        }
+                    });
+                    showMessage(response.message, 'success');
+                }
+            },
+            error: function() {
+                showMessage('Error removing item from wishlist', 'danger');
+            }
+        });
+    }
+    
+    function clearWishlist() {
+        $.ajax({
+            url: '/wishlist/clear/',
+            method: 'POST',
+            data: {
+                'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+            },
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function(response) {
+                if (response.success) {
+                    location.reload();
+                }
+            },
+            error: function() {
+                showMessage('Error clearing wishlist', 'danger');
+            }
+        });
+    }
+    
+    function updateCartCount() {
+        // Update cart count in navbar if it exists
+        $.get('/cart/count/', function(data) {
+            $('#cart-count').text(data.count);
+        });
+    }
+    
+    function showMessage(message, type) {
+        var alertHtml = `<div class="alert alert-${type} alert-dismissible fade show position-fixed" 
+                              style="top: 100px; right: 20px; z-index: 1050; min-width: 300px;" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>`;
+        $('body').append(alertHtml);
+        
+        setTimeout(function() {
+            $('.alert').fadeOut();
+        }, 3000);
+    }
+});
+</script>
+{% endblock %}

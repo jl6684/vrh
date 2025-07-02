@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Invoice - {{ order.order_id|truncatechars:8 }} - Vinyl Record House{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="invoice-container bg-white p-4">
+        <!-- Invoice Header -->
+        <div class="row mb-4">
+            <div class="col-6">
+                <img src="{% static 'img/VRHlogo.png' %}" width="60" alt="VRH Logo" class="logo-spin">
+                <h3 class="mt-2">Vinyl Record House</h3>
+                <p class="text-muted">
+                    123 Music Street<br>
+                    Tsim Sha Tsui, Kowloon<br>
+                    Hong Kong<br>
+                    Phone: +852 1234 5678
+                </p>
+            </div>
+            <div class="col-6 text-end">
+                <h2 class="text-primary">INVOICE</h2>
+                <p class="mb-1"><strong>Invoice #:</strong> INV-{{ order.order_id|truncatechars:8 }}</p>
+                <p class="mb-1"><strong>Order #:</strong> {{ order.order_id|truncatechars:8 }}</p>
+                <p class="mb-1"><strong>Date:</strong> {{ order.created_at|date:"F d, Y" }}</p>
+                <p class="mb-1"><strong>Status:</strong> 
+                    <span class="badge bg-{{ order.status|default:'secondary' }}">
+                        {{ order.get_status_display }}
+                    </span>
+                </p>
+            </div>
+        </div>
+
+        <hr>
+
+        <!-- Billing Information -->
+        <div class="row mb-4">
+            <div class="col-6">
+                <h5>Bill To:</h5>
+                <p>
+                    {{ order.get_full_name }}<br>
+                    {{ order.email }}<br>
+                    {% if order.phone %}{{ order.phone }}<br>{% endif %}
+                </p>
+            </div>
+            <div class="col-6">
+                <h5>Ship To:</h5>
+                <p>
+                    {{ order.get_full_name }}<br>
+                    {{ order.address_line_1 }}<br>
+                    {% if order.address_line_2 %}{{ order.address_line_2 }}<br>{% endif %}
+                    {{ order.city }}, {{ order.state }} {{ order.postal_code }}<br>
+                    {{ order.country }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Order Items -->
+        <div class="table-responsive mb-4">
+            <table class="table table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>Item</th>
+                        <th>Artist</th>
+                        <th>Year</th>
+                        <th class="text-center">Qty</th>
+                        <th class="text-end">Unit Price</th>
+                        <th class="text-end">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order.items.all %}
+                    <tr>
+                        <td>{{ item.vinyl_title }}</td>
+                        <td>{{ item.vinyl_artist }}</td>
+                        <td>{{ item.vinyl_year }}</td>
+                        <td class="text-center">{{ item.quantity }}</td>
+                        <td class="text-end">${{ item.price|floatformat:2 }}</td>
+                        <td class="text-end">${{ item.get_total_price|floatformat:2 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="5" class="text-end"><strong>Subtotal:</strong></td>
+                        <td class="text-end">${{ order.total_amount|add:order.shipping_cost|floatformat:2 }}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="5" class="text-end"><strong>Shipping:</strong></td>
+                        <td class="text-end">${{ order.shipping_cost|floatformat:2 }}</td>
+                    </tr>
+                    <tr class="table-primary">
+                        <td colspan="5" class="text-end"><strong>Total:</strong></td>
+                        <td class="text-end"><strong>${{ order.total_amount|floatformat:2 }}</strong></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <!-- Notes -->
+        {% if order.notes %}
+        <div class="mb-4">
+            <h6>Notes:</h6>
+            <p class="text-muted">{{ order.notes }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Footer -->
+        <div class="row mt-5">
+            <div class="col-12 text-center">
+                <p class="text-muted small">
+                    Thank you for shopping with Vinyl Record House!<br>
+                    For questions about this invoice, contact us at info@vinylrecordhouse.com
+                </p>
+            </div>
+        </div>
+
+        <!-- Print Button -->
+        <div class="text-center mt-4 no-print">
+            <button onclick="window.print()" class="btn btn-primary">
+                <i class="fas fa-print"></i> Print Invoice
+            </button>
+            <a href="{% url 'orders:detail' order.order_id %}" class="btn btn-secondary ms-2">
+                <i class="fas fa-arrow-left"></i> Back to Order
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .invoice-container {
+        box-shadow: none !important;
+        border: none !important;
+    }
+    
+    body {
+        padding-top: 0 !important;
+    }
+    
+    .navbar, footer {
+        display: none !important;
+    }
+}
+
+.invoice-container {
+    max-width: 800px;
+    margin: 0 auto;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
+</style>
+{% endblock %}

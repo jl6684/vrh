@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Reviews for {{ vinyl_record.title }} - Vinyl Record House{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12">
+            <!-- Back to Product -->
+            <div class="mb-4">
+                <a href="{% url 'vinyl:detail' vinyl_record.slug %}" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left"></i> Back to {{ vinyl_record.title }}
+                </a>
+            </div>
+
+            <!-- Review Summary -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-3 text-center">
+                            {% if vinyl_record.cover_image %}
+                                <img src="{{ vinyl_record.cover_image.url }}" class="img-fluid rounded" 
+                                     alt="{{ vinyl_record.title }}" style="max-height: 150px;">
+                            {% else %}
+                                <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                     style="height: 150px;">
+                                    <i class="fas fa-compact-disc fa-3x text-muted"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <h4>{{ vinyl_record.title }}</h4>
+                            <p class="text-muted">{{ vinyl_record.artist.name }}</p>
+                            <p class="mb-2">
+                                {% if review_stats.avg_rating %}
+                                    <span class="h5">{{ review_stats.avg_rating|floatformat:1 }}</span>
+                                    <span class="text-warning">
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= review_stats.avg_rating %}
+                                                <i class="fas fa-star"></i>
+                                            {% else %}
+                                                <i class="far fa-star"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </span>
+                                    <span class="text-muted">({{ review_stats.total_reviews }} review{{ review_stats.total_reviews|pluralize }})</span>
+                                {% else %}
+                                    <span class="text-muted">No reviews yet</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            {% if user.is_authenticated %}
+                                <a href="{% url 'reviews:write' vinyl_record.id %}" class="btn btn-primary">
+                                    <i class="fas fa-pen"></i> Write Review
+                                </a>
+                            {% else %}
+                                <a href="{% url 'accounts:login' %}?next={% url 'reviews:write' vinyl_record.id %}" 
+                                   class="btn btn-primary">
+                                    <i class="fas fa-sign-in-alt"></i> Login to Review
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters and Sorting -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-3">
+                            <select name="rating" class="form-select">
+                                <option value="">All Ratings</option>
+                                <option value="5" {% if request.GET.rating == '5' %}selected{% endif %}>5 Stars</option>
+                                <option value="4" {% if request.GET.rating == '4' %}selected{% endif %}>4 Stars</option>
+                                <option value="3" {% if request.GET.rating == '3' %}selected{% endif %}>3 Stars</option>
+                                <option value="2" {% if request.GET.rating == '2' %}selected{% endif %}>2 Stars</option>
+                                <option value="1" {% if request.GET.rating == '1' %}selected{% endif %}>1 Star</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select name="sort" class="form-select">
+                                <option value="newest" {% if request.GET.sort == 'newest' %}selected{% endif %}>Newest First</option>
+                                <option value="oldest" {% if request.GET.sort == 'oldest' %}selected{% endif %}>Oldest First</option>
+                                <option value="highest_rated" {% if request.GET.sort == 'highest_rated' %}selected{% endif %}>Highest Rated</option>
+                                <option value="lowest_rated" {% if request.GET.sort == 'lowest_rated' %}selected{% endif %}>Lowest Rated</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-outline-primary">Filter</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Reviews List -->
+            {% if page_obj %}
+                {% for review in page_obj %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <div>
+                                        <strong>{{ review.user.first_name|default:review.user.username }}</strong>
+                                        {% if review.is_verified_purchase %}
+                                            <span class="badge bg-success ms-2">Verified Purchase</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="text-warning">
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= review.rating %}
+                                                <i class="fas fa-star"></i>
+                                            {% else %}
+                                                <i class="far fa-star"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                
+                                {% if review.title %}
+                                    <h6>{{ review.title }}</h6>
+                                {% endif %}
+                                
+                                <p>{{ review.comment }}</p>
+                                
+                                <small class="text-muted">
+                                    Posted on {{ review.created_at|date:"F d, Y" }}
+                                    {% if review.updated_at != review.created_at %}
+                                        (Updated {{ review.updated_at|date:"F d, Y" }})
+                                    {% endif %}
+                                </small>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                {% if review.user == user %}
+                                    <div class="mt-2">
+                                        <a href="{% url 'reviews:edit' review.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
+                                        <form method="post" action="{% url 'reviews:delete' review.id %}" style="display: inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                    onclick="return confirm('Are you sure you want to delete this review?')">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <!-- Pagination -->
+                {% if page_obj.has_other_pages %}
+                <nav aria-label="Reviews pagination">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}&{{ request.GET.urlencode }}">Previous</a>
+                            </li>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}&{{ request.GET.urlencode }}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}&{{ request.GET.urlencode }}">Next</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-comments fa-4x text-muted mb-3"></i>
+                    <h5>No reviews yet</h5>
+                    <p class="text-muted">Be the first to review this vinyl record!</p>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'reviews:write' vinyl_record.id %}" class="btn btn-primary">
+                            <i class="fas fa-pen"></i> Write First Review
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

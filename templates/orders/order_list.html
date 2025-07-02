@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Orders - Vinyl Record House{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4"><i class="fas fa-box"></i> My Orders</h2>
+            
+            {% if orders %}
+                <div class="row">
+                    {% for order in orders %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Order #{{ order.order_id|truncatechars:8 }}</span>
+                                <span class="badge bg-{{ order.status|default:'secondary' }}">
+                                    {{ order.get_status_display }}
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-muted small mb-2">
+                                    <i class="fas fa-calendar"></i> {{ order.created_at|date:"M d, Y" }}
+                                </p>
+                                <p class="mb-2">
+                                    <strong>Items:</strong> {{ order.get_total_items }}
+                                </p>
+                                <p class="mb-3">
+                                    <strong>Total:</strong> ${{ order.total_amount }}
+                                </p>
+                                
+                                <!-- Order Items Preview -->
+                                <div class="order-items-preview mb-3">
+                                    {% for item in order.items.all|slice:":2" %}
+                                        <div class="d-flex align-items-center mb-2">
+                                            {% if item.vinyl_record.cover_image %}
+                                                <img src="{{ item.vinyl_record.cover_image.url }}" 
+                                                     class="img-thumbnail me-2" style="width: 40px; height: 40px;">
+                                            {% else %}
+                                                <div class="bg-light rounded me-2 d-flex align-items-center justify-content-center" 
+                                                     style="width: 40px; height: 40px;">
+                                                    <i class="fas fa-compact-disc text-muted"></i>
+                                                </div>
+                                            {% endif %}
+                                            <div class="flex-grow-1">
+                                                <small class="fw-bold">{{ item.vinyl_title }}</small><br>
+                                                <small class="text-muted">{{ item.vinyl_artist }} × {{ item.quantity }}</small>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                    {% if order.items.count > 2 %}
+                                        <small class="text-muted">... and {{ order.items.count|add:"-2" }} more item{{ order.items.count|add:"-2"|pluralize }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="d-flex gap-2">
+                                    <a href="{% url 'orders:detail' order.order_id %}" class="btn btn-primary btn-sm flex-grow-1">
+                                        <i class="fas fa-eye"></i> View Details
+                                    </a>
+                                    {% if order.can_be_cancelled %}
+                                        <form method="post" action="{% url 'orders:cancel' order.order_id %}" class="d-inline" onsubmit="return confirm('Are you sure you want to cancel this order?')">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-box fa-4x text-muted mb-3"></i>
+                    <h5>No orders yet</h5>
+                    <p class="text-muted">Start shopping to see your orders here!</p>
+                    <a href="{% url 'vinyl:list' %}" class="btn btn-primary">
+                        <i class="fas fa-compact-disc"></i> Browse Vinyl Records
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

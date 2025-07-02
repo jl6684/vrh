@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Review - {{ review.vinyl_record.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Edit Your Review</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Product Info -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            {% if review.vinyl_record.cover_image %}
+                                <img src="{{ review.vinyl_record.cover_image.url }}" 
+                                     alt="{{ review.vinyl_record.title }}" 
+                                     class="img-fluid rounded">
+                            {% else %}
+                                <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                     style="height: 120px;">
+                                    <i class="fas fa-record-vinyl fa-2x text-muted"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-9">
+                            <h5>{{ review.vinyl_record.title }}</h5>
+                            <p class="text-muted">by {{ review.vinyl_record.artist.name }}</p>
+                            <p class="text-muted small">{{ review.vinyl_record.genre.name }} • {{ review.vinyl_record.release_year }}</p>
+                            {% if review.is_verified_purchase %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check"></i> Verified Purchase
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Review Form -->
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Rating -->
+                        <div class="mb-3">
+                            <label for="{{ form.rating.id_for_label }}" class="form-label">Rating *</label>
+                            <div class="rating-input">
+                                {{ form.rating }}
+                            </div>
+                            {% if form.rating.errors %}
+                                <div class="text-danger small">{{ form.rating.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Title -->
+                        <div class="mb-3">
+                            <label for="{{ form.title.id_for_label }}" class="form-label">Review Title</label>
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                                <div class="text-danger small">{{ form.title.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Comment -->
+                        <div class="mb-3">
+                            <label for="{{ form.comment.id_for_label }}" class="form-label">Your Review *</label>
+                            {{ form.comment }}
+                            {% if form.comment.errors %}
+                                <div class="text-danger small">{{ form.comment.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'vinyl:detail' review.vinyl_record.slug %}" 
+                               class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Update Review
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.rating-input select {
+    appearance: none;
+    background: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 0.75rem center/16px 12px;
+}
+</style>
+{% endblock %}
