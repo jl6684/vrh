@@ -1,51 +1,149 @@
-# Title: ERB Full time Python Django project
+# Vinyl Record House (VRH)
 
-Frontend reference from https://github.com/codrkai/codrkai.github.io
-A Bootstrap 4 Website Example using Fontawesome
+A full-featured e-commerce platform for vinyl record enthusiasts built with Django 5.2. This application allows users to browse, search, and purchase vinyl records, manage their wishlist, leave reviews, and more.
 
-<!-- Initial Environment -->
-1. Bootstrap 4.6.2
-2. Fontawesome 6.7.2
-3. JQuery 3.7.1
-4. Popper 1.16.1
-5. Python 3.10.17
+![VRH Logo](/images/VRHlogo.png)
 
-Remarks: After milestone of Django 5.2 kicked off, please refer to the requirement.txt created by pip freeze.
+## Features
 
-<!-- Change log -->
-20250619_0101
-1. Finish unified format of frontend template and kick off the git.
-2. First git push named: "Step 0: First Commit of Frontend templates"
+- **Product Catalog**: Browse and search vinyl records with filtering by artist, genre, release year, and more
+- **User Authentication**: 
+  - Custom user profiles
+  - Social login integration (Google, GitHub, Microsoft)
+  - Session management for both authenticated and anonymous users
+- **Shopping Cart**: 
+  - Add/remove items
+  - Persistent cart across sessions
+  - Quantity management
+- **Checkout System**:
+  - Stripe payment integration
+  - Option to place orders without payment
+  - Order tracking
+- **Wishlist**: Save favorite vinyl records for later
+- **Reviews & Ratings**: Leave reviews and ratings for purchased vinyl records
+- **Admin Interface**: Enhanced with Django JET for better management
+- **Responsive Design**: Mobile-friendly interface using Bootstrap 4
 
-20250619_1136
-1. Finished copied initial frontend development local packages from from bcre project except Fontawesome.
-2. Updated all html files.
-3. Git push named: "Step 1: Use local frontend packages from bcre project."
-4. Create Django project in project folder "proj1" ~> Django-admin startproject vrhp1 .
-5. Follow bcre project, changed settings.py and urls.py accordingly.
-6. Git push named: "Step2: Kicked of Django project vrhp1."
-7. Rename branch names.
-8. Git push named: "Step 3: Changed branches name."
-9. Move all javascrip code under js folder file "script.js".
+## Technology Stack
 
-20250620_0145
-1. Added Pagination button on male.html, then remove button and add href on each vinyl photos.
-2. Added 4 more html files under each categories.
-3. Git push named: "Step 4: Added pagination button on male.html and added 4 more html files under each categories."
+- **Backend**: Django 5.2 / Python 3.10+
+- **Database**: PostgreSQL
+- **Frontend**: 
+  - Bootstrap 4.6.2
+  - FontAwesome 6.7.2
+  - jQuery 3.7.1
+  - Popper 1.16.1
+- **Payment Processing**: Stripe API
+- **Authentication**: Django Allauth with social login providers
+- **Admin Interface**: Django JET
 
-20250620_1100
-1. Change Navbar class aligned with Joel, keep script.js unchange.
-2. Applied to all other html files.
-3. Applied latest style.css from Joel.
-4. Generate dropdow list style by AI and applied to style.css
-5. Git push named: "Step 5: Categories pull down frontend finished."
+## Project Structure
 
-issue:
-1.nav text
-2. login sign up
-3. empty cart layout 
-4.index explore categories layout 
-5. pressing year, catalog number, barcode, move release year to basic info
-6. order cancel
-7. rating mark
-8. oder list cancel, index view product, categories artist type page according vinyl_list, modify the layout.
+```
+vrhp1/                  # Main Django project folder
+apps/                   # Custom Django applications
+├── accounts/          # User authentication and profiles
+├── cart/              # Shopping cart functionality
+├── home/              # Landing pages and site info
+├── orders/            # Order processing and history
+├── reviews/           # Product reviews and ratings
+├── vinyl/             # Vinyl record catalog and details
+└── wishlist/          # User wishlist functionality
+templates/              # HTML templates
+static/                 # Static files (CSS, JS, images)
+media/                  # User-uploaded content
+├── vinyl_covers/      # Album covers
+├── audio_samples/     # Preview audio clips
+└── profile_pics/      # User profile pictures
+```
+
+## Installation
+
+### Prerequisites
+
+- Python 3.10+
+- PostgreSQL
+- Git
+
+### Setup
+
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd vrh
+   ```
+
+2. Create a virtual environment:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   
+   pyenv-virtualenv
+   pyenv virtualenv 2.7.10 my-virtual-env-2.7.10
+   current version:
+   pyenv virtualenv my-virtual-env
+   python activate myvirtual-env
+   ```
+
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. Set up environment variables (create a `.env` file in the root directory):
+   ```
+   SITE_SECRET_KEY=your_secret_key
+   DB_PASSWORD=your_database_password
+   STRIPE_PUBLISHABLE_KEY=your_stripe_public_key
+   STRIPE_SECRET_KEY=your_stripe_secret_key
+   ```
+
+5. Run migrations:
+   ```bash
+   python manage.py migrate
+   ```
+
+6. Create a superuser:
+   ```bash
+   python manage.py createsuperuser
+   ```
+
+7. Run the development server:
+   ```bash
+   python manage.py runserver
+   ```
+
+8. Access the application at http://127.0.0.1:8000/
+
+## Data Management
+
+The application includes management commands for importing and managing vinyl record data:
+- `create_sample_data`: Create data
+- `manage_data`: interactive CLI to do CRUD
+- `import_vinyl_data`: Import vinyl records from JSON data
+- `match_vinyl_covers`: Match cover images to vinyl records
+- `cleanup_cover_duplicates`: Remove duplicate cover images
+
+Example usage:
+```bash
+python manage.py import_vinyl_data --file data_exports/vinyldata.json
+python manage.py match_vinyl_covers
+```
+
+## Payment Integration
+
+The application uses Stripe for payment processing. To test payments, use Stripe's test credit cards:
+
+- Card Number: `4242 4242 4242 4242`
+- Expiration: Any future date
+- CVC: Any 3 digits
+- ZIP: Any 5 digits
+
+
+
+
+
+## Credits
+
+- Frontend design inspired by: https://github.com/codrkai/codrkai.github.io
+- Icons from FontAwesome
