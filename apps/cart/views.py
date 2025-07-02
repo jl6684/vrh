@@ -12,7 +12,7 @@ import json
 import stripe
 from django.conf import settings
 from django.urls import reverse
-from apps.orders.models import Order
+from apps.orders.models import Order, OrderItem
 
 # Configure Stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -371,22 +371,43 @@ def payment_success(request):
             cart = get_or_create_cart(request)
             cart_items = CartItem.objects.filter(cart=cart).select_related('vinyl_record')
             
-            # Create order
-            order = Order.objects.create(
-                user=request.user,
-                email=request.user.email,
-                first_name=request.user.first_name or 'Customer',
-                last_name=request.user.last_name or '',
-                address_line_1='To be updated',  # User can update this later
-                city='Hong Kong',
-                postal_code='000000',
-                total_amount=int(float(session.metadata.get('total_amount', 0))),
-                status='confirmed',
-                notes=f'Stripe Payment ID: {session.payment_intent}'
-            )
+            # Use transaction to ensure all DB operations succeed or fail together
+            from django.db import transaction
             
-            # Clear the cart
-            cart_items.delete()
+            with transaction.atomic():
+                # Create order
+                order = Order.objects.create(
+                    user=request.user,
+                    email=request.user.email,
+                    first_name=request.user.first_name or 'Customer',
+                    last_name=request.user.last_name or '',
+                    address_line_1='To be updated',  # User can update this later
+                    city='Hong Kong',
+                    postal_code='000000',
+                    total_amount=int(float(session.metadata.get('total_amount', 0))),
+                    status='confirmed',
+                    notes=f'Stripe Payment ID: {session.payment_intent}'
+                )
+                
+                # Create order items and update stock
+                for cart_item in cart_items:
+                    OrderItem.objects.create(
+                        order=order,
+                        vinyl_record=cart_item.vinyl_record,
+                        quantity=cart_item.quantity,
+                        price=cart_item.vinyl_record.price,
+                        vinyl_title=cart_item.vinyl_record.title,
+                        vinyl_artist=cart_item.vinyl_record.artist.name,
+                        vinyl_year=cart_item.vinyl_record.release_year
+                    )
+                    
+                    # Update stock quantity
+                    vinyl = cart_item.vinyl_record
+                    vinyl.stock_quantity -= cart_item.quantity
+                    vinyl.save()
+                
+                # Clear the cart
+                cart_items.delete()
             
             messages.success(request, f'Payment successful! Order #{order.order_id} has been created.')
             return render(request, 'cart/payment_success.html', {
@@ -422,22 +443,43 @@ def place_order_no_payment(request):
         # Calculate total
         total_amount = sum(item.get_total_price() for item in cart_items)
         
-        # Create order
-        order = Order.objects.create(
-            user=request.user,
-            email=request.user.email,
-            first_name=request.user.first_name or 'Customer',
-            last_name=request.user.last_name or '',
-            address_line_1='To be updated',  # User can update this later
-            city='Hong Kong',
-            postal_code='000000',
-            total_amount=int(total_amount),
-            status='pending',  # Status: pending (no payment yet)
-            notes='Order placed without payment - Payment pending'
-        )
+        # Use transaction to ensure all DB operations succeed or fail together
+        from django.db import transaction
         
-        # Clear the cart
-        cart_items.delete()
+        with transaction.atomic():
+            # Create order
+            order = Order.objects.create(
+                user=request.user,
+                email=request.user.email,
+                first_name=request.user.first_name or 'Customer',
+                last_name=request.user.last_name or '',
+                address_line_1='To be updated',  # User can update this later
+                city='Hong Kong',
+                postal_code='000000',
+                total_amount=int(total_amount),
+                status='pending',  # Status: pending (no payment yet)
+                notes='Order placed without payment - Payment pending'
+            )
+            
+            # Create order items and update stock
+            for cart_item in cart_items:
+                OrderItem.objects.create(
+                    order=order,
+                    vinyl_record=cart_item.vinyl_record,
+                    quantity=cart_item.quantity,
+                    price=cart_item.vinyl_record.price,
+                    vinyl_title=cart_item.vinyl_record.title,
+                    vinyl_artist=cart_item.vinyl_record.artist.name,
+                    vinyl_year=cart_item.vinyl_record.release_year
+                )
+                
+                # Update stock quantity
+                vinyl = cart_item.vinyl_record
+                vinyl.stock_quantity -= cart_item.quantity
+                vinyl.save()
+            
+            # Clear the cart
+            cart_items.delete()
         
         messages.success(request, f'Order #{order.order_id} has been created! You can pay later.')
         return render(request, 'cart/order_success.html', {

@@ -1,0 +1,202 @@
+[
+  {
+    "title": "搭錯車電影原聲帶",
+    "artist": "蘇芮",
+    "genre": "Soundtrack",
+    "year": 1983,
+    "price": 2850,
+    "type": "female",
+    "country": "China",
+    "label": "UFO"
+  },
+  {
+    "title": "我是一片雲",
+    "artist": "鳳飛飛",
+    "genre": "Folk",
+    "year": 1977,
+    "price": 2100,
+    "type": "female",
+    "country": "Taiwan",
+    "label": "Kolín"
+  },
+  {
+    "title": "雙鳳朝陽",
+    "artist": "合衆中西樂團",
+    "genre": "Folk",
+    "year": 1967,
+    "price": 380,
+    "type": "band",
+    "country": "Taiwan",
+    "label": "Unknown"
+  },
+  {
+    "title": "新編廣東音樂 娛樂昇平",
+    "artist": "風行國樂隊",
+    "genre": "Folk",
+    "year": 1960,
+    "price": 420,
+    "type": "Assortment",
+    "country": "Hong Kong",
+    "label": "Fung Hang"
+  },
+  {
+    "title": "金蛇狂舞",
+    "artist": "民間舞曲",
+    "genre": "Folk",
+    "year": 1965,
+    "price": 300,
+    "type": "Assortment",
+    "country": "China",
+    "label": "China Record"
+  },
+  {
+    "title": "四喜臨門",
+    "artist": "風行國樂隊",
+    "genre": "Folk",
+    "year": 1971,
+    "price": 460,
+    "type": "band",
+    "country": "Hong Kong",
+    "label": "Fung Hang"
+  },
+  {
+    "title": "讓我慢慢告訴你",
+    "artist": "鼓霸大樂隊",
+    "genre": "Jazz",
+    "year": 1970,
+    "price": 720,
+    "type": "band",
+    "country": "Taiwan",
+    "label": "Unknown"
+  },
+  {
+    "title": "Chinese Kung Fu",
+    "artist": "Banzaii",
+    "genre": "Funk",
+    "year": 1975,
+    "price": 80,
+    "type": "Others",
+    "country": "Hong Kong",
+    "label": "Dragon Records"
+  },
+  {
+    "title": "Sakura FM-1403",
+    "artist": "Assortment",
+    "genre": "Pop",
+    "year": 1965,
+    "price": 480,
+    "type": "Others",
+    "country": "Japan",
+    "label": "Sakura"
+  },
+  {
+    "title": "Vintage B&W Records Cantonese Pop Promo",
+    "artist": "Assortment",
+    "genre": "Pop",
+    "year": 1987,
+    "price": 550,
+    "type": "Assortment",
+    "country": "Hong Kong",
+    "label": "EMI"
+  },
+  {
+    "title": "Chinese Pathe Collection",
+    "artist": "Assortment",
+    "genre": "Folk",
+    "year": 1967,
+    "price": 300,
+    "type": "Assortment",
+    "country": "China",
+    "label": "Unknown"
+  },
+  {
+    "title": "Golden Era of Singaporean Pop",
+    "artist": "Assortment",
+    "genre": "Pop",
+    "year": 1978,
+    "price": 400,
+    "type": "Assortment",
+    "country": "Singapore",
+    "label": "Shaws"
+  },
+  {
+    "title": "Cantonese Drama Soundtracks",
+    "artist": "Assortment",
+    "genre": "Soundtrack",
+    "year": 1985,
+    "price": 620,
+    "type": "Assortment",
+    "country": "Hong Kong",
+    "label": "Capital Artists"
+  },
+  {
+    "title": "Malaysian Chinese Promo Jukebox",
+    "artist": "Assortment",
+    "genre": "Pop",
+    "year": 1990,
+    "price": 180,
+    "type": "Assortment",
+    "country": "Malaysia",
+    "label": "Life"
+  },
+  {
+    "title": "Beethoven: IX. Symphonie",
+    "artist": "Herbert von Karajan & Berlin Philharmonic",
+    "genre": "Classical",
+    "year": 1963,
+    "price": 5070,
+    "type": "Classical",
+    "country": "Austria",
+    "label": "Deutsche Grammophon"
+  },
+  {
+    "title": "Stravinsky Conducts Le Sacre du printemps",
+    "artist": "Columbia Symphony Orchestra / Igor Stravinsky",
+    "genre": "Classical",
+    "year": 1961,
+    "price": 3900,
+    "type": "Classical",
+    "country": "USA",
+    "label": "Columbia"
+  },
+  {
+    "title": "Chopin-Polonaises",
+    "artist": "Sviatoslav Richter",
+    "genre": "Classical",
+    "year": 1960,
+    "price": 430,
+    "type": "Classical",
+    "country": "Soviet Union",
+    "label": "Melodiya"
+  },
+  {
+    "title": "Beethoven-Violin Concerto",
+    "artist": "Salvatore Accardo,Gewandhausorchester Leipzig, Kurt Masur",
+    "genre": "Classical",
+    "year": 1981,
+    "price": 117,
+    "type": "Classical",
+    "country": "Italy",
+    "label": "Philips"
+  },
+  {
+    "title": "Bruckner-The Symphonies",
+    "artist": "Herbert von Karajan,Berlin Philharmonic",
+    "genre": "Classical",
+    "year": 1976,
+    "price": 390,
+    "type": "Classical",
+    "country": "Austria",
+    "label": "Deutsche Grammophon"
+  },
+  {
+    "title": "Beethoven Bicentennial Collection",
+    "artist": "Various Orchestras & Conductors",
+    "genre": "Classical",
+    "year": 1970,
+    "price": 1170,
+    "type": "Classical",
+    "country": "International",
+    "label": "Time Life"
+  }
+]

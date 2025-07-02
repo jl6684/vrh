@@ -1,6 +1,7 @@
 from django.db import models
 from django.urls import reverse
 from django.contrib.auth.models import User
+from .storage import ExistingFileStorage
 
 
 class Genre(models.Model):
@@ -95,7 +96,11 @@ class VinylRecord(models.Model):
     is_available = models.BooleanField(default=True)
     
     # Media Files
-    cover_image = models.ImageField(upload_to='vinyl_covers/', blank=True)
+    cover_image = models.ImageField(
+        upload_to='vinyl_covers/', 
+        blank=True,
+        storage=ExistingFileStorage()  # Use custom storage to avoid file copying
+    )
     audio_sample = models.FileField(upload_to='audio_samples/', blank=True)
     
     # SEO and Description
