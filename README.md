@@ -1,4 +1,4 @@
-# Title: ERB Full time Python Django project
+# Title:Python Django project
 
 Frontend reference from https://github.com/codrkai/codrkai.github.io
 A Bootstrap 4 Website Example using Fontawesome
