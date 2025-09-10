@@ -118,8 +118,10 @@ WSGI_APPLICATION = 'vrhp1.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'vrhp1',
-        'USER': 'postgres',
+        #'NAME': 'vrhp1',
+        #'USER': 'postgres',
+        'NAME': 'myprojectdb',
+        'USER': 'myprojectuser',
         'PASSWORD' : os.getenv('DB_PASSWORD'),
         #'PASSWORD': 'pgDBerb6',
         'HOST' : 'localhost' # For deployment, this will change.
