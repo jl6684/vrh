@@ -269,3 +269,5 @@ STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET', '')  # Optional for n
 
 # Currency for your vinyl shop (Hong Kong Dollars)
 STRIPE_CURRENCY = 'hkd'
+
+CSRF_TRUSTED_ORIGINS = ['https://joelworks.app', 'https://www.joelworks.app']
