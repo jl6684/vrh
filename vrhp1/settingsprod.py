@@ -32,7 +32,7 @@ SECRET_KEY = os.getenv('SITE_SECRET_KEY')   # Read from environment variable wit
 DEBUG = False
 
 # Cloud deploy IP will be input here.
-ALLOWED_HOSTS = [www.joelworks.app, joelworks.app]
+ALLOWED_HOSTS = ['www.joelworks.app','joelworks.app']
 
 
 # Application definition
