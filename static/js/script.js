@@ -16,8 +16,9 @@ $(function() {
     // If you are not using the load() function above, then uncomment 
     // the function below and it will work the same way.
     
-    $('.dropdown-item, .nav-item').on('click', function(e) {
-        if ( this.hash !== "" ) {
+    // Only handle anchor links that have valid hash targets, but exclude dropdown toggles
+    $('a[href^="#"]:not(.dropdown-toggle)').on('click', function(e) {
+        if ( this.hash !== "" && $(this.hash).length > 0 ) {
             e.preventDefault();
             var anchor = this.hash;
 

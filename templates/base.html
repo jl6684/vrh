@@ -23,15 +23,39 @@
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
         <div class="container-fluid">
             <!-- Brand Logo and Name -->
-            <div class="nav-brand nav-link" href="#about" data-toggle="modal" data-target="#aboutModal" >
+            <button class="nav-brand nav-link btn btn-link p-0 border-0" data-toggle="modal" data-target="#aboutModal">
                 <span class="navbar-brand">
                     <img src="{% static 'img/VRHlogo.png' %}" width="30" height="30" class="d-inline-block align-items-start logo-spin" alt="">
                 </span>
-                    <span class="navbar-text"><h3 class="text-light">VRH</h3></span>
+                <span class="navbar-text"><h3 class="text-light d-none d-sm-inline">VRH</h3></span>
+            </button>
+
+            <!-- Mobile Action Buttons (visible on mobile) -->
+            <div class="d-flex d-lg-none align-items-center">
+                <!-- Search Toggle Button (mobile) -->
+                <button class="btn btn-outline-light btn-sm mr-2" type="button" data-toggle="collapse" data-target="#mobile-search" aria-expanded="false">
+                    <i class="fas fa-search"></i>
+                </button>
+                
+                <!-- Cart Badge (mobile) -->
+                <a class="nav-link cart-badge text-light mr-2 p-1" href="{% url 'cart:view' %}">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="shop-cart" id="mobile-cart-count">{{ cart_items_count|default:0 }}</span>
+                </a>
+                
+                <!-- Dark Mode Toggle (mobile) -->
+                <button class="dark-mode-toggle nav-link btn btn-sm mr-2" onclick="toggleDarkMode()" id="darkModeToggleMobile">
+                    <i class="fas fa-moon" id="darkModeIconMobile"></i>
+                </button>
+                
+                <!-- Navbar toggler -->
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-menu" aria-controls="navbar-menu" aria-expanded="false">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
             </div>
 
-            <!-- Search Box -->
-            <form class="form-inline mr-auto h4" method="get" action="{% url 'vinyl:list' %}">
+            <!-- Desktop Search Box (hidden on mobile) -->
+            <form class="form-inline mr-auto h4 d-none d-lg-flex" method="get" action="{% url 'vinyl:list' %}">
                 <div class="input-group">
                     <input class="form-control" type="search" name="search" placeholder="Album, Artist, Genre..." aria-label="Search">
                     <div class="input-group-append">
@@ -41,145 +65,221 @@
                     </div>
                 </div>
             </form>
-
-            <!-- Navbar toggler for responsive design (only shows when necessary)-->
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-menu">
-                <span class="navbar-toggler-icon"></span>
+            
+            <!-- Desktop Dark Mode Toggle (hidden on mobile) -->
+            <button class="dark-mode-toggle nav-link d-none d-lg-block" onclick="toggleDarkMode()" id="darkModeToggle">
+                <i class="fas fa-moon" id="darkModeIcon"></i>
             </button>
+
+            <!-- Mobile Search Bar (collapsible) -->
+            <div class="collapse d-lg-none" id="mobile-search">
+                <form class="form-inline mt-2 mb-3" method="get" action="{% url 'vinyl:list' %}">
+                    <div class="input-group w-100">
+                        <input class="form-control" type="search" name="search" placeholder="Search albums, artists..." aria-label="Search">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
 
             <!-- Navigation Items -->
             <div class="collapse navbar-collapse" id="navbar-menu">
-                <div class="navbar-nav ml-auto h5">
+                <div class="navbar-nav ml-auto">
                     <!-- Home -->
-                    <a class="nav-link text-light" href="{% url 'home:index' %}">Home</a>
+                    <a class="nav-link text-light" href="{% url 'home:index' %}">
+                        <i class="fas fa-home d-lg-none mr-2"></i>Home
+                    </a>
 
                     <!-- Categories Dropdown -->
-                    <div class="dropdown">
-                        <a class="nav-item nav-link text-light dropdown-toggle" href="#" id="categoriesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Categories
+                    <div class="nav-item dropdown">
+                        <a class="nav-link text-light dropdown-toggle" href="javascript:void(0)" id="categoriesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-list d-lg-none mr-2"></i>Categories
                         </a>
                         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="categoriesDropdown">
                             <!-- Artist Categories -->
                             <h6 class="dropdown-header font-weight-bold">by Artist Type</h6>
-                            <a class="dropdown-item" href="{% url 'vinyl:male' %}">Male Artists</a>
-                            <a class="dropdown-item" href="{% url 'vinyl:female' %}">Female Artists</a>
-                            <a class="dropdown-item" href="{% url 'vinyl:band' %}">Bands</a>
-                            <a class="dropdown-item" href="{% url 'vinyl:assortments' %}">Assortments</a>
-                            <a class="dropdown-item" href="{% url 'vinyl:others' %}">Others</a>
+                            <a class="dropdown-item" href="{% url 'vinyl:male' %}">
+                                <i class="fas fa-male mr-2"></i>Male Artists
+                            </a>
+                            <a class="dropdown-item" href="{% url 'vinyl:female' %}">
+                                <i class="fas fa-female mr-2"></i>Female Artists
+                            </a>
+                            <a class="dropdown-item" href="{% url 'vinyl:band' %}">
+                                <i class="fas fa-users mr-2"></i>Bands
+                            </a>
+                            <a class="dropdown-item" href="{% url 'vinyl:assortments' %}">
+                                <i class="fas fa-layer-group mr-2"></i>Assortments
+                            </a>
+                            <a class="dropdown-item" href="{% url 'vinyl:others' %}">
+                                <i class="fas fa-music mr-2"></i>Others
+                            </a>
                             
                             <div class="dropdown-divider"></div>
                             
                             <!-- By Genre -->
                             <h6 class="dropdown-header font-weight-bold">by Genre</h6>
-                            <a class="dropdown-item" href="{% url 'vinyl:list' %}?genre=rock">Rock</a>
-                            <a class="dropdown-item" href="{% url 'vinyl:list' %}?genre=pop">Pop</a>
-                            <a class="dropdown-item" href="{% url 'vinyl:list' %}?genre=jazz">Jazz</a>
-                            <a class="dropdown-item" href="{% url 'vinyl:list' %}?genre=classical">Classical</a>
+                            <a class="dropdown-item" href="{% url 'vinyl:list' %}?genre=rock">
+                                <i class="fas fa-guitar mr-2"></i>Rock
+                            </a>
+                            <a class="dropdown-item" href="{% url 'vinyl:list' %}?genre=pop">
+                                <i class="fas fa-star mr-2"></i>Pop
+                            </a>
+                            <a class="dropdown-item" href="{% url 'vinyl:list' %}?genre=jazz">
+                                <i class="fas fa-saxophone mr-2"></i>Jazz
+                            </a>
+                            <a class="dropdown-item" href="{% url 'vinyl:list' %}?genre=classical">
+                                <i class="fas fa-music mr-2"></i>Classical
+                            </a>
                             
                             <div class="dropdown-divider"></div>
                             
                             <!-- Browse All -->
-                            <a class="dropdown-item" href="{% url 'vinyl:list' %}">All Vinyl Records</a>
+                            <a class="dropdown-item font-weight-bold" href="{% url 'vinyl:list' %}">
+                                <i class="fas fa-record-vinyl mr-2"></i>All Vinyl Records
+                            </a>
                         </div>
                     </div>
 
                     <!-- Membership Dropdown -->
-                    <div class="dropdown">
-                        <a class="nav-item nav-link text-light dropdown-toggle" href="#" id="membershipDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Membership
+                    <div class="nav-item dropdown">
+                        <a class="nav-link text-light dropdown-toggle" href="javascript:void(0)" id="membershipDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-user-circle d-lg-none mr-2"></i>Account
                         </a>
-                        <div class="dropdown-menu" aria-labelledby="membershipDropdown">
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="membershipDropdown">
                             {% if user.is_authenticated %}
-                                <a class="dropdown-item" href="{% url 'accounts:profile' %}">My Profile</a>
-                                <a class="dropdown-item" href="{% url 'orders:list' %}">My Orders</a>
-                                <a class="dropdown-item" href="{% url 'reviews:my_reviews' %}">My Reviews</a>
+                                <h6 class="dropdown-header">Hello, {{ user.first_name|default:user.username }}!</h6>
+                                <a class="dropdown-item" href="{% url 'accounts:profile' %}">
+                                    <i class="fas fa-user mr-2"></i>My Profile
+                                </a>
+                                <a class="dropdown-item" href="{% url 'orders:list' %}">
+                                    <i class="fas fa-box mr-2"></i>My Orders
+                                </a>
+                                <a class="dropdown-item" href="{% url 'reviews:my_reviews' %}">
+                                    <i class="fas fa-star mr-2"></i>My Reviews
+                                </a>
+                                {% if user.is_authenticated %}
+                                    <a class="dropdown-item" href="{% url 'wishlist:view' %}">
+                                        <i class="fas fa-heart mr-2"></i>My Wishlist
+                                    </a>
+                                {% endif %}
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="{% url 'accounts:logout' %}">Logout</a>
+                                <a class="dropdown-item text-danger" href="{% url 'accounts:logout' %}">
+                                    <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                                </a>
                             {% else %}
-                                <a class="dropdown-item" href="{% url 'accounts:register' %}">Sign Up</a>
-                                <a class="dropdown-item" href="{% url 'accounts:login' %}">Log in</a>
+                                <a class="dropdown-item" href="{% url 'accounts:register' %}">
+                                    <i class="fas fa-user-plus mr-2"></i>Sign Up
+                                </a>
+                                <a class="dropdown-item" href="{% url 'accounts:login' %}">
+                                    <i class="fas fa-sign-in-alt mr-2"></i>Log in
+                                </a>
                             {% endif %}
                         </div>
                     </div>
 
                     <!-- Contact Us -->
-                    <a class="nav-link text-light" href="{% url 'home:contact' %}">Contact Us</a>
-
-                    <!-- Dark Mode Toggle -->
-                    <button class="dark-mode-toggle nav-link" onclick="toggleDarkMode()" id="darkModeToggle">
-                        <i class="fas fa-moon" id="darkModeIcon"></i>
-                    </button>
-
-                    <!-- Wishlist -->
-                    {% if user.is_authenticated %}
-                        <a class="nav-link text-light" href="{% url 'wishlist:view' %}">
-                            <i class="fas fa-heart"></i>
-                        </a>
-                    {% endif %}
-
-                    <!-- Shopping Cart with Badge -->
-                    <a class="nav-link cart-badge" href="{% url 'cart:view' %}">
-                        <i class="fas fa-shopping-cart"></i>
-                        <span class="shop-cart" id="cart-count">{{ cart_items_count|default:0 }}</span>
+                    <a class="nav-link text-light" href="{% url 'home:contact' %}">
+                        <i class="fas fa-envelope d-lg-none mr-2"></i>Contact
                     </a>
 
-                    <!-- Welcome User Item -->
-                    {% if user.is_authenticated %}
-                        <a class="nav-link text-light" href="{% url 'accounts:profile' %}">
-                            <i class="fas fa-user"></i> {{ user.first_name|default:user.username }}
-                        </a>
-                    {% else %}
-                        <a class="nav-link text-light" href="{% url 'accounts:login' %}">
-                            <i class="fas fa-user-circle fa-xl"></i>
-                        </a>
-                    {% endif %}
+                    <!-- Desktop-only items -->
+                    <div class="d-none d-lg-flex">
+                        <!-- Wishlist (desktop) -->
+                        {% if user.is_authenticated %}
+                            <a class="nav-link text-light" href="{% url 'wishlist:view' %}" title="Wishlist">
+                                <i class="fas fa-heart"></i>
+                            </a>
+                        {% endif %}
 
-                    <!-- Logout button-->   
-                    {% if user.is_authenticated %}
-                        <a class="nav-link text-light" href="{% url 'accounts:logout' %}">
-                            <i class="fas fa-sign-out-alt"></i> Logout
+                        <!-- Shopping Cart (desktop) -->
+                        <a class="nav-link cart-badge" href="{% url 'cart:view' %}" title="Shopping Cart">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="shop-cart" id="cart-count">{{ cart_items_count|default:0 }}</span>
                         </a>
-                    {% endif %}
+
+                        <!-- User Info (desktop) -->
+                        {% if user.is_authenticated %}
+                            <a class="nav-link text-light" href="{% url 'accounts:profile' %}" title="Profile">
+                                <i class="fas fa-user"></i> {{ user.first_name|default:user.username }}
+                            </a>
+                        {% else %}
+                            <a class="nav-link text-light" href="{% url 'accounts:login' %}" title="Login">
+                                <i class="fas fa-user-circle fa-xl"></i>
+                            </a>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- About modal (hidden) -->
-    <div class="modal fade" id="aboutModal" role="dialog" tabindex="-1">
-        <div class="modal-dialog modal-lg" role="document">
+    <!-- About Modal (Mobile-Friendly Sidebar Style) -->
+    <div class="modal fade" id="aboutModal" tabindex="-1" role="dialog" aria-labelledby="aboutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-slideout" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <div class="modal-title h2">
-                        About Vinyl Record Home
-                    </div>
+                    <h5 class="modal-title" id="aboutModalLabel">
+                        <img src="{% static 'img/VRHlogo.png' %}" width="40" height="40" class="mr-2 logo-spin" alt="">
+                        Vinyl Record House
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
                 <div class="modal-body">
-                    <div class="media">
-                    <img src="{% static 'img/pexels-lg.jpg' %}" width="225" alt="">
-                        <div class="media-body">
-                            <div class="container">
-                                <h5 class="mt-0">
-                                    Welcome to our premier online vinyl store, your ultimate destination for high-quality records! Whether you're a seasoned collector or a newbie exploring the world of analog sound, we offer a vast selection of vinyl records across genres—from classic rock and jazz to modern pop and electronic. Our carefully curated collection features new releases, rare pressings, and timeless classics, all at competitive prices. With secure packaging, fast shipping, and exceptional customer service, we ensure your vinyl arrives in perfect condition. Dive into the rich, warm sound of vinyl and rediscover music the way it was meant to be heard. Happy spinning!
-                                </h5>
-                            </div>
-                            <div class="container">
-                                    <a href="https://x.com/yourpage">
-                                    <i class="fa-brands fa-x-twitter fa-2xl"></i>
-                                    </a>
-                                    <a href="https://www.facebook.com/yourpage">
-                                    <i class="fa-brands fa-square-facebook fa-2xl"></i>
-                                    </a>
-                                    <a href="https://www.instagram.com">
-                                    <i class="fa-brands fa-instagram fa-2xl"></i> 
-                                    </a>
-                                    <a href="https://www.youtube.com">
-                                    <i class="fa-brands fa-youtube fa-2xl"></i> 
-                                    </a>
-                                    <a href="mailto:info@example.com?subject=Inquiry&body=Hello, I would like to know more about...">
-                                    <i class="fas fa-envelope fa-2xl"></i>
-                                    </a>
-                            </div>
+                    <!-- About Content -->
+                    <div class="row mb-4">
+                        <div class="col-12 col-md-4 mb-3">
+                            <img src="{% static 'img/pexels-lg.jpg' %}" class="img-fluid rounded" alt="Vinyl Records">
+                        </div>
+                        <div class="col-12 col-md-8">
+                            <p class="lead">
+                                Welcome to our premier online vinyl store, your ultimate destination for high-quality records!
+                            </p>
+                            <p>
+                                Whether you're a seasoned collector or a newbie exploring the world of analog sound, we offer a vast selection of vinyl records across genres—from classic rock and jazz to modern pop and electronic. Our carefully curated collection features new releases, rare pressings, and timeless classics, all at competitive prices.
+                            </p>
+                            <p>
+                                With secure packaging, fast shipping, and exceptional customer service, we ensure your vinyl arrives in perfect condition. Dive into the rich, warm sound of vinyl and rediscover music the way it was meant to be heard. Happy spinning!
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="mb-4">
+                        <a href="{% url 'home:index' %}" class="btn btn-primary btn-lg btn-block mb-2">
+                            <i class="fas fa-home mr-2"></i>Visit Our Store
+                        </a>
+                        <a href="{% url 'vinyl:list' %}" class="btn btn-outline-primary btn-block mb-2">
+                            <i class="fas fa-record-vinyl mr-2"></i>Browse Vinyl Collection
+                        </a>
+                        <a href="{% url 'home:contact' %}" class="btn btn-outline-secondary btn-block">
+                            <i class="fas fa-envelope mr-2"></i>Contact Us
+                        </a>
+                    </div>
+                    
+                    <!-- Social Media Links -->
+                    <div class="text-center">
+                        <h6 class="mb-3">Follow Us</h6>
+                        <div class="d-flex justify-content-center">
+                            <a href="https://x.com/yourpage" class="text-decoration-none mx-2">
+                                <i class="fa-brands fa-x-twitter fa-2x"></i>
+                            </a>
+                            <a href="https://www.facebook.com/yourpage" class="text-decoration-none mx-2">
+                                <i class="fa-brands fa-square-facebook fa-2x"></i>
+                            </a>
+                            <a href="https://www.instagram.com" class="text-decoration-none mx-2">
+                                <i class="fa-brands fa-instagram fa-2x"></i>
+                            </a>
+                            <a href="https://www.youtube.com" class="text-decoration-none mx-2">
+                                <i class="fa-brands fa-youtube fa-2x"></i>
+                            </a>
+                            <a href="mailto:info@example.com?subject=Inquiry&body=Hello, I would like to know more about..." class="text-decoration-none mx-2">
+                                <i class="fas fa-envelope fa-2x"></i>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -254,8 +354,8 @@
     <!-- js file copied from bcre project -->
     <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
-    <!-- Original script file from codrkai.github.io template -->
-    <script src="{% static 'js/script.js' %}"></script>
+    <!-- Original script file from codrkai.github.io template - DISABLED due to dropdown conflicts -->
+    <!-- <script src="{% static 'js/script.js' %}"></script> -->
     
     <!-- Dark Mode Toggle Script -->
     <script>
@@ -265,13 +365,14 @@
         
         // Update icon based on current theme
         function updateDarkModeIcon() {
-            const icon = document.getElementById('darkModeIcon');
+            const desktopIcon = document.getElementById('darkModeIcon');
+            const mobileIcon = document.getElementById('darkModeIconMobile');
             const currentTheme = document.documentElement.getAttribute('data-bs-theme');
-            if (currentTheme === 'dark') {
-                icon.className = 'fas fa-sun';
-            } else {
-                icon.className = 'fas fa-moon';
-            }
+            
+            const iconClass = currentTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            
+            if (desktopIcon) desktopIcon.className = iconClass;
+            if (mobileIcon) mobileIcon.className = iconClass;
         }
         
         // Toggle dark mode
@@ -284,9 +385,53 @@
             updateDarkModeIcon();
         }
         
-        // Initialize icon on page load
-        document.addEventListener('DOMContentLoaded', function() {
+        // Initialize everything when page loads
+        $(document).ready(function() {
+            console.log('Page ready, initializing...');
+            
+            // Initialize dark mode
             updateDarkModeIcon();
+            
+            // Sync cart count between mobile and desktop
+            const desktopCartCount = document.getElementById('cart-count');
+            const mobileCartCount = document.getElementById('mobile-cart-count');
+            
+            if (desktopCartCount && mobileCartCount) {
+                mobileCartCount.textContent = desktopCartCount.textContent;
+            }
+            
+            // Debug Bootstrap and jQuery
+            console.log('jQuery version:', $.fn.jquery);
+            console.log('Bootstrap dropdown available:', typeof $.fn.dropdown !== 'undefined');
+            
+            // Custom dropdown handler - replace Bootstrap's default behavior
+            $('.dropdown-toggle').on('click', function(e) {
+                console.log('Dropdown toggle clicked:', this.id);
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Close other dropdowns first
+                $('.dropdown-menu.show').not($(this).next('.dropdown-menu')).removeClass('show');
+                
+                // Toggle this dropdown
+                const menu = $(this).next('.dropdown-menu');
+                menu.toggleClass('show');
+                
+                console.log('Dropdown menu now:', menu.hasClass('show') ? 'open' : 'closed');
+            });
+            
+            // Close dropdowns when clicking outside
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('.dropdown').length) {
+                    $('.dropdown-menu.show').removeClass('show');
+                    console.log('Closed all dropdowns - clicked outside');
+                }
+            });
+            
+            // Prevent dropdown menu clicks from closing the dropdown
+            $('.dropdown-menu').on('click', function(e) {
+                e.stopPropagation();
+            });
         });
     </script>
     
