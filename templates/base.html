@@ -346,6 +346,8 @@
         <p class="text-center">Vinyl Record House &copy; 2025</p>
         <p class="text-center">
             <a href="https://www.flaticon.com/free-icons/vinyl" title="vinyl icons" class="text-center">
+                Designed & developed by Joel Lam
+                <br>
                 Vinyl icons created by Freepik - Flaticon
             </a>
         </p>
@@ -359,37 +361,86 @@
     
     <!-- Dark Mode Toggle Script -->
     <script>
+        // Enhanced dark mode with better production support
+        let darkModeInitialized = false;
+        
         // Check for saved dark mode preference or default to light mode
-        const currentTheme = localStorage.getItem('theme') || 'light';
-        document.documentElement.setAttribute('data-bs-theme', currentTheme);
+        function initializeDarkMode() {
+            try {
+                const currentTheme = localStorage.getItem('theme') || 'light';
+                console.log('Initializing dark mode. Current theme:', currentTheme);
+                document.documentElement.setAttribute('data-bs-theme', currentTheme);
+                updateDarkModeIcon();
+                darkModeInitialized = true;
+                console.log('Dark mode initialized successfully');
+            } catch (error) {
+                console.error('Error initializing dark mode:', error);
+                // Fallback to light mode if localStorage fails
+                document.documentElement.setAttribute('data-bs-theme', 'light');
+            }
+        }
         
         // Update icon based on current theme
         function updateDarkModeIcon() {
-            const desktopIcon = document.getElementById('darkModeIcon');
-            const mobileIcon = document.getElementById('darkModeIconMobile');
-            const currentTheme = document.documentElement.getAttribute('data-bs-theme');
-            
-            const iconClass = currentTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-            
-            if (desktopIcon) desktopIcon.className = iconClass;
-            if (mobileIcon) mobileIcon.className = iconClass;
+            try {
+                const desktopIcon = document.getElementById('darkModeIcon');
+                const mobileIcon = document.getElementById('darkModeIconMobile');
+                const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+                
+                const iconClass = currentTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+                
+                if (desktopIcon) {
+                    desktopIcon.className = iconClass;
+                    console.log('Updated desktop dark mode icon:', iconClass);
+                }
+                if (mobileIcon) {
+                    mobileIcon.className = iconClass;
+                    console.log('Updated mobile dark mode icon:', iconClass);
+                }
+            } catch (error) {
+                console.error('Error updating dark mode icons:', error);
+            }
         }
         
-        // Toggle dark mode
+        // Toggle dark mode with enhanced error handling
         function toggleDarkMode() {
-            const currentTheme = document.documentElement.getAttribute('data-bs-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            
-            document.documentElement.setAttribute('data-bs-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateDarkModeIcon();
+            try {
+                const currentTheme = document.documentElement.getAttribute('data-bs-theme') || 'light';
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                console.log('Toggling dark mode from', currentTheme, 'to', newTheme);
+                
+                document.documentElement.setAttribute('data-bs-theme', newTheme);
+                
+                // Try to save to localStorage with error handling
+                try {
+                    localStorage.setItem('theme', newTheme);
+                    console.log('Theme saved to localStorage:', newTheme);
+                } catch (storageError) {
+                    console.warn('Could not save theme to localStorage:', storageError);
+                }
+                
+                updateDarkModeIcon();
+                console.log('Dark mode toggle completed successfully');
+            } catch (error) {
+                console.error('Error toggling dark mode:', error);
+            }
         }
+        
+        // Initialize dark mode immediately (before DOM ready)
+        initializeDarkMode();
         
         // Initialize everything when page loads
         $(document).ready(function() {
             console.log('Page ready, initializing...');
             
-            // Initialize dark mode
+            // Ensure dark mode is initialized (in case script above failed)
+            if (!darkModeInitialized) {
+                console.log('Dark mode not initialized, retrying...');
+                initializeDarkMode();
+            }
+            
+            // Update dark mode icons again to be sure
             updateDarkModeIcon();
             
             // Sync cart count between mobile and desktop
